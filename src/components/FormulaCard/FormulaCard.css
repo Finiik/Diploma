@@ -1,0 +1,99 @@
+.formula-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--transition-base);
+  position: relative;
+}
+
+.formula-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-primary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.formula-card.subject-physics::before { background: var(--color-physics); }
+.formula-card.subject-chemistry::before { background: var(--color-chemistry); }
+.formula-card.subject-biology::before { background: var(--color-biology); }
+
+.formula-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+}
+
+.formula-card:hover::before {
+  opacity: 1;
+}
+
+.formula-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.formula-card-title {
+  font-size: var(--font-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  text-decoration: none;
+  line-height: var(--line-height-tight);
+  flex: 1;
+}
+
+.formula-card-title:hover {
+  color: var(--color-primary);
+}
+
+.bookmark-btn {
+  font-size: var(--font-xl);
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.bookmark-btn:hover {
+  color: var(--color-warning);
+  transform: scale(1.2);
+}
+
+.bookmark-btn.bookmarked {
+  color: var(--color-warning);
+}
+
+.formula-card-body {
+  display: block;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  text-decoration: none;
+  color: inherit;
+}
+
+.formula-latex {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-3);
+  text-align: center;
+  transition: background var(--transition-base);
+  overflow-x: auto;
+}
+
+.formula-desc {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

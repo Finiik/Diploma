@@ -1,0 +1,89 @@
+{
+  "app": {
+    "title": "SciLearn",
+    "subtitle": "Recommendation system for natural science students",
+    "description": "Formulas, theory, problem examples & calculator for biology, physics, and chemistry students"
+  },
+  "nav": {
+    "home": "Home",
+    "physics": "Physics",
+    "chemistry": "Chemistry",
+    "biology": "Biology",
+    "theory": "Theory",
+    "problems": "Problems",
+    "bookmarks": "Bookmarks",
+    "search": "Search"
+  },
+  "home": {
+    "hero_title": "Your personal assistant in learning natural sciences",
+    "hero_subtitle": "Formulas, theory, problem examples & calculator — all in one place",
+    "explore": "Explore",
+    "recommended": "Recommended for you",
+    "popular": "Popular formulas",
+    "start_learning": "Start Learning"
+  },
+  "subjects": {
+    "physics": "Physics",
+    "chemistry": "Chemistry",
+    "biology": "Biology",
+    "physics_desc": "Mechanics, thermodynamics, electricity & more",
+    "chemistry_desc": "General chemistry, solutions, reactions",
+    "biology_desc": "Genetics, ecology, biochemistry"
+  },
+  "formula": {
+    "variables": "Variables",
+    "description": "Description",
+    "calculate": "Calculate",
+    "result": "Result",
+    "derived": "Derived Formulas",
+    "enter_value": "Enter value",
+    "unit": "Unit",
+    "bookmark_add": "Add to bookmarks",
+    "bookmark_remove": "Remove from bookmarks",
+    "back_to_list": "Back to list",
+    "no_result": "Enter values and press \"Calculate\""
+  },
+  "search": {
+    "placeholder": "Search formulas, theory, problems...",
+    "no_results": "Nothing found",
+    "results_for": "Results for",
+    "hint": "Start typing to search"
+  },
+  "bookmarks": {
+    "title": "My Bookmarks",
+    "empty": "You have no saved formulas yet",
+    "empty_hint": "Click ☆ next to any formula to add it to bookmarks"
+  },
+  "theory": {
+    "title": "Theory Materials",
+    "read_more": "Read more"
+  },
+  "problems": {
+    "title": "Problem Examples",
+    "show_solution": "Show solution",
+    "hide_solution": "Hide solution",
+    "difficulty": "Difficulty",
+    "step": "Step"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "back": "Back",
+    "close": "Close",
+    "topic": "Topic",
+    "subtopic": "Subtopic",
+    "all": "All"
+  },
+  "theme": {
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "language": {
+    "uk": "Українська",
+    "en": "English"
+  },
+  "footer": {
+    "copyright": "© 2026 SciLearn. Diploma project.",
+    "description": "Recommendation system to support learning for natural science students"
+  }
+}

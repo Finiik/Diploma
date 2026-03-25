@@ -1,0 +1,63 @@
+import { createContext, useContext, useState, useEffect } from 'react';
+import { auth } from '../firebase/config';
+import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+
+const AuthContext = createContext();
+
+// Check if Firebase is actually configured (not placeholder values)
+function isFirebaseConfigured() {
+  const key = import.meta.env.VITE_FIREBASE_API_KEY;
+  return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
+}
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // If Firebase is not configured, skip auth entirely
+    if (!isFirebaseConfigured()) {
+      console.info('Firebase not configured — running in offline mode');
+      setUser({ uid: 'local_user', isAnonymous: true, offline: true });
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setLoading(false);
+    });
+
+    // Auto sign-in anonymously with a timeout
+    const authTimeout = setTimeout(() => {
+      setLoading(false);
+      console.warn('Auth timed out — running without authentication');
+    }, 3000);
+
+    signInAnonymously(auth)
+      .then(() => clearTimeout(authTimeout))
+      .catch((error) => {
+        clearTimeout(authTimeout);
+        console.warn('Anonymous auth failed, app will work in offline mode:', error);
+        setUser({ uid: 'local_user', isAnonymous: true, offline: true });
+        setLoading(false);
+      });
+
+    return () => {
+      unsubscribe();
+      clearTimeout(authTimeout);
+    };
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+}
