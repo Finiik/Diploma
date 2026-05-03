@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // User interactions — each user can only read/write their own data
+    match /interactions/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Individual formula interactions for a user
+    match /interactions/{userId}/formulas/{formulaId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Bookmarks — each user can only manage their own bookmarks
+    match /bookmarks/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Aggregated interactions for recommendations (read-only for authenticated users)
+    match /aggregated_interactions/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only cloud functions should write
+    }
+
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

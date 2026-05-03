@@ -84,6 +84,8 @@
   },
   "footer": {
     "copyright": "© 2026 SciLearn. Diploma project.",
-    "description": "Recommendation system to support learning for natural science students"
+    "description": "Recommendation system to support learning for natural science students",
+    "subjects": "Subjects",
+    "resources": "Resources"
   }
 }

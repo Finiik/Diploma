@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getRecommendations } from '../../services/recommendations';
 import FormulaCard from '../../components/FormulaCard/FormulaCard';
+import { SkeletonGrid } from '../../components/LoadingSkeleton/LoadingSkeleton';
 import './Home.css';
 
 const subjects = [
@@ -16,15 +17,19 @@ export default function Home() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [recommendations, setRecommendations] = useState([]);
+  const [recsLoading, setRecsLoading] = useState(true);
   const isUk = i18n.language === 'uk';
 
   useEffect(() => {
     async function loadRecs() {
+      setRecsLoading(true);
       try {
         const recs = await getRecommendations(user?.uid, 6);
         setRecommendations(recs);
       } catch (e) {
         console.warn('Failed to load recommendations:', e);
+      } finally {
+        setRecsLoading(false);
       }
     }
     loadRecs();
@@ -71,18 +76,20 @@ export default function Home() {
       </section>
 
       {/* Recommendations */}
-      {recommendations.length > 0 && (
-        <section className="recommendations-section animate-slide-up">
-          <div className="container">
-            <h2 className="section-title">{t('home.recommended')}</h2>
+      <section className="recommendations-section animate-slide-up">
+        <div className="container">
+          <h2 className="section-title">{t('home.recommended')}</h2>
+          {recsLoading ? (
+            <SkeletonGrid count={3} />
+          ) : recommendations.length > 0 ? (
             <div className="formulas-grid">
               {recommendations.map((formula) => (
                 <FormulaCard key={formula.id} formula={formula} />
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          ) : null}
+        </div>
+      </section>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { physicsData } from '../../data/physics';
 import { chemistryData } from '../../data/chemistry';
 import { biologyData } from '../../data/biology';
 import FormulaCard from '../../components/FormulaCard/FormulaCard';
+import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import './Subject.css';
 
 const subjectMap = {
@@ -27,11 +28,17 @@ export default function Subject() {
     );
   }
 
+  const breadcrumbs = [
+    { label: 'Головна', labelEn: 'Home', to: '/', icon: '🏠' },
+    { label: subject.name, labelEn: subject.nameEn, icon: subject.icon }
+  ];
+
   return (
     <div className="subject-page">
       <div className="container">
+        <Breadcrumb items={breadcrumbs} />
+
         <div className="subject-header animate-fade-in">
-          <Link to="/" className="back-link">← {t('common.back')}</Link>
           <div className="subject-title-row">
             <span className="subject-page-icon">{subject.icon}</span>
             <h1 className="page-title">{isUk ? subject.name : subject.nameEn}</h1>

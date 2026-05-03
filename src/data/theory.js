@@ -78,6 +78,380 @@ export const theoryData = [
 
 **Equation:** p² + 2pq + q² = 1, where p + q = 1.`,
     relatedFormulas: ['bio_hardy_weinberg', 'bio_population_growth']
+  },
+  {
+    id: 'theory_thermodynamics',
+    name: 'Закони термодинаміки',
+    nameEn: 'Laws of Thermodynamics',
+    subject: 'physics',
+    topic: 'Термодинаміка',
+    description: 'Основні закони термодинаміки, що описують теплові процеси та перетворення енергії.',
+    descriptionEn: 'Fundamental laws of thermodynamics describing heat processes and energy transformations.',
+    content: `**Нульовий закон:** Якщо два тіла перебувають у тепловій рівновазі з третім, вони перебувають у рівновазі між собою.
+
+**Перший закон (закон збереження енергії):** Кількість теплоти, передана системі, дорівнює сумі зміни внутрішньої енергії та виконаної роботи: Q = ΔU + A.
+
+**Другий закон:** Теплота не може самовільно переходити від холодного тіла до гарячого. Ентропія ізольованої системи не зменшується.
+
+**ККД теплового двигуна** завжди менший за 100%. Максимальний ККД визначається циклом Карно: η = 1 - T₂/T₁.`,
+    contentEn: `**Zeroth Law:** If two systems are in thermal equilibrium with a third, they are in equilibrium with each other.
+
+**First Law (Energy Conservation):** Heat transferred to a system equals the sum of internal energy change and work done: Q = ΔU + A.
+
+**Second Law:** Heat cannot spontaneously flow from a colder body to a hotter one. Entropy of an isolated system never decreases.
+
+**Heat engine efficiency** is always less than 100%. Maximum efficiency is defined by the Carnot cycle: η = 1 - T₂/T₁.`,
+    relatedFormulas: ['phys_heat_energy', 'phys_thermal_efficiency', 'phys_carnot']
+  },
+  {
+    id: 'theory_electricity',
+    name: 'Електричне коло та закон Ома',
+    nameEn: 'Electric Circuits and Ohm\'s Law',
+    subject: 'physics',
+    topic: 'Електрика',
+    description: 'Основні поняття електричних кіл: струм, напруга, опір.',
+    descriptionEn: 'Basic concepts of electric circuits: current, voltage, resistance.',
+    content: `**Електричний струм** — впорядкований рух заряджених частинок. Сила струму (I) вимірюється в амперах (А).
+
+**Закон Ома для ділянки кола:** I = U/R — сила струму прямо пропорційна напрузі та обернено пропорційна опору.
+
+**З'єднання провідників:**
+- **Послідовне:** R_заг = R₁ + R₂ + ... , I = const, U = U₁ + U₂
+- **Паралельне:** 1/R_заг = 1/R₁ + 1/R₂ + ... , U = const, I = I₁ + I₂
+
+**Потужність:** P = U·I = I²R = U²/R. Вимірюється у ватах (Вт).`,
+    contentEn: `**Electric current** — ordered movement of charged particles. Current (I) is measured in amperes (A).
+
+**Ohm's Law for a circuit section:** I = U/R — current is directly proportional to voltage and inversely proportional to resistance.
+
+**Conductor connections:**
+- **Series:** R_total = R₁ + R₂ + ... , I = const, U = U₁ + U₂
+- **Parallel:** 1/R_total = 1/R₁ + 1/R₂ + ... , U = const, I = I₁ + I₂
+
+**Power:** P = U·I = I²R = U²/R. Measured in watts (W).`,
+    relatedFormulas: ['phys_ohm', 'phys_power_electric']
+  },
+  {
+    id: 'theory_kinetics',
+    name: 'Хімічна кінетика',
+    nameEn: 'Chemical Kinetics',
+    subject: 'chemistry',
+    topic: 'Хімічні реакції',
+    description: 'Вивчення швидкості хімічних реакцій та факторів, що на неї впливають.',
+    descriptionEn: 'Study of the rates of chemical reactions and factors that affect them.',
+    content: `**Швидкість хімічної реакції** — зміна концентрації реагенту або продукту за одиницю часу: v = ΔC/Δt.
+
+**Фактори, що впливають на швидкість:**
+1. **Природа реагентів** — різні речовини реагують з різною швидкістю
+2. **Концентрація** — зі збільшенням концентрації швидкість зростає
+3. **Температура** — правило Вант-Гоффа: при підвищенні на 10°C швидкість зростає в 2-4 рази
+4. **Каталізатор** — прискорює реакцію, не витрачаючись
+5. **Площа поверхні** — для гетерогенних реакцій
+
+**Хімічна рівновага** настає, коли швидкості прямої та зворотної реакцій рівні.`,
+    contentEn: `**Reaction rate** — change in concentration of reactant or product per unit time: v = ΔC/Δt.
+
+**Factors affecting rate:**
+1. **Nature of reactants** — different substances react at different rates
+2. **Concentration** — increasing concentration increases rate
+3. **Temperature** — Van 't Hoff rule: for every 10°C increase, rate increases 2-4 times
+4. **Catalyst** — speeds up reaction without being consumed
+5. **Surface area** — for heterogeneous reactions
+
+**Chemical equilibrium** occurs when forward and reverse reaction rates are equal.`,
+    relatedFormulas: ['chem_reaction_rate', 'chem_arrhenius', 'chem_equilibrium']
+  },
+  {
+    id: 'theory_ph',
+    name: 'Кислотно-основна теорія',
+    nameEn: 'Acid-Base Theory',
+    subject: 'chemistry',
+    topic: 'Загальна хімія',
+    description: 'Поняття кислот, основ та водневого показника pH.',
+    descriptionEn: 'Concepts of acids, bases, and the pH scale.',
+    content: `**Кислоти** — речовини, що утворюють іони H⁺ у водному розчині (теорія Ареніуса).
+**Основи** — речовини, що утворюють іони OH⁻.
+
+**Шкала pH:**
+- pH < 7 — кислотне середовище
+- pH = 7 — нейтральне середовище
+- pH > 7 — лужне середовище
+
+**Обчислення pH:** pH = -log[H⁺]. Наприклад, [H⁺] = 0.001 моль/л → pH = 3.
+
+**Буферні розчини** — розчини, що зберігають pH при додаванні невеликих кількостей кислоти або лугу.`,
+    contentEn: `**Acids** — substances that produce H⁺ ions in aqueous solution (Arrhenius theory).
+**Bases** — substances that produce OH⁻ ions.
+
+**pH Scale:**
+- pH < 7 — acidic environment
+- pH = 7 — neutral environment
+- pH > 7 — alkaline environment
+
+**Calculating pH:** pH = -log[H⁺]. For example, [H⁺] = 0.001 mol/L → pH = 3.
+
+**Buffer solutions** — solutions that maintain pH when small amounts of acid or base are added.`,
+    relatedFormulas: ['chem_ph', 'chem_molarity']
+  },
+  {
+    id: 'theory_ecology',
+    name: 'Основи екології',
+    nameEn: 'Ecology Fundamentals',
+    subject: 'biology',
+    topic: 'Екологія',
+    description: 'Основні екологічні концепції: екосистеми, біорізноманіття, популяційна динаміка.',
+    descriptionEn: 'Key ecological concepts: ecosystems, biodiversity, population dynamics.',
+    content: `**Екосистема** — сукупність живих організмів та середовища їх існування, що функціонує як єдина система.
+
+**Біорізноманіття** вимірюється різними індексами:
+- **Індекс Шеннона (H')** — враховує кількість видів та рівномірність їх розподілу
+- **Індекс Сімпсона (D)** — ймовірність належності двох випадкових особин до різних видів
+
+**Моделі зростання популяції:**
+- **Експоненційна** (J-крива): N_t = N₀·e^(rt) — необмежені ресурси
+- **Логістична** (S-крива): враховує ємність середовища (K)
+
+**Ємність середовища (K)** — максимальна чисельність популяції, яку може підтримувати екосистема.`,
+    contentEn: `**Ecosystem** — a community of living organisms and their environment functioning as a single system.
+
+**Biodiversity** is measured by various indices:
+- **Shannon Index (H')** — accounts for species count and evenness of distribution
+- **Simpson's Index (D)** — probability that two random individuals belong to different species
+
+**Population growth models:**
+- **Exponential** (J-curve): N_t = N₀·e^(rt) — unlimited resources
+- **Logistic** (S-curve): accounts for carrying capacity (K)
+
+**Carrying capacity (K)** — maximum population size that an ecosystem can sustain.`,
+    relatedFormulas: ['bio_logistic_growth', 'bio_shannon', 'bio_simpson']
+  },
+  {
+    id: 'theory_enzymes',
+    name: 'Ферментативна кінетика',
+    nameEn: 'Enzyme Kinetics',
+    subject: 'biology',
+    topic: 'Біохімія',
+    description: 'Механізми роботи ферментів та кінетика ферментативних реакцій.',
+    descriptionEn: 'Mechanisms of enzyme action and kinetics of enzymatic reactions.',
+    content: `**Ферменти** — біологічні каталізатори білкової природи, що прискорюють хімічні реакції в організмі.
+
+**Модель Міхаеліса-Ментен:** v = (V_max · [S]) / (K_m + [S])
+- **V_max** — максимальна швидкість при насиченні ферменту субстратом
+- **K_m** (стала Міхаеліса) — концентрація субстрату, при якій швидкість = V_max/2
+
+**Фактори, що впливають на активність ферментів:**
+1. **Температура** — оптимальна ~37°C для людських ферментів
+2. **pH** — кожен фермент має оптимальний pH
+3. **Концентрація субстрату** — зростання до насичення
+4. **Інгібітори** — конкурентні та неконкурентні`,
+    contentEn: `**Enzymes** — biological catalysts of protein nature that accelerate chemical reactions in organisms.
+
+**Michaelis-Menten Model:** v = (V_max · [S]) / (K_m + [S])
+- **V_max** — maximum rate when enzyme is saturated with substrate
+- **K_m** (Michaelis constant) — substrate concentration at which rate = V_max/2
+
+**Factors affecting enzyme activity:**
+1. **Temperature** — optimal ~37°C for human enzymes
+2. **pH** — each enzyme has an optimal pH
+3. **Substrate concentration** — increases until saturation
+4. **Inhibitors** — competitive and non-competitive`,
+    relatedFormulas: ['bio_michaelis_menten']
+  },
+  {
+    id: 'theory_optics',
+    name: 'Геометрична оптика',
+    nameEn: 'Geometric Optics',
+    subject: 'physics',
+    topic: 'Оптика',
+    description: 'Закони заломлення та відбивання світла, лінзи та оптичні прилади.',
+    descriptionEn: 'Laws of refraction and reflection of light, lenses and optical instruments.',
+    content: `**Закон відбивання:** Кут падіння дорівнює куту відбивання.
+
+**Закон заломлення (Снелліуса):** n₁·sin(θ₁) = n₂·sin(θ₂). При переході з оптично менш щільного середовища в більш щільне промінь наближається до нормалі.
+
+**Повне внутрішнє відбивання** відбувається, коли кут падіння перевищує критичний кут: sin(θ_кр) = n₂/n₁.
+
+**Формула тонкої лінзи:** 1/f = 1/d + 1/d', де f — фокусна відстань, d — відстань до предмета, d' — до зображення.
+
+**Збільшення лінзи:** M = d'/d = H'/H (відношення розмірів зображення до предмета).`,
+    contentEn: `**Law of Reflection:** Angle of incidence equals angle of reflection.
+
+**Snell's Law:** n₁·sin(θ₁) = n₂·sin(θ₂). When light passes from a less dense to a denser medium, it bends toward the normal.
+
+**Total Internal Reflection** occurs when incidence angle exceeds the critical angle: sin(θ_c) = n₂/n₁.
+
+**Thin Lens Equation:** 1/f = 1/d + 1/d', where f = focal length, d = object distance, d' = image distance.
+
+**Magnification:** M = d'/d = H'/H (ratio of image size to object size).`,
+    relatedFormulas: ['phys_snell', 'phys_thin_lens', 'phys_magnification']
+  },
+  {
+    id: 'theory_waves',
+    name: 'Коливання і хвилі',
+    nameEn: 'Oscillations and Waves',
+    subject: 'physics',
+    topic: 'Коливання і хвилі',
+    description: 'Механічні коливання, хвилі та їх властивості.',
+    descriptionEn: 'Mechanical oscillations, waves and their properties.',
+    content: `**Коливання** — періодичний рух тіла навколо положення рівноваги.
+
+**Характеристики коливань:**
+- **Амплітуда (A)** — максимальне відхилення
+- **Період (T)** — час одного повного коливання
+- **Частота (f = 1/T)** — кількість коливань за секунду
+- **Фаза** — стан коливання у даний момент
+
+**Хвиля** — поширення коливань у просторі. v = λ·f.
+
+**Математичний маятник:** T = 2π√(l/g) — період не залежить від маси та амплітуди (при малих кутах).
+
+**Резонанс** виникає, коли частота вимушених коливань збігається з власною частотою системи.`,
+    contentEn: `**Oscillation** — periodic motion around an equilibrium position.
+
+**Oscillation characteristics:**
+- **Amplitude (A)** — maximum displacement
+- **Period (T)** — time for one complete oscillation
+- **Frequency (f = 1/T)** — oscillations per second
+- **Phase** — state of oscillation at a given moment
+
+**Wave** — propagation of oscillations through space. v = λ·f.
+
+**Simple Pendulum:** T = 2π√(l/g) — period is independent of mass and amplitude (for small angles).
+
+**Resonance** occurs when driving frequency matches the natural frequency of a system.`,
+    relatedFormulas: ['phys_wave_speed', 'phys_period_freq', 'phys_pendulum']
+  },
+  {
+    id: 'theory_electrochemistry',
+    name: 'Електрохімія',
+    nameEn: 'Electrochemistry',
+    subject: 'chemistry',
+    topic: 'Електрохімія',
+    description: 'Зв\'язок між хімічними реакціями та електричним струмом.',
+    descriptionEn: 'The relationship between chemical reactions and electric current.',
+    content: `**Електроліз** — процес розкладання речовини електричним струмом.
+
+**Закони Фарадея:**
+1. Маса речовини, виділеної при електролізі, пропорційна кількості електрики: m = (M·I·t)/(n·F)
+2. Маси різних речовин, виділених однаковою кількістю електрики, відносяться як їх еквівалентні маси
+
+**Стала Фарадея:** F = 96485 Кл/моль
+
+**Рівняння Нернста** описує залежність потенціалу електрода від концентрації іонів: E = E⁰ - (RT/nF)·ln(Q)
+
+**Гальванічний елемент** — пристрій, що перетворює хімічну енергію в електричну. ЕРС = E(катод) - E(анод).`,
+    contentEn: `**Electrolysis** — decomposition of a substance by electric current.
+
+**Faraday's Laws:**
+1. Mass deposited is proportional to charge passed: m = (M·I·t)/(n·F)
+2. Masses of different substances deposited by equal charge are proportional to their equivalent masses
+
+**Faraday Constant:** F = 96,485 C/mol
+
+**Nernst Equation** describes electrode potential dependence on ion concentration: E = E⁰ - (RT/nF)·ln(Q)
+
+**Galvanic cell** converts chemical energy to electrical energy. EMF = E(cathode) - E(anode).`,
+    relatedFormulas: ['chem_faraday', 'chem_nernst']
+  },
+  {
+    id: 'theory_thermochem',
+    name: 'Термохімія та ентальпія',
+    nameEn: 'Thermochemistry and Enthalpy',
+    subject: 'chemistry',
+    topic: 'Термохімія',
+    description: 'Тепловий ефект хімічних реакцій, закон Гесса.',
+    descriptionEn: 'Heat effects of chemical reactions, Hess\'s law.',
+    content: `**Ентальпія (H)** — термодинамічна функція, що характеризує теплоту реакції при постійному тиску.
+
+**Екзотермічна реакція:** ΔH < 0 (теплота виділяється)
+**Ендотермічна реакція:** ΔH > 0 (теплота поглинається)
+
+**Закон Гесса:** Тепловий ефект реакції не залежить від шляху, а лише від початкового і кінцевого стану.
+
+**Теплота згоряння** — кількість теплоти, що виділяється при повному згорянні 1 моля речовини.
+
+**Кількість речовини:** n = m/M — фундаментальне співвідношення для стехіометричних розрахунків.`,
+    contentEn: `**Enthalpy (H)** — thermodynamic function characterizing reaction heat at constant pressure.
+
+**Exothermic reaction:** ΔH < 0 (heat released)
+**Endothermic reaction:** ΔH > 0 (heat absorbed)
+
+**Hess's Law:** The enthalpy change of a reaction is independent of the pathway, only depending on initial and final states.
+
+**Heat of combustion** — heat released when 1 mole of substance is completely burned.
+
+**Amount of substance:** n = m/M — fundamental relation for stoichiometric calculations.`,
+    relatedFormulas: ['chem_enthalpy', 'chem_combustion_heat', 'chem_molar_mass']
+  },
+  {
+    id: 'theory_cell_biology',
+    name: 'Клітинна біологія',
+    nameEn: 'Cell Biology',
+    subject: 'biology',
+    topic: 'Клітинна біологія',
+    description: 'Будова клітини, транспорт через мембрану, мікробіологічні методи.',
+    descriptionEn: 'Cell structure, membrane transport, microbiological methods.',
+    content: `**Клітина** — структурна та функціональна одиниця живого організму.
+
+**Осмос** — переміщення молекул розчинника через напівпроникну мембрану від менш концентрованого до більш концентрованого розчину.
+
+**Осмотичний тиск:** Π = iCRT — залежить від концентрації розчиненої речовини та температури.
+
+**Типи розчинів:**
+- **Гіпотонічний** — клітина набухає (тургор)
+- **Ізотонічний** — рівновага
+- **Гіпертонічний** — клітина зморщується (плазмоліз)
+
+**Метод розведень** у мікробіології дозволяє підрахувати кількість живих бактерій у зразку: N = C/(V·D).`,
+    contentEn: `**Cell** — the structural and functional unit of all living organisms.
+
+**Osmosis** — movement of solvent molecules through a semipermeable membrane from low to high concentration.
+
+**Osmotic pressure:** Π = iCRT — depends on solute concentration and temperature.
+
+**Solution types:**
+- **Hypotonic** — cell swells (turgor)
+- **Isotonic** — equilibrium
+- **Hypertonic** — cell shrinks (plasmolysis)
+
+**Dilution plating** in microbiology counts viable bacteria in a sample: N = C/(V·D).`,
+    relatedFormulas: ['bio_osmotic_pressure', 'bio_dilution_plating']
+  },
+  {
+    id: 'theory_cardiovascular',
+    name: 'Фізіологія серцево-судинної системи',
+    nameEn: 'Cardiovascular Physiology',
+    subject: 'biology',
+    topic: 'Фізіологія',
+    description: 'Робота серця, кровообіг та основні показники.',
+    descriptionEn: 'Heart function, blood circulation and key metrics.',
+    content: `**Серцевий цикл** складається з систоли (скорочення) та діастоли (розслаблення).
+
+**Серцевий викид (CO):** CO = SV × HR
+- SV (ударний об'єм) ≈ 70 мл
+- HR (ЧСС у спокої) ≈ 60-80 уд/хв
+- CO у спокої ≈ 5 л/хв
+
+**Артеріальний тиск:** систолічний/діастолічний. Норма: 120/80 мм рт.ст.
+
+**Базальний метаболізм (BMR)** — мінімальна кількість енергії для підтримання життєдіяльності у стані спокою. Залежить від маси тіла, зросту, віку та статі.
+
+**Формула Харріса-Бенедикта (чоловіки):**
+BMR = 88.362 + 13.397×m + 4.799×h - 5.677×a`,
+    contentEn: `**Cardiac cycle** consists of systole (contraction) and diastole (relaxation).
+
+**Cardiac Output (CO):** CO = SV × HR
+- SV (stroke volume) ≈ 70 mL
+- HR (resting heart rate) ≈ 60-80 bpm
+- CO at rest ≈ 5 L/min
+
+**Blood pressure:** systolic/diastolic. Normal: 120/80 mmHg.
+
+**Basal Metabolic Rate (BMR)** — minimum energy needed to sustain life at rest. Depends on weight, height, age, and sex.
+
+**Harris-Benedict Equation (males):**
+BMR = 88.362 + 13.397×m + 4.799×h - 5.677×a`,
+    relatedFormulas: ['bio_cardiac_output', 'bio_bmr', 'bio_bmi']
   }
 ];
 

@@ -5,10 +5,17 @@ import katex from 'katex';
 import { useBookmarks } from '../../contexts/BookmarkContext';
 import { useAuth } from '../../contexts/AuthContext';
 import Calculator from '../../components/Calculator/Calculator';
-import { getFormulaById as getPhysFormula, getAllFormulas as getPhysAll } from '../../data/physics';
-import { getFormulaById as getChemFormula, getAllFormulas as getChemAll } from '../../data/chemistry';
-import { getFormulaById as getBioFormula, getAllFormulas as getBioAll } from '../../data/biology';
+import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import { physicsData, getFormulaById as getPhysFormula, getAllFormulas as getPhysAll } from '../../data/physics';
+import { chemistryData, getFormulaById as getChemFormula, getAllFormulas as getChemAll } from '../../data/chemistry';
+import { biologyData, getFormulaById as getBioFormula, getAllFormulas as getBioAll } from '../../data/biology';
 import './FormulaDetail.css';
+
+const subjectDataMap = {
+  physics: physicsData,
+  chemistry: chemistryData,
+  biology: biologyData
+};
 
 function isFirebaseConfigured() {
   const key = import.meta.env.VITE_FIREBASE_API_KEY;
@@ -75,10 +82,24 @@ export default function FormulaDetail() {
     }
   };
 
+  // Build breadcrumb
+  const subjectData = subjectDataMap[formula.subject];
+  const breadcrumbs = [
+    { label: 'Головна', labelEn: 'Home', to: '/', icon: '🏠' },
+    subjectData && {
+      label: subjectData.name,
+      labelEn: subjectData.nameEn,
+      to: `/subject/${formula.subject}`,
+      icon: subjectData.icon
+    },
+    formula.topic && { label: formula.topic, labelEn: formula.topic },
+    { label: isUk ? formula.name : (formula.nameEn || formula.name) }
+  ].filter(Boolean);
+
   return (
     <div className="formula-detail-page">
       <div className="container">
-        <Link to="/" className="back-link">← {t('formula.back_to_list')}</Link>
+        <Breadcrumb items={breadcrumbs} />
 
         <div className="formula-detail animate-fade-in">
           <div className="formula-detail-header">
