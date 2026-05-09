@@ -8,10 +8,16 @@ export default function Problems() {
   const { t, i18n } = useTranslation();
   const isUk = i18n.language === 'uk';
   const [filter, setFilter] = useState('all');
+  const [diffFilter, setDiffFilter] = useState('all');
   const [openSolutions, setOpenSolutions] = useState({});
 
   const subjects = ['all', 'physics', 'chemistry', 'biology'];
-  const filtered = filter === 'all' ? problemsData : problemsData.filter(p => p.subject === filter);
+
+  const filtered = problemsData.filter(p => {
+    const matchSubject = filter === 'all' || p.subject === filter;
+    const matchDiff = diffFilter === 'all' || p.difficulty === Number(diffFilter);
+    return matchSubject && matchDiff;
+  });
 
   const toggleSolution = (id) => {
     setOpenSolutions(prev => ({ ...prev, [id]: !prev[id] }));
@@ -22,31 +28,62 @@ export default function Problems() {
     return labels[level] || '⭐';
   };
 
+  const getDiffName = (level) => {
+    const names = {
+      1: isUk ? 'Легка' : 'Easy',
+      2: isUk ? 'Середня' : 'Medium',
+      3: isUk ? 'Складна' : 'Hard'
+    };
+    return names[level] || names[1];
+  };
+
   return (
     <div className="problems-page">
       <div className="container">
         <h1 className="page-title animate-fade-in">{t('problems.title')}</h1>
 
-        <div className="filter-bar animate-fade-in">
-          {subjects.map(s => (
-            <button
-              key={s}
-              className={`filter-btn ${filter === s ? 'active' : ''}`}
-              onClick={() => setFilter(s)}
-            >
-              {s === 'all' ? t('common.all') : t(`subjects.${s}`)}
-            </button>
-          ))}
+        <div className="filters-row animate-fade-in">
+          <div className="filter-bar">
+            {subjects.map(s => (
+              <button
+                key={s}
+                className={`filter-btn ${filter === s ? 'active' : ''}`}
+                onClick={() => setFilter(s)}
+              >
+                {s === 'all' ? t('common.all') : t(`subjects.${s}`)}
+              </button>
+            ))}
+          </div>
+
+          <div className="filter-bar difficulty-filter">
+            {['all', '1', '2', '3'].map(d => {
+              const label = d === 'all'
+                ? (isUk ? 'Всі рівні' : 'All levels')
+                : `${difficultyLabel(Number(d))} ${getDiffName(Number(d))}`;
+              return (
+                <button
+                  key={d}
+                  className={`filter-btn diff-filter-btn ${diffFilter === d ? 'active' : ''}`}
+                  onClick={() => setDiffFilter(d)}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="problems-list stagger-children">
+          {filtered.length === 0 && (
+            <p className="no-results">{isUk ? 'Нічого не знайдено' : 'No results found'}</p>
+          )}
           {filtered.map(prob => (
             <article key={prob.id} className="problem-card" id={`problem-${prob.id}`}>
               <div className="problem-header">
                 <h2 className="problem-title">
                   {isUk ? prob.name : prob.nameEn}
                 </h2>
-                <span className="problem-difficulty">
+                <span className="problem-difficulty" title={getDiffName(prob.difficulty)}>
                   {difficultyLabel(prob.difficulty)}
                 </span>
               </div>

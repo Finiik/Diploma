@@ -1,6 +1,7 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from '../Header/Header';
+import AIAssistant from '../AIAssistant/AIAssistant';
 import './Layout.css';
 import { useTranslation } from 'react-i18next';
 
@@ -42,6 +43,7 @@ export default function Layout() {
           <p className="footer-copyright">{t('footer.copyright')}</p>
         </div>
       </footer>
+      <AIAssistant />
     </div>
   );
 }
