@@ -520,6 +520,162 @@ export const physicsData = {
           }
         ]
       }]
+    },
+    {
+      id: 'fluid_mechanics',
+      name: 'Механіка рідин',
+      nameEn: 'Fluid Mechanics',
+      subtopics: [{
+        id: 'hydrostatics',
+        name: 'Гідростатика',
+        nameEn: 'Hydrostatics',
+        formulas: [
+          {
+            id: 'phys_bernoulli',
+            name: 'Рівняння Бернуллі',
+            nameEn: "Bernoulli's Equation",
+            latex: 'P + \\frac{1}{2}\\rho v^2 + \\rho g h = \\text{const}',
+            description: 'Закон збереження енергії для потоку ідеальної рідини: сума тиску, кінетичної та потенціальної енергії є сталою.',
+            descriptionEn: "Conservation of energy in fluid flow: sum of pressure, kinetic, and potential energy is constant.",
+            variables: [
+              { symbol: 'P', name: 'Тиск', nameEn: 'Pressure', unit: 'Па (Pa)', type: 'input' },
+              { symbol: 'ρ', name: 'Густина рідини', nameEn: 'Fluid density', unit: 'кг/м³', type: 'input' },
+              { symbol: 'v', name: 'Швидкість потоку', nameEn: 'Flow velocity', unit: 'м/с', type: 'input' },
+              { symbol: 'g', name: 'Прискорення вільного падіння', nameEn: 'Gravitational acceleration', unit: 'м/с²', type: 'input', defaultValue: 9.81 },
+              { symbol: 'h', name: 'Висота', nameEn: 'Height', unit: 'м (m)', type: 'input' },
+              { symbol: 'E_total', name: 'Повна енергія', nameEn: 'Total energy', unit: 'Па', type: 'result' }
+            ],
+            compute: (v) => v.P + 0.5 * v['ρ'] * v.v * v.v + v['ρ'] * v.g * v.h,
+            resultVar: 'E_total', derivedFormulas: ['phys_archimedes'],
+            topic: 'Механіка рідин', subtopic: 'Гідростатика'
+          },
+          {
+            id: 'phys_archimedes',
+            name: 'Закон Архімеда',
+            nameEn: "Archimedes' Principle",
+            latex: 'F_a = \\rho_f \\cdot g \\cdot V',
+            description: 'Виштовхувальна сила, що діє на тіло, занурене в рідину, дорівнює вазі витісненої рідини.',
+            descriptionEn: "The buoyant force on an object submerged in fluid equals the weight of displaced fluid.",
+            variables: [
+              { symbol: 'F_a', name: 'Сила Архімеда', nameEn: 'Buoyant force', unit: 'Н (N)', type: 'result' },
+              { symbol: 'ρ_f', name: 'Густина рідини', nameEn: 'Fluid density', unit: 'кг/м³', type: 'input' },
+              { symbol: 'g', name: 'Прискорення', nameEn: 'Gravity', unit: 'м/с²', type: 'input', defaultValue: 9.81 },
+              { symbol: 'V', name: "Об'єм зануреної частини", nameEn: 'Submerged volume', unit: 'м³', type: 'input' }
+            ],
+            compute: (v) => v['ρ_f'] * v.g * v.V,
+            resultVar: 'F_a', derivedFormulas: ['phys_bernoulli'],
+            topic: 'Механіка рідин', subtopic: 'Гідростатика'
+          },
+          {
+            id: 'phys_continuity',
+            name: 'Рівняння неперервності',
+            nameEn: 'Continuity Equation',
+            latex: 'A_1 v_1 = A_2 v_2',
+            description: 'Об\'ємна витрата рідини залишається сталою: при звуженні труби швидкість потоку зростає.',
+            descriptionEn: 'Volume flow rate remains constant: when a pipe narrows, flow velocity increases.',
+            variables: [
+              { symbol: 'A₁', name: 'Площа перерізу 1', nameEn: 'Cross-section area 1', unit: 'м²', type: 'input' },
+              { symbol: 'v₁', name: 'Швидкість 1', nameEn: 'Velocity 1', unit: 'м/с', type: 'input' },
+              { symbol: 'A₂', name: 'Площа перерізу 2', nameEn: 'Cross-section area 2', unit: 'м²', type: 'input' },
+              { symbol: 'v₂', name: 'Швидкість 2', nameEn: 'Velocity 2', unit: 'м/с', type: 'result' }
+            ],
+            compute: (v) => (v['A₁'] * v['v₁']) / v['A₂'],
+            resultVar: 'v₂', derivedFormulas: ['phys_bernoulli'],
+            topic: 'Механіка рідин', subtopic: 'Гідростатика'
+          }
+        ]
+      }]
+    },
+    {
+      id: 'em_waves',
+      name: 'Електромагнітні хвилі',
+      nameEn: 'Electromagnetic Waves',
+      subtopics: [{
+        id: 'wave_properties',
+        name: 'Властивості хвиль',
+        nameEn: 'Wave Properties',
+        formulas: [
+          {
+            id: 'phys_em_wave',
+            name: 'Рівняння електромагнітної хвилі',
+            nameEn: 'EM Wave Equation',
+            latex: 'c = \\frac{1}{\\sqrt{\\mu_0 \\varepsilon_0}}',
+            description: 'Швидкість світла у вакуумі визначається магнітною та електричною сталими.',
+            descriptionEn: 'Speed of light in vacuum is determined by magnetic and electric constants.',
+            variables: [
+              { symbol: 'c', name: 'Швидкість світла', nameEn: 'Speed of light', unit: 'м/с', type: 'result' },
+              { symbol: 'μ₀', name: 'Магнітна стала', nameEn: 'Magnetic constant', unit: 'Гн/м', type: 'input', defaultValue: 1.2566e-6 },
+              { symbol: 'ε₀', name: 'Електрична стала', nameEn: 'Electric constant', unit: 'Ф/м', type: 'input', defaultValue: 8.854e-12 }
+            ],
+            compute: (v) => 1 / Math.sqrt(v['μ₀'] * v['ε₀']),
+            resultVar: 'c', derivedFormulas: ['phys_photon_energy'],
+            topic: 'Електромагнітні хвилі', subtopic: 'Властивості хвиль'
+          },
+          {
+            id: 'phys_doppler',
+            name: 'Ефект Доплера',
+            nameEn: 'Doppler Effect',
+            latex: "f' = f \\cdot \\frac{v \\pm v_o}{v \\mp v_s}",
+            description: 'Зміна частоти хвилі внаслідок руху джерела або спостерігача.',
+            descriptionEn: 'Change in wave frequency due to relative motion of source or observer.',
+            variables: [
+              { symbol: "f'", name: 'Спостережена частота', nameEn: 'Observed frequency', unit: 'Гц', type: 'result' },
+              { symbol: 'f', name: 'Частота джерела', nameEn: 'Source frequency', unit: 'Гц', type: 'input' },
+              { symbol: 'v', name: 'Швидкість хвилі', nameEn: 'Wave speed', unit: 'м/с', type: 'input', defaultValue: 343 },
+              { symbol: 'v_o', name: 'Швидкість спостерігача', nameEn: 'Observer speed', unit: 'м/с', type: 'input', defaultValue: 0 },
+              { symbol: 'v_s', name: 'Швидкість джерела', nameEn: 'Source speed', unit: 'м/с', type: 'input' }
+            ],
+            compute: (v) => v.f * ((v.v + v.v_o) / (v.v - v.v_s)),
+            resultVar: "f'", derivedFormulas: ['phys_wave_speed'],
+            topic: 'Електромагнітні хвилі', subtopic: 'Властивості хвиль'
+          }
+        ]
+      }]
+    },
+    {
+      id: 'rotational',
+      name: 'Обертальний рух',
+      nameEn: 'Rotational Mechanics',
+      subtopics: [{
+        id: 'rotation_basics',
+        name: 'Основи обертання',
+        nameEn: 'Rotation Basics',
+        formulas: [
+          {
+            id: 'phys_torque',
+            name: 'Момент сили',
+            nameEn: 'Torque',
+            latex: '\\tau = r \\cdot F \\cdot \\sin\\theta',
+            description: 'Момент сили — міра здатності сили обертати тіло навколо осі.',
+            descriptionEn: 'Torque measures the ability of a force to cause rotational motion about an axis.',
+            variables: [
+              { symbol: 'τ', name: 'Момент сили', nameEn: 'Torque', unit: 'Н·м', type: 'result' },
+              { symbol: 'r', name: 'Плече сили', nameEn: 'Lever arm', unit: 'м', type: 'input' },
+              { symbol: 'F', name: 'Сила', nameEn: 'Force', unit: 'Н', type: 'input' },
+              { symbol: 'θ', name: 'Кут', nameEn: 'Angle', unit: 'рад', type: 'input', defaultValue: 1.5708 }
+            ],
+            compute: (v) => v.r * v.F * Math.sin(v['θ']),
+            resultVar: 'τ', derivedFormulas: ['phys_moment_inertia'],
+            topic: 'Обертальний рух', subtopic: 'Основи обертання'
+          },
+          {
+            id: 'phys_moment_inertia',
+            name: 'Кінетична енергія обертання',
+            nameEn: 'Rotational Kinetic Energy',
+            latex: 'E_k = \\frac{1}{2} I \\omega^2',
+            description: 'Кінетична енергія тіла, що обертається, залежить від моменту інерції та кутової швидкості.',
+            descriptionEn: 'Rotational kinetic energy depends on the moment of inertia and angular velocity.',
+            variables: [
+              { symbol: 'E_k', name: 'Кінетична енергія', nameEn: 'Kinetic energy', unit: 'Дж', type: 'result' },
+              { symbol: 'I', name: 'Момент інерції', nameEn: 'Moment of inertia', unit: 'кг·м²', type: 'input' },
+              { symbol: 'ω', name: 'Кутова швидкість', nameEn: 'Angular velocity', unit: 'рад/с', type: 'input' }
+            ],
+            compute: (v) => 0.5 * v.I * v['ω'] * v['ω'],
+            resultVar: 'E_k', derivedFormulas: ['phys_torque'],
+            topic: 'Обертальний рух', subtopic: 'Основи обертання'
+          }
+        ]
+      }]
     }
   ]
 };

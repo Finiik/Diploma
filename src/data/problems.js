@@ -281,6 +281,193 @@ export const problemsData = [
     ],
     answer: 'CO = 5.5 л/хв',
     answerEn: 'CO = 5.5 L/min'
+  },
+  {
+    id: 'prob_bernoulli_pipe',
+    name: 'Тиск у звуженій трубі',
+    nameEn: 'Pressure in a Narrow Pipe',
+    subject: 'physics',
+    topic: 'Механіка рідин',
+    difficulty: 2,
+    description: 'Вода тече по трубі. У широкій частині (S₁=0.01 м²) швидкість 2 м/с, тиск 200 кПа. Знайдіть тиск у вузькій частині (S₂=0.005 м²).',
+    descriptionEn: 'Water flows through a pipe. In the wide section (S₁=0.01 m²) velocity is 2 m/s, pressure is 200 kPa. Find pressure in the narrow section (S₂=0.005 m²).',
+    relatedFormula: 'phys_bernoulli',
+    steps: [
+      { text: 'З рівняння неперервності: v₂ = S₁·v₁/S₂ = 0.01·2/0.005 = 4 м/с', textEn: 'From continuity equation: v₂ = S₁·v₁/S₂ = 0.01·2/0.005 = 4 m/s' },
+      { text: 'Рівняння Бернуллі: P₁ + ½ρv₁² = P₂ + ½ρv₂²', textEn: "Bernoulli's equation: P₁ + ½ρv₁² = P₂ + ½ρv₂²" },
+      { text: 'P₂ = P₁ + ½ρ(v₁² - v₂²) = 200000 + 0.5·1000·(4 - 16)', textEn: 'P₂ = P₁ + ½ρ(v₁² - v₂²) = 200000 + 0.5·1000·(4 - 16)' },
+      { text: 'P₂ = 200000 - 6000 = 194000 Па = 194 кПа', textEn: 'P₂ = 200000 - 6000 = 194000 Pa = 194 kPa' }
+    ],
+    answer: 'P₂ = 194 кПа',
+    answerEn: 'P₂ = 194 kPa'
+  },
+  {
+    id: 'prob_torque_wrench',
+    name: 'Момент сили гайкового ключа',
+    nameEn: 'Torque of a Wrench',
+    subject: 'physics',
+    topic: 'Обертальний рух',
+    difficulty: 1,
+    description: 'Механік прикладає силу 80 Н до гайкового ключа довжиною 0.3 м під кутом 90°. Знайдіть момент сили.',
+    descriptionEn: 'A mechanic applies 80 N of force to a 0.3 m wrench at a 90° angle. Find the torque.',
+    relatedFormula: 'phys_torque',
+    steps: [
+      { text: 'Формула моменту сили: τ = r · F · sin θ', textEn: 'Torque formula: τ = r · F · sin θ' },
+      { text: 'При θ = 90°, sin 90° = 1', textEn: 'At θ = 90°, sin 90° = 1' },
+      { text: 'τ = 0.3 · 80 · 1 = 24 Н·м', textEn: 'τ = 0.3 · 80 · 1 = 24 N·m' }
+    ],
+    answer: 'τ = 24 Н·м',
+    answerEn: 'τ = 24 N·m'
+  },
+  {
+    id: 'prob_doppler_ambulance',
+    name: 'Ефект Доплера для швидкої',
+    nameEn: 'Doppler Effect for Ambulance',
+    subject: 'physics',
+    topic: 'Електромагнітні хвилі',
+    difficulty: 3,
+    description: 'Швидка допомога їде зі швидкістю 30 м/с і подає сигнал частотою 800 Гц. Яку частоту почує нерухомий спостерігач, коли машина наближається? (v_звуку = 343 м/с)',
+    descriptionEn: 'An ambulance moves at 30 m/s sounding a 800 Hz siren. What frequency does a stationary observer hear as it approaches? (v_sound = 343 m/s)',
+    relatedFormula: 'phys_doppler',
+    steps: [
+      { text: "Ефект Доплера: f' = f · v/(v - v_s)", textEn: "Doppler effect: f' = f · v/(v - v_s)" },
+      { text: "f' = 800 · 343/(343 - 30)", textEn: "f' = 800 · 343/(343 - 30)" },
+      { text: "f' = 800 · 343/313 ≈ 876.7 Гц", textEn: "f' = 800 · 343/313 ≈ 876.7 Hz" },
+      { text: 'Частота зростає, бо джерело наближається', textEn: 'Frequency increases because the source is approaching' }
+    ],
+    answer: "f' ≈ 877 Гц",
+    answerEn: "f' ≈ 877 Hz"
+  },
+  {
+    id: 'prob_osmotic_glucose',
+    name: 'Осмотичний тиск розчину глюкози',
+    nameEn: 'Osmotic Pressure of Glucose',
+    subject: 'chemistry',
+    topic: 'Колігативні властивості',
+    difficulty: 2,
+    description: 'Знайдіть осмотичний тиск 0.1 М розчину глюкози (неелектроліт) при 37°C.',
+    descriptionEn: 'Find the osmotic pressure of a 0.1 M glucose solution (nonelectrolyte) at 37°C.',
+    relatedFormula: 'chem_osmotic_pressure',
+    steps: [
+      { text: 'Формула: Π = i·C·R·T', textEn: 'Formula: Π = i·C·R·T' },
+      { text: 'Глюкоза — неелектроліт, тому i = 1', textEn: 'Glucose is a nonelectrolyte, so i = 1' },
+      { text: 'T = 37 + 273 = 310 К', textEn: 'T = 37 + 273 = 310 K' },
+      { text: 'Π = 1 · 0.1 · 0.0821 · 310 ≈ 2.55 атм', textEn: 'Π = 1 · 0.1 · 0.0821 · 310 ≈ 2.55 atm' }
+    ],
+    answer: 'Π ≈ 2.55 атм',
+    answerEn: 'Π ≈ 2.55 atm'
+  },
+  {
+    id: 'prob_henderson_buffer',
+    name: 'pH ацетатного буфера',
+    nameEn: 'pH of Acetate Buffer',
+    subject: 'chemistry',
+    topic: 'Аналітична хімія',
+    difficulty: 2,
+    description: 'Буферний розчин містить 0.2 М ацетат натрію та 0.1 М оцтову кислоту. pKa = 4.75. Знайдіть pH.',
+    descriptionEn: 'A buffer contains 0.2 M sodium acetate and 0.1 M acetic acid. pKa = 4.75. Find the pH.',
+    relatedFormula: 'chem_henderson',
+    steps: [
+      { text: 'Рівняння Гендерсона-Гассельбаха: pH = pKa + log([A⁻]/[HA])', textEn: 'Henderson-Hasselbalch: pH = pKa + log([A⁻]/[HA])' },
+      { text: 'pH = 4.75 + log(0.2/0.1)', textEn: 'pH = 4.75 + log(0.2/0.1)' },
+      { text: 'pH = 4.75 + log(2) = 4.75 + 0.301', textEn: 'pH = 4.75 + log(2) = 4.75 + 0.301' },
+      { text: 'pH ≈ 5.05', textEn: 'pH ≈ 5.05' }
+    ],
+    answer: 'pH ≈ 5.05',
+    answerEn: 'pH ≈ 5.05'
+  },
+  {
+    id: 'prob_titration_hcl',
+    name: 'Титрування HCl розчином NaOH',
+    nameEn: 'Titration of HCl with NaOH',
+    subject: 'chemistry',
+    topic: 'Аналітична хімія',
+    difficulty: 1,
+    description: 'Для титрування 25 мл розчину HCl знадобилось 30 мл 0.1 М розчину NaOH. Знайдіть концентрацію HCl.',
+    descriptionEn: 'To titrate 25 mL of HCl solution, 30 mL of 0.1 M NaOH was needed. Find the concentration of HCl.',
+    relatedFormula: 'chem_titration',
+    steps: [
+      { text: 'У точці еквівалентності: C₁V₁ = C₂V₂', textEn: 'At equivalence: C₁V₁ = C₂V₂' },
+      { text: 'C₁ · 25 = 0.1 · 30', textEn: 'C₁ · 25 = 0.1 · 30' },
+      { text: 'C₁ = 3/25 = 0.12 М', textEn: 'C₁ = 3/25 = 0.12 M' }
+    ],
+    answer: 'C(HCl) = 0.12 М',
+    answerEn: 'C(HCl) = 0.12 M'
+  },
+  {
+    id: 'prob_dna_gene',
+    name: 'Довжина гена',
+    nameEn: 'Gene Length',
+    subject: 'biology',
+    topic: 'Молекулярна біологія',
+    difficulty: 1,
+    description: 'Ген кодує білок із 300 амінокислот. Знайдіть довжину цього гена в нанометрах.',
+    descriptionEn: 'A gene encodes a protein of 300 amino acids. Find the gene length in nanometers.',
+    relatedFormula: 'bio_dna_length',
+    steps: [
+      { text: '1 амінокислота = 3 нуклеотиди (кодон)', textEn: '1 amino acid = 3 nucleotides (codon)' },
+      { text: 'Кількість нуклеотидних пар: N = 300 × 3 = 900', textEn: 'Number of base pairs: N = 300 × 3 = 900' },
+      { text: 'Довжина: L = N × 0.34 нм = 900 × 0.34 = 306 нм', textEn: 'Length: L = N × 0.34 nm = 900 × 0.34 = 306 nm' }
+    ],
+    answer: 'L = 306 нм',
+    answerEn: 'L = 306 nm'
+  },
+  {
+    id: 'prob_r0_flu',
+    name: 'Базове репродуктивне число грипу',
+    nameEn: 'Flu R₀ Calculation',
+    subject: 'biology',
+    topic: 'Епідеміологія',
+    difficulty: 2,
+    description: 'Ймовірність зараження грипом при контакті — 5%. Хвора людина контактує з 20 особами на день протягом 5 днів. Знайдіть R₀.',
+    descriptionEn: 'Flu transmission probability per contact is 5%. An infected person contacts 20 people per day for 5 days. Find R₀.',
+    relatedFormula: 'bio_r0',
+    steps: [
+      { text: 'R₀ = β · c · D', textEn: 'R₀ = β · c · D' },
+      { text: 'R₀ = 0.05 · 20 · 5', textEn: 'R₀ = 0.05 · 20 · 5' },
+      { text: 'R₀ = 5.0 — кожна хвора людина інфікує в середньому 5 осіб', textEn: 'R₀ = 5.0 — each infected person infects 5 others on average' },
+      { text: 'R₀ > 1, тому епідемія буде поширюватися', textEn: 'R₀ > 1, so the epidemic will spread' }
+    ],
+    answer: 'R₀ = 5.0',
+    answerEn: 'R₀ = 5.0'
+  },
+  {
+    id: 'prob_protein_mw',
+    name: 'Молекулярна маса інсуліну',
+    nameEn: 'Insulin Molecular Weight',
+    subject: 'biology',
+    topic: 'Молекулярна біологія',
+    difficulty: 3,
+    description: 'Інсулін людини складається з 51 амінокислоти. Оцініть його молекулярну масу (середня маса амінокислоти — 128 Да).',
+    descriptionEn: 'Human insulin consists of 51 amino acids. Estimate its molecular weight (average amino acid mass: 128 Da).',
+    relatedFormula: 'bio_protein_mw',
+    steps: [
+      { text: 'Формула: M = n · m_aa - (n-1) · 18', textEn: 'Formula: M = n · m_aa - (n-1) · 18' },
+      { text: 'M = 51 · 128 - 50 · 18', textEn: 'M = 51 · 128 - 50 · 18' },
+      { text: 'M = 6528 - 900 = 5628 Да', textEn: 'M = 6528 - 900 = 5628 Da' },
+      { text: 'Реальна маса інсуліну — ~5808 Да (різниця через різні бічні ланцюги)', textEn: 'Actual insulin MW is ~5808 Da (difference due to varied side chains)' }
+    ],
+    answer: 'M ≈ 5628 Да',
+    answerEn: 'M ≈ 5628 Da'
+  },
+  {
+    id: 'prob_selection_coeff',
+    name: 'Коефіцієнт відбору серповидноклітинної анемії',
+    nameEn: 'Sickle Cell Selection Coefficient',
+    subject: 'biology',
+    topic: 'Епідеміологія',
+    difficulty: 3,
+    description: 'Пристосованість генотипу AA = 1.0, генотипу AS = 1.15 (перевага гетерозигот у зоні малярії). Знайдіть коефіцієнт відбору проти AA.',
+    descriptionEn: 'Fitness of AA genotype = 1.0, AS genotype = 1.15 (heterozygote advantage in malaria zones). Find selection coefficient against AA.',
+    relatedFormula: 'bio_selection',
+    steps: [
+      { text: 'Коефіцієнт відбору: s = 1 - w_AA/w_AS', textEn: 'Selection coefficient: s = 1 - w_AA/w_AS' },
+      { text: 's = 1 - 1.0/1.15', textEn: 's = 1 - 1.0/1.15' },
+      { text: 's = 1 - 0.87 = 0.13', textEn: 's = 1 - 0.87 = 0.13' },
+      { text: 'Це пояснює високу частоту алеля S у зонах малярії', textEn: 'This explains the high frequency of the S allele in malaria zones' }
+    ],
+    answer: 's ≈ 0.13 (13% зниження пристосованості)',
+    answerEn: 's ≈ 0.13 (13% fitness reduction)'
   }
 ];
 

@@ -407,6 +407,140 @@ export const biologyData = {
           }
         ]
       }]
+    },
+    {
+      id: 'molecular_bio',
+      name: 'Молекулярна біологія',
+      nameEn: 'Molecular Biology',
+      subtopics: [{
+        id: 'dna_protein',
+        name: 'ДНК та білки',
+        nameEn: 'DNA & Proteins',
+        formulas: [
+          {
+            id: 'bio_dna_length',
+            name: 'Довжина молекули ДНК',
+            nameEn: 'DNA Molecule Length',
+            latex: 'L = N \\cdot 0.34\\,\\text{нм}',
+            description: 'Довжина молекули ДНК визначається кількістю нуклеотидних пар, кожна з яких має крок 0.34 нм.',
+            descriptionEn: 'DNA length is determined by the number of base pairs, each spaced 0.34 nm apart.',
+            variables: [
+              { symbol: 'L', name: 'Довжина ДНК', nameEn: 'DNA length', unit: 'нм', type: 'result' },
+              { symbol: 'N', name: 'Кількість нуклеотидних пар', nameEn: 'Number of base pairs', unit: '', type: 'input' }
+            ],
+            compute: (v) => v.N * 0.34,
+            resultVar: 'L', derivedFormulas: ['bio_codon_count'],
+            topic: 'Молекулярна біологія', subtopic: 'ДНК та білки'
+          },
+          {
+            id: 'bio_protein_mw',
+            name: 'Молекулярна маса білка',
+            nameEn: 'Protein Molecular Weight',
+            latex: 'M_w = n \\cdot \\bar{m}_{aa} - (n-1) \\cdot 18',
+            description: 'Молекулярна маса білка: сума мас амінокислот мінус маса води, що виділилася при утворенні пептидних зв\'язків.',
+            descriptionEn: 'Protein MW: sum of amino acid masses minus water released during peptide bond formation.',
+            variables: [
+              { symbol: 'M_w', name: 'Молекулярна маса', nameEn: 'Molecular weight', unit: 'Да', type: 'result' },
+              { symbol: 'n', name: 'Кількість амінокислот', nameEn: 'Number of amino acids', unit: '', type: 'input' },
+              { symbol: 'm_aa', name: 'Середня маса амінокислоти', nameEn: 'Average amino acid mass', unit: 'Да', type: 'input', defaultValue: 128 }
+            ],
+            compute: (v) => v.n * v.m_aa - (v.n - 1) * 18,
+            resultVar: 'M_w', derivedFormulas: ['bio_dna_length'],
+            topic: 'Молекулярна біологія', subtopic: 'ДНК та білки'
+          },
+          {
+            id: 'bio_codon_count',
+            name: 'Кількість кодонів',
+            nameEn: 'Codon Count',
+            latex: 'C = \\frac{N_{bp}}{3}',
+            description: 'Кількість кодонів (трійок нуклеотидів) у мРНК визначає кількість амінокислот у білку.',
+            descriptionEn: 'The number of codons (nucleotide triplets) in mRNA determines the number of amino acids.',
+            variables: [
+              { symbol: 'C', name: 'Кількість кодонів', nameEn: 'Number of codons', unit: '', type: 'result' },
+              { symbol: 'N_bp', name: 'Кількість нуклеотидів', nameEn: 'Number of nucleotides', unit: '', type: 'input' }
+            ],
+            compute: (v) => Math.floor(v.N_bp / 3),
+            resultVar: 'C', derivedFormulas: ['bio_protein_mw'],
+            topic: 'Молекулярна біологія', subtopic: 'ДНК та білки'
+          }
+        ]
+      }]
+    },
+    {
+      id: 'epidemiology',
+      name: 'Епідеміологія',
+      nameEn: 'Epidemiology',
+      subtopics: [{
+        id: 'disease_spread',
+        name: 'Поширення захворювань',
+        nameEn: 'Disease Spread',
+        formulas: [
+          {
+            id: 'bio_r0',
+            name: 'Базове репродуктивне число',
+            nameEn: 'Basic Reproduction Number',
+            latex: 'R_0 = \\beta \\cdot c \\cdot D',
+            description: 'Середня кількість людей, яких може інфікувати одна хвора людина. Якщо R₀ > 1, епідемія зростає.',
+            descriptionEn: 'Average number of people infected by one case. If R₀ > 1, the epidemic grows.',
+            variables: [
+              { symbol: 'R₀', name: 'Репродуктивне число', nameEn: 'Reproduction number', unit: '', type: 'result' },
+              { symbol: 'β', name: 'Ймовірність зараження', nameEn: 'Transmission probability', unit: '', type: 'input' },
+              { symbol: 'c', name: 'Кількість контактів/день', nameEn: 'Contacts per day', unit: '', type: 'input' },
+              { symbol: 'D', name: 'Тривалість інфекції', nameEn: 'Duration of infection', unit: 'дні', type: 'input' }
+            ],
+            compute: (v) => v['β'] * v.c * v.D,
+            resultVar: 'R₀', derivedFormulas: ['bio_prevalence'],
+            topic: 'Епідеміологія', subtopic: 'Поширення захворювань'
+          },
+          {
+            id: 'bio_prevalence',
+            name: 'Поширеність захворювання',
+            nameEn: 'Disease Prevalence',
+            latex: 'P = \\frac{\\text{хворих}}{\\text{популяція}} \\times 100\\%',
+            description: 'Частка населення, що має захворювання на певний момент часу.',
+            descriptionEn: 'Proportion of a population that has a disease at a given time point.',
+            variables: [
+              { symbol: 'P', name: 'Поширеність', nameEn: 'Prevalence', unit: '%', type: 'result' },
+              { symbol: 'cases', name: 'Кількість хворих', nameEn: 'Number of cases', unit: '', type: 'input' },
+              { symbol: 'pop', name: 'Популяція', nameEn: 'Population', unit: '', type: 'input' }
+            ],
+            compute: (v) => (v.cases / v.pop) * 100,
+            resultVar: 'P', derivedFormulas: ['bio_r0'],
+            topic: 'Епідеміологія', subtopic: 'Поширення захворювань'
+          },
+          {
+            id: 'bio_selection',
+            name: 'Коефіцієнт відбору',
+            nameEn: 'Selection Coefficient',
+            latex: 's = 1 - \\frac{w_{Aa}}{w_{AA}}',
+            description: 'Міра зниження пристосованості генотипу порівняно з найбільш пристосованим генотипом.',
+            descriptionEn: 'Measure of fitness reduction of a genotype compared to the fittest genotype.',
+            variables: [
+              { symbol: 's', name: 'Коефіцієнт відбору', nameEn: 'Selection coefficient', unit: '', type: 'result' },
+              { symbol: 'w_Aa', name: 'Пристосованість Aa', nameEn: 'Fitness of Aa', unit: '', type: 'input' },
+              { symbol: 'w_AA', name: 'Пристосованість AA', nameEn: 'Fitness of AA', unit: '', type: 'input', defaultValue: 1 }
+            ],
+            compute: (v) => 1 - (v.w_Aa / v.w_AA),
+            resultVar: 's', derivedFormulas: ['bio_hardy_weinberg'],
+            topic: 'Епідеміологія', subtopic: 'Поширення захворювань'
+          },
+          {
+            id: 'bio_doubling_time',
+            name: 'Час подвоєння популяції',
+            nameEn: 'Population Doubling Time',
+            latex: 't_d = \\frac{\\ln 2}{r}',
+            description: 'Час, необхідний для подвоєння чисельності популяції при сталій швидкості росту.',
+            descriptionEn: 'Time required for a population to double at a constant growth rate.',
+            variables: [
+              { symbol: 't_d', name: 'Час подвоєння', nameEn: 'Doubling time', unit: '', type: 'result' },
+              { symbol: 'r', name: 'Швидкість росту', nameEn: 'Growth rate', unit: '', type: 'input' }
+            ],
+            compute: (v) => Math.log(2) / v.r,
+            resultVar: 't_d', derivedFormulas: ['bio_population_growth'],
+            topic: 'Епідеміологія', subtopic: 'Поширення захворювань'
+          }
+        ]
+      }]
     }
   ]
 };

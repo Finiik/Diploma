@@ -428,6 +428,151 @@ export const chemistryData = {
           }
         ]
       }]
+    },
+    {
+      id: 'colligative',
+      name: 'Колігативні властивості',
+      nameEn: 'Colligative Properties',
+      subtopics: [{
+        id: 'solution_props',
+        name: 'Властивості розчинів',
+        nameEn: 'Solution Properties',
+        formulas: [
+          {
+            id: 'chem_osmotic_pressure',
+            name: 'Осмотичний тиск',
+            nameEn: 'Osmotic Pressure',
+            latex: '\\Pi = i \\cdot C \\cdot R \\cdot T',
+            description: "Осмотичний тиск розчину пропорційний молярній концентрації, температурі та фактору Вант-Гоффа.",
+            descriptionEn: "Osmotic pressure is proportional to molar concentration, temperature, and van't Hoff factor.",
+            variables: [
+              { symbol: 'Π', name: 'Осмотичний тиск', nameEn: 'Osmotic pressure', unit: 'атм', type: 'result' },
+              { symbol: 'i', name: "Фактор Вант-Гоффа", nameEn: "Van't Hoff factor", unit: '', type: 'input', defaultValue: 1 },
+              { symbol: 'C', name: 'Молярна концентрація', nameEn: 'Molar concentration', unit: 'моль/л', type: 'input' },
+              { symbol: 'R', name: 'Газова стала', nameEn: 'Gas constant', unit: 'л·атм/(моль·К)', type: 'input', defaultValue: 0.0821 },
+              { symbol: 'T', name: 'Температура', nameEn: 'Temperature', unit: 'К', type: 'input', defaultValue: 298 }
+            ],
+            compute: (v) => v.i * v.C * v.R * v.T,
+            resultVar: 'Π', derivedFormulas: ['chem_boiling_elevation'],
+            topic: 'Колігативні властивості', subtopic: 'Властивості розчинів'
+          },
+          {
+            id: 'chem_boiling_elevation',
+            name: 'Підвищення температури кипіння',
+            nameEn: 'Boiling Point Elevation',
+            latex: '\\Delta T_b = i \\cdot K_b \\cdot m',
+            description: 'Додавання розчиненої речовини підвищує температуру кипіння розчинника.',
+            descriptionEn: 'Adding solute raises the boiling point of the solvent.',
+            variables: [
+              { symbol: 'ΔT_b', name: 'Підвищення Т кипіння', nameEn: 'Boiling point elevation', unit: '°C', type: 'result' },
+              { symbol: 'i', name: "Фактор Вант-Гоффа", nameEn: "Van't Hoff factor", unit: '', type: 'input', defaultValue: 1 },
+              { symbol: 'K_b', name: 'Ебуліоскопічна стала', nameEn: 'Ebullioscopic constant', unit: '°C·кг/моль', type: 'input', defaultValue: 0.512 },
+              { symbol: 'm', name: 'Моляльність', nameEn: 'Molality', unit: 'моль/кг', type: 'input' }
+            ],
+            compute: (v) => v.i * v.K_b * v.m,
+            resultVar: 'ΔT_b', derivedFormulas: ['chem_freezing_depression'],
+            topic: 'Колігативні властивості', subtopic: 'Властивості розчинів'
+          },
+          {
+            id: 'chem_freezing_depression',
+            name: 'Зниження температури замерзання',
+            nameEn: 'Freezing Point Depression',
+            latex: '\\Delta T_f = i \\cdot K_f \\cdot m',
+            description: 'Додавання розчиненої речовини знижує температуру замерзання розчинника.',
+            descriptionEn: 'Adding solute lowers the freezing point of the solvent.',
+            variables: [
+              { symbol: 'ΔT_f', name: 'Зниження Т замерзання', nameEn: 'Freezing point depression', unit: '°C', type: 'result' },
+              { symbol: 'i', name: "Фактор Вант-Гоффа", nameEn: "Van't Hoff factor", unit: '', type: 'input', defaultValue: 1 },
+              { symbol: 'K_f', name: 'Кріоскопічна стала', nameEn: 'Cryoscopic constant', unit: '°C·кг/моль', type: 'input', defaultValue: 1.86 },
+              { symbol: 'm', name: 'Моляльність', nameEn: 'Molality', unit: 'моль/кг', type: 'input' }
+            ],
+            compute: (v) => v.i * v.K_f * v.m,
+            resultVar: 'ΔT_f', derivedFormulas: ['chem_boiling_elevation'],
+            topic: 'Колігативні властивості', subtopic: 'Властивості розчинів'
+          }
+        ]
+      }]
+    },
+    {
+      id: 'analytical',
+      name: 'Аналітична хімія',
+      nameEn: 'Analytical Chemistry',
+      subtopics: [{
+        id: 'quantitative',
+        name: 'Кількісний аналіз',
+        nameEn: 'Quantitative Analysis',
+        formulas: [
+          {
+            id: 'chem_henderson',
+            name: 'Рівняння Гендерсона-Гассельбаха',
+            nameEn: 'Henderson-Hasselbalch Equation',
+            latex: 'pH = pK_a + \\log\\frac{[A^-]}{[HA]}',
+            description: 'Розраховує pH буферного розчину, знаючи pKa кислоти та співвідношення солі до кислоти.',
+            descriptionEn: 'Calculates pH of a buffer solution knowing the pKa and the ratio of conjugate base to acid.',
+            variables: [
+              { symbol: 'pH', name: 'Водневий показник', nameEn: 'pH value', unit: '', type: 'result' },
+              { symbol: 'pK_a', name: 'pKa кислоти', nameEn: 'pKa of acid', unit: '', type: 'input' },
+              { symbol: '[A⁻]', name: 'Концентрація основи', nameEn: 'Base concentration', unit: 'моль/л', type: 'input' },
+              { symbol: '[HA]', name: 'Концентрація кислоти', nameEn: 'Acid concentration', unit: 'моль/л', type: 'input' }
+            ],
+            compute: (v) => v.pK_a + Math.log10(v['[A⁻]'] / v['[HA]']),
+            resultVar: 'pH', derivedFormulas: ['chem_ph'],
+            topic: 'Аналітична хімія', subtopic: 'Кількісний аналіз'
+          },
+          {
+            id: 'chem_percent_composition',
+            name: 'Відсотковий склад елемента',
+            nameEn: 'Percent Composition',
+            latex: '\\%_{element} = \\frac{n \\cdot A_r}{M_r} \\times 100\\%',
+            description: 'Масова частка елемента у сполуці: відношення маси атомів елемента до молярної маси сполуки.',
+            descriptionEn: 'Mass fraction of an element: ratio of atomic mass of element to molar mass of compound.',
+            variables: [
+              { symbol: '%', name: 'Відсотковий склад', nameEn: 'Percent composition', unit: '%', type: 'result' },
+              { symbol: 'n', name: 'Кількість атомів', nameEn: 'Number of atoms', unit: '', type: 'input' },
+              { symbol: 'A_r', name: 'Атомна маса', nameEn: 'Atomic mass', unit: 'г/моль', type: 'input' },
+              { symbol: 'M_r', name: 'Молярна маса сполуки', nameEn: 'Molar mass of compound', unit: 'г/моль', type: 'input' }
+            ],
+            compute: (v) => (v.n * v.A_r / v.M_r) * 100,
+            resultVar: '%', derivedFormulas: ['chem_molar_mass'],
+            topic: 'Аналітична хімія', subtopic: 'Кількісний аналіз'
+          },
+          {
+            id: 'chem_titration',
+            name: 'Титрування',
+            nameEn: 'Titration',
+            latex: 'C_1 V_1 = C_2 V_2',
+            description: 'У точці еквівалентності кількість молів кислоти дорівнює кількості молів основи.',
+            descriptionEn: 'At the equivalence point, moles of acid equal moles of base.',
+            variables: [
+              { symbol: 'C₁', name: 'Концентрація 1', nameEn: 'Concentration 1', unit: 'моль/л', type: 'input' },
+              { symbol: 'V₁', name: "Об'єм 1", nameEn: 'Volume 1', unit: 'мл', type: 'input' },
+              { symbol: 'C₂', name: 'Концентрація 2', nameEn: 'Concentration 2', unit: 'моль/л', type: 'input' },
+              { symbol: 'V₂', name: "Об'єм 2", nameEn: 'Volume 2', unit: 'мл', type: 'result' }
+            ],
+            compute: (v) => (v['C₁'] * v['V₁']) / v['C₂'],
+            resultVar: 'V₂', derivedFormulas: ['chem_ph', 'chem_henderson'],
+            topic: 'Аналітична хімія', subtopic: 'Кількісний аналіз'
+          },
+          {
+            id: 'chem_solubility_product',
+            name: 'Добуток розчинності',
+            nameEn: 'Solubility Product',
+            latex: 'K_{sp} = [A^+]^m \\cdot [B^-]^n',
+            description: 'Константа добутку розчинності — добуток концентрацій іонів малорозчинної солі.',
+            descriptionEn: 'Solubility product constant is the product of ion concentrations of a sparingly soluble salt.',
+            variables: [
+              { symbol: 'K_sp', name: 'Добуток розчинності', nameEn: 'Solubility product', unit: '', type: 'result' },
+              { symbol: '[A⁺]', name: 'Концентрація катіона', nameEn: 'Cation concentration', unit: 'моль/л', type: 'input' },
+              { symbol: 'm', name: 'Коефіцієнт катіона', nameEn: 'Cation coefficient', unit: '', type: 'input', defaultValue: 1 },
+              { symbol: '[B⁻]', name: 'Концентрація аніона', nameEn: 'Anion concentration', unit: 'моль/л', type: 'input' },
+              { symbol: 'n', name: 'Коефіцієнт аніона', nameEn: 'Anion coefficient', unit: '', type: 'input', defaultValue: 1 }
+            ],
+            compute: (v) => Math.pow(v['[A⁺]'], v.m) * Math.pow(v['[B⁻]'], v.n),
+            resultVar: 'K_sp', derivedFormulas: ['chem_equilibrium'],
+            topic: 'Аналітична хімія', subtopic: 'Кількісний аналіз'
+          }
+        ]
+      }]
     }
   ]
 };

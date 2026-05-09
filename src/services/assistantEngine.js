@@ -237,11 +237,22 @@ ${relevantContent}`;
 // ============================================
 
 function detectHelpIntent(query) {
-  return /(?:допоможи|help|що ти (?:вмієш|можеш)|what can you|можливості|capabilities)/i.test(query);
+  return /(?:допомог[аи]|help|що ти (?:вмієш|можеш|знаєш)|what can you|можливості|capabilities|як (?:користуватись|працюєш|працює)|how (?:do you work|to use)|menu|меню|інструкція|instructions)/i.test(query);
 }
 
 function detectListIntent(query) {
-  return /(?:які є|які формули|list|перелічи|покажи всі|show all|список|скільки)/i.test(query);
+  return /(?:які є|які формули|list|перелічи|покажи всі|show all|список|скільки|all formulas|всі формули|what(?:'s| is) available)/i.test(query);
+}
+
+function detectThanksIntent(query) {
+  return /^(?:дякую|дякуємо|спасибі|thanks|thank you|thx|ок|ok|зрозуміло|got it|cool|класно|супер|чудово)/i.test(query);
+}
+
+function detectSubjectIntent(query) {
+  if (/(?:фізик|physic)/i.test(query)) return 'physics';
+  if (/(?:хім|chem)/i.test(query)) return 'chemistry';
+  if (/(?:біолог|bio)/i.test(query)) return 'biology';
+  return null;
 }
 
 function localFallback(query, isUk) {
@@ -399,8 +410,10 @@ export async function processMessage(query, isUk = true) {
 
   const trimmed = query.trim();
 
-  // Quick greeting detection (no API call needed)
-  if (/^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good)/i.test(trimmed)) {
+  // ---- INSTANT INTENTS (no API call needed) ----
+
+  // Greeting
+  if (/^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i.test(trimmed)) {
     const allFormulas = getAllFormulasFlat();
     return {
       text: isUk
@@ -413,10 +426,83 @@ export async function processMessage(query, isUk = true) {
     };
   }
 
+  // Help / capabilities
+  if (detectHelpIntent(trimmed)) {
+    const allFormulas = getAllFormulasFlat();
+    return {
+      text: isUk
+        ? `🤖 Ось що я вмію:\n\n• **Формули** — знайду будь-яку з ${allFormulas.length} формул та поясню її\n• **Теорія** — розкажу про теоретичні матеріали (${theoryData.length} статей)\n• **Задачі** — допоможу знайти приклади розв'язків (${problemsData.length} задач)\n• **Калькулятор** — підкажу, де обчислити значення\n\nПросто напишіть назву формули, теми або запитання!`
+        : `🤖 Here's what I can do:\n\n• **Formulas** — find any of ${allFormulas.length} formulas and explain them\n• **Theory** — explain theoretical materials (${theoryData.length} articles)\n• **Problems** — help find example solutions (${problemsData.length} problems)\n• **Calculator** — point you to the right calculator\n\nJust type a formula name, topic, or question!`,
+      links: [],
+      suggestions: isUk
+        ? ['Закон Ома', 'Що таке pH?', 'Задачі з біології']
+        : ["Ohm's law", 'What is pH?', 'Biology problems']
+    };
+  }
+
+  // Thanks
+  if (detectThanksIntent(trimmed)) {
+    return {
+      text: isUk
+        ? '😊 Будь ласка! Якщо є ще питання — запитуйте, я завжди готовий допомогти!'
+        : "😊 You're welcome! If you have more questions, feel free to ask!",
+      links: [],
+      suggestions: isUk
+        ? ['Що таке E=mc²?', 'Формули хімії', 'Задачі з фізики']
+        : ['What is E=mc²?', 'Chemistry formulas', 'Physics problems']
+    };
+  }
+
+  // List all / statistics
+  if (detectListIntent(trimmed)) {
+    const subj = detectSubjectIntent(trimmed);
+    if (subj) {
+      const fBySubject = {
+        physics: getAllFormulas(),
+        chemistry: getAllChemFormulas(),
+        biology: getAllBioFormulas()
+      }[subj] || [];
+      const names = fBySubject.slice(0, 10).map(f => `• ${isUk ? f.name : f.nameEn}`).join('\n');
+      return {
+        text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}** — ${fBySubject.length} ${isUk ? 'формул' : 'formulas'}:\n\n${names}${fBySubject.length > 10 ? `\n\n...${isUk ? 'та ще' : 'and'} ${fBySubject.length - 10} ${isUk ? 'більше' : 'more'}` : ''}`,
+        links: [{ type: 'subject', id: subj, label: isUk ? 'Переглянути всі' : 'View all' }],
+        suggestions: []
+      };
+    }
+    return {
+      text: isUk
+        ? `📊 На платформі доступно:\n\n• ⚛️ Фізика — ${getAllFormulas().length} формул\n• 🧪 Хімія — ${getAllChemFormulas().length} формул\n• 🧬 Біологія — ${getAllBioFormulas().length} формул\n• 📖 ${theoryData.length} теоретичних статей\n• 📝 ${problemsData.length} прикладів задач\n\nОберіть предмет для деталей!`
+        : `📊 Available on the platform:\n\n• ⚛️ Physics — ${getAllFormulas().length} formulas\n• 🧪 Chemistry — ${getAllChemFormulas().length} formulas\n• 🧬 Biology — ${getAllBioFormulas().length} formulas\n• 📖 ${theoryData.length} theory articles\n• 📝 ${problemsData.length} problem examples\n\nPick a subject for details!`,
+      links: [],
+      suggestions: isUk
+        ? ['Формули фізики', 'Формули хімії', 'Формули біології']
+        : ['Physics formulas', 'Chemistry formulas', 'Biology formulas']
+    };
+  }
+
+  // Pure subject query (e.g., just "фізика" or "chemistry")
+  const pureSubject = detectSubjectIntent(trimmed);
+  if (pureSubject && trimmed.length < 15) {
+    const fBySubject = {
+      physics: getAllFormulas(),
+      chemistry: getAllChemFormulas(),
+      biology: getAllBioFormulas()
+    }[pureSubject] || [];
+    const topics = [...new Set(fBySubject.map(f => f.topic))].filter(Boolean);
+    return {
+      text: `${getSubjectEmoji(pureSubject)} **${getSubjectLabel(pureSubject, isUk)}**\n\n${isUk ? 'Доступно' : 'Available'}: ${fBySubject.length} ${isUk ? 'формул' : 'formulas'} ${isUk ? 'з' : 'in'} ${topics.length} ${isUk ? 'тем' : 'topics'}:\n${topics.map(t => `• ${t}`).join('\n')}\n\n${isUk ? 'Запитайте конкретну формулу або тему!' : 'Ask about a specific formula or topic!'}`,
+      links: [{ type: 'subject', id: pureSubject, label: isUk ? 'Відкрити предмет' : 'Open subject' }],
+      suggestions: isUk
+        ? [`Формули ${getSubjectLabel(pureSubject, true).toLowerCase()}`]
+        : [`${getSubjectLabel(pureSubject, false)} formulas`]
+    };
+  }
+
+  // ---- GEMINI API (for complex questions) ----
+
   // Extract navigation links using smart search
   const links = extractLinks(trimmed, isUk);
 
-  // Try Gemini API first
   if (GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY') {
     try {
       const geminiResponse = await callGemini(trimmed, isUk);
@@ -430,7 +516,7 @@ export async function processMessage(query, isUk = true) {
     }
   }
 
-  // Rich local fallback
+  // ---- RICH LOCAL FALLBACK ----
   const fallback = localFallback(trimmed, isUk);
   return {
     text: fallback.text,
