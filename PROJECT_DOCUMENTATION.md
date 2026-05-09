@@ -64,11 +64,11 @@
 │  └── assistantEngine.js (AI chatbot logic)           │
 ├─────────────────────────────────────────────────────┤
 │  Data Layer (Static JS modules)                      │
-│  ├── physics.js (23 formulas, 7 topics)              │
-│  ├── chemistry.js (18 formulas, 6 topics)            │
-│  ├── biology.js (16 formulas, 7 topics)              │
+│  ├── physics.js (30 formulas, 10 topics)             │
+│  ├── chemistry.js (25 formulas, 8 topics)            │
+│  ├── biology.js (23 formulas, 9 topics)              │
 │  ├── theory.js (15 articles)                         │
-│  └── problems.js (15 problems)                       │
+│  └── problems.js (25 problems)                       │
 ├─────────────────────────────────────────────────────┤
 │  Firebase (Optional Cloud Layer)                     │
 │  ├── Anonymous Auth                                  │
@@ -225,10 +225,10 @@ Diploma/
 - Fuzzy matching with configurable threshold
 - Returns typed results (formula/theory/problem) with navigation links
 
-### AI Assistant
-- Client-side only — no external API
-- Parses questions using keyword/intent detection
-- Searches all content via Fuse.js
+### AI Assistant (Gemini-Powered)
+- Powered by Google Gemini 2.0 Flash API with full platform context
+- Intelligent local fallback with intent detection and fuzzy search
+- Strips 40+ intent words (UA/EN) for accurate query matching
 - Constructs contextual responses with formula references and links
 - Supports bilingual queries (UA/EN)
 
@@ -243,10 +243,10 @@ Diploma/
 
 | Category | Count | Subjects |
 |---|---|---|
-| **Formulas** | 57 | Physics (23), Chemistry (18), Biology (16) |
+| **Formulas** | 78 | Physics (30), Chemistry (25), Biology (23) |
 | **Theory Articles** | 15 | 5 per subject |
-| **Problem Examples** | 15 | 5 per subject |
-| **Topics** | 20 | 7 Physics, 6 Chemistry, 7 Biology |
+| **Problem Examples** | 25 | 8 Physics, 8 Chemistry, 9 Biology |
+| **Topics** | 27 | 10 Physics, 8 Chemistry, 9 Biology |
 
 ---
 

@@ -44,7 +44,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 ## ✨ Key Features
 
 ### 📐 Interactive Formula Database
-- **57 formulas** across Physics (23), Chemistry (18), and Biology (16)
+- **78 formulas** across Physics (30), Chemistry (25), and Biology (23)
 - Each formula includes LaTeX rendering, variable descriptions with units, and a **real-time calculator**
 - Organized hierarchically: Subject → Topic → Subtopic → Formulas
 - Cross-linked with related/derived formulas for navigation
@@ -65,7 +65,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 
 ### 📖 Theory & Problems
 - **15 theory articles** with difficulty badges (🟢 Beginner / 🟡 Intermediate / 🔴 Advanced)
-- **15 step-by-step problem examples** with expandable solutions
+- **25 step-by-step problem examples** with expandable solutions
 - Filterable by subject and difficulty level
 - Cross-referenced with relevant formulas
 
@@ -137,11 +137,11 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 │  └── assistantEngine.js (Gemini AI + local fallback)      │
 ├──────────────────────────────────────────────────────────┤
 │  Data Layer (Static JS modules)                           │
-│  ├── physics.js    — 23 formulas, 7 topics                │
-│  ├── chemistry.js  — 18 formulas, 6 topics                │
-│  ├── biology.js    — 16 formulas, 7 topics                │
+│  ├── physics.js    — 30 formulas, 10 topics               │
+│  ├── chemistry.js  — 25 formulas, 8 topics                │
+│  ├── biology.js    — 23 formulas, 9 topics                │
 │  ├── theory.js     — 15 articles with difficulty          │
-│  └── problems.js   — 15 problems with step-by-step       │
+│  └── problems.js   — 25 problems with step-by-step       │
 ├──────────────────────────────────────────────────────────┤
 │  External Services                                        │
 │  ├── Google Gemini API (AI chatbot)                       │
@@ -280,7 +280,7 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 
 ## 📚 Content Database
 
-### Physics (23 formulas)
+### Physics (30 formulas)
 
 | Topic | Formulas |
 |---|---|
@@ -291,8 +291,11 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 | **Waves** | Wave Speed, Period & Frequency, Pendulum Period |
 | **Gravitation** | Universal Gravitation, Orbital Velocity, Escape Velocity |
 | **Nuclear Physics** | E=mc², Radioactive Decay, Photon Energy |
+| **Fluid Mechanics** | Bernoulli's Equation, Archimedes' Principle, Continuity Equation |
+| **Electromagnetic Waves** | EM Wave Equation, Doppler Effect |
+| **Rotational Mechanics** | Torque, Rotational Kinetic Energy |
 
-### Chemistry (18 formulas)
+### Chemistry (25 formulas)
 
 | Topic | Formulas |
 |---|---|
@@ -302,8 +305,10 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 | **Thermochemistry** | Enthalpy, Combustion Heat, Molar Mass |
 | **Gas Laws** | Dalton's Law, Graham's Law |
 | **Organic Chemistry** | Degree of Unsaturation, Mass Percent, Reaction Yield |
+| **Colligative Properties** | Osmotic Pressure, Boiling Point Elevation, Freezing Point Depression |
+| **Analytical Chemistry** | Henderson-Hasselbalch, Percent Composition, Titration, Solubility Product |
 
-### Biology (16 formulas)
+### Biology (23 formulas)
 
 | Topic | Formulas |
 |---|---|
@@ -314,6 +319,8 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 | **Physiology** | Cardiac Output, Harris-Benedict BMR |
 | **Mendelian Genetics** | Monohybrid Cross, Dihybrid Cross |
 | **Metabolism** | Respiratory Quotient, Daily Caloric Expenditure, Water Balance |
+| **Molecular Biology** | DNA Length, Protein Molecular Weight, Codon Count |
+| **Epidemiology** | Basic Reproduction Number (R₀), Prevalence, Selection Coefficient, Doubling Time |
 
 ### Theory Articles (15)
 5 per subject — ranging from 🟢 Beginner to 🔴 Advanced, covering Newton's Laws, Solutions, Hardy-Weinberg, Thermodynamics, Circuits, Kinetics, Acid-Base Theory, Ecology, Enzymes, Optics, Waves, Electrochemistry, Thermochemistry, Cell Biology, and Cardiovascular Physiology.
@@ -351,7 +358,7 @@ Smart Local Fallback
 ```
 
 ### Features
-- **Context injection** — Gemini receives all 57 formulas, 15 theory articles, and 15 problems as context
+- **Context injection** — Gemini receives all 78 formulas, 15 theory articles, and 25 problems as context
 - **Intent detection** — Recognizes greetings, help requests, formula lookups, theory explanations
 - **Smart query extraction** — Strips 40+ intent words in UA/EN to find the core search term
 - **Rich fallback** — Even without Gemini, provides formula details with variables and units
