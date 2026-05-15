@@ -223,6 +223,26 @@
   font-size: 0.9em;
 }
 
+/* Rendered KaTeX inside chat bubbles */
+.ai-msg-text .katex {
+  font-size: 1em;
+}
+
+/* Block formulas ($$...$$): keep them on their own line and let long
+   expressions scroll horizontally instead of overflowing the panel. */
+.ai-msg-text .katex-display {
+  margin: 10px 0;
+  padding: 4px 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* KaTeX inherits text color, so it sits correctly on both the light
+   bot bubble and the colored user bubble. */
+.ai-msg-user .ai-msg-text .katex {
+  color: white;
+}
+
 /* Links in bot messages */
 .ai-msg-links {
   display: flex;

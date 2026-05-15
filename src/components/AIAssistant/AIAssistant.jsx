@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 import { processMessage } from '../../services/assistantEngine';
 import './AIAssistant.css';
 
@@ -101,11 +103,44 @@ export default function AIAssistant() {
     }
   };
 
+  // Render a single LaTeX expression to HTML. Falls back to the escaped
+  // source (not raw, to avoid breaking layout) if KaTeX can't parse it.
+  const renderMath = (tex, displayMode) => {
+    try {
+      return katex.renderToString(tex.trim(), {
+        throwOnError: false,
+        displayMode,
+      });
+    } catch {
+      const safe = tex.replace(/[&<>]/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]
+      ));
+      return `<code class="formula-inline">${safe}</code>`;
+    }
+  };
+
+  // Turn an assistant message into HTML: real KaTeX for $$...$$ (block) and
+  // $...$ (inline), plus **bold** and newlines for the surrounding text.
+  // Math is extracted to placeholders first so the markdown pass can't
+  // mangle the generated KaTeX markup.
   const formatText = (text) => {
-    return text
+    if (!text) return '';
+
+    const mathBlocks = [];
+    const stash = (html) => {
+      mathBlocks.push(html);
+      return `${mathBlocks.length - 1}`;
+    };
+
+    let out = text
+      .replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => stash(renderMath(tex, true)))
+      .replace(/\$([^$\n]+?)\$/g, (_, tex) => stash(renderMath(tex, false)));
+
+    out = out
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\$\$(.*?)\$\$/g, '<code class="formula-inline">$1</code>')
       .replace(/\n/g, '<br/>');
+
+    return out.replace(/(\d+)/g, (_, i) => mathBlocks[Number(i)]);
   };
 
   return (
