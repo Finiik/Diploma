@@ -121,15 +121,48 @@ function buildPlatformContext(isUk) {
   return { formulaList, theoryList, problemList, totalFormulas: allFormulas.length };
 }
 
-// Search for relevant content to include in Gemini prompt
+// Is the question phrased as a definition request ("що таке X", "what is X")?
+function isDefinitionalQuery(query) {
+  return /(?:^|\s)(?:що таке|що це|поясни|розкажи про|what(?:'s| is| are)|define|tell me about)(?:\s|$)/i
+    .test(query.toLowerCase());
+}
+
+// Match a query against the general-concept knowledge base. Triggers only on
+// an exact concept word ("фізика", "energy"), so specific lookups like
+// "сила тяжіння" or "закон Ома" fall through to normal search.
+function matchConcept(query) {
+  const q = query.toLowerCase().replace(/[?!.]+$/, '').trim();
+  const core = extractSearchQuery(q);
+  for (const c of CONCEPTS) {
+    for (const k of c.keys) {
+      if (core === k || q === k) return c;
+    }
+  }
+  return null;
+}
+
+// Broad conceptual = a definition request whose subject is a recognized
+// general concept (a whole field or core idea), e.g. "що таке фізика".
+// A specific definitional lookup like "що таке E=mc²?" is NOT broad, so it
+// still gets its platform context injected for Gemini.
+function isBroadConceptualQuery(query) {
+  return isDefinitionalQuery(query) && matchConcept(query) !== null;
+}
+
+// Search for platform content to OPTIONALLY reference in the Gemini prompt.
+// Only strong matches are injected, and broad conceptual questions inject
+// nothing — so weak fuzzy hits can't bias the model toward a random formula.
 function findRelevantContent(query, isUk) {
-  const results = smartSearch(query);
+  if (isBroadConceptualQuery(query)) return '';
+
+  const results = smartSearch(query)
+    .filter(r => r.score == null || r.score <= 0.4)
+    .slice(0, 3);
   if (results.length === 0) return '';
 
-  const top = results.slice(0, 5);
-  let context = '\n\n--- RELEVANT CONTENT FOUND ---\n';
+  let context = '\n\n--- POSSIBLY RELATED PLATFORM ITEMS (reference these ONLY if they directly help answer the question; ignore them otherwise) ---\n';
 
-  top.forEach(item => {
+  results.forEach(item => {
     const name = isUk ? item.name : (item.nameEn || item.name);
     if (item.type === 'formula') {
       const desc = isUk ? item.description : item.descriptionEn;
@@ -176,20 +209,21 @@ async function callGemini(userMessage, isUk) {
 
   const lang = isUk ? 'Ukrainian' : 'English';
 
-  const systemPrompt = `You are SciLearn AI — a friendly, knowledgeable assistant for a science learning platform. You help students with Physics, Chemistry, and Biology.
+  const systemPrompt = `You are SciLearn AI — a friendly, knowledgeable science tutor for a learning platform covering Physics, Chemistry and Biology.
 
-RULES:
+HOW TO ANSWER:
 1. ALWAYS respond in ${lang}.
-2. Keep responses concise (3-6 sentences max for simple questions, more for explanations).
-3. When mentioning formulas, write them in plain text or LaTeX (wrap in $$...$$).
-4. When a formula from the platform matches the question, mention it by name and say the student can find it on the platform.
-5. Be encouraging and educational.
-6. If asked about something NOT on the platform, still answer using your knowledge but note it's not in the platform yet.
-7. Use emoji sparingly (1-2 per message).
-8. For math calculations, show the steps clearly.
-9. Do NOT use markdown headers (#). Use **bold** for emphasis.
+2. Answer the student's ACTUAL question first, directly and clearly, using your own knowledge.
+3. For broad or conceptual questions (e.g. "what is physics?", "why does X happen?", "what is energy?"), give a clear GENERAL explanation of the field or idea in plain language. Do NOT jump to a single specific formula unless the student explicitly asked for one.
+4. Bring up a specific platform formula/topic/problem ONLY when it genuinely helps answer THIS question. When you do, name it and say the student can open it on the platform. Never force an unrelated formula into the answer.
+5. Keep it concise: 3-6 sentences for simple questions, a little more for explanations. Move from the general idea to specifics, not the other way around.
+6. Write formulas in LaTeX wrapped in $$...$$. Show calculation steps clearly when solving a problem.
+7. Be encouraging and educational. Use at most 1-2 emoji. Use **bold** for emphasis; do NOT use markdown headers (#).
+8. If something isn't on the platform, still answer from your knowledge.
 
-PLATFORM CONTENT (${totalFormulas} formulas, ${theoryData.length} theory articles, ${problemsData.length} problems):
+The catalog below is the platform's library — use it ONLY to point students to relevant materials, NOT as the source of your answer and NOT something to recite.
+
+PLATFORM CATALOG (${totalFormulas} formulas, ${theoryData.length} theory articles, ${problemsData.length} problems):
 
 FORMULAS:
 ${formulaList}
@@ -255,6 +289,64 @@ function detectSubjectIntent(query) {
   return null;
 }
 
+// General-concept knowledge base for broad/definitional questions, so the
+// offline fallback answers "what is physics?" with an explanation of the
+// field instead of forcing the nearest specific formula. Extend as needed.
+const CONCEPTS = [
+  {
+    keys: ['фізика', 'фізику', 'фізики', 'physics'],
+    emoji: '⚛️',
+    uk: { title: 'Фізика', body: 'Фізика — це природнича наука, яка вивчає матерію, енергію та фундаментальні взаємодії, а також закони, за якими рухається і змінюється світ. Основні розділи: механіка, термодинаміка, електрика й магнетизм, оптика, коливання та хвилі, атомна і ядерна фізика.' },
+    en: { title: 'Physics', body: 'Physics is a natural science that studies matter, energy and the fundamental interactions, and the laws that govern how the world moves and changes. Main branches: mechanics, thermodynamics, electricity & magnetism, optics, oscillations & waves, and atomic & nuclear physics.' }
+  },
+  {
+    keys: ['хімія', 'хімію', 'хімії', 'chemistry'],
+    emoji: '🧪',
+    uk: { title: 'Хімія', body: 'Хімія — це наука про речовини, їхній склад, будову, властивості та перетворення під час хімічних реакцій. Вона вивчає атоми й молекули, зв’язки між ними, розчини, кислоти та основи, а також енергію хімічних процесів.' },
+    en: { title: 'Chemistry', body: 'Chemistry is the science of substances — their composition, structure, properties and the transformations they undergo in chemical reactions. It studies atoms and molecules, bonds, solutions, acids and bases, and the energy of chemical processes.' }
+  },
+  {
+    keys: ['біологія', 'біологію', 'біології', 'biology'],
+    emoji: '🧬',
+    uk: { title: 'Біологія', body: 'Біологія — це наука про живі організми: їхню будову, функціонування, розвиток, спадковість та взаємодію із середовищем. Основні напрями: клітинна біологія, генетика, екологія, фізіологія та еволюція.' },
+    en: { title: 'Biology', body: 'Biology is the science of living organisms — their structure, function, growth, heredity and interaction with the environment. Main areas: cell biology, genetics, ecology, physiology and evolution.' }
+  },
+  {
+    keys: ['енергія', 'енергію', 'енергії', 'energy'],
+    emoji: '⚡',
+    uk: { title: 'Енергія', body: 'Енергія — це фізична величина, що характеризує здатність системи виконувати роботу. Вона буває кінетичною, потенціальною, тепловою, електричною, хімічною тощо; за законом збереження енергія не зникає, а лише переходить з однієї форми в іншу.' },
+    en: { title: 'Energy', body: 'Energy is a physical quantity describing a system’s ability to do work. It comes in kinetic, potential, thermal, electrical, chemical and other forms; by the conservation law it is never destroyed, only converted between forms.' }
+  },
+  {
+    keys: ['сила', 'силу', 'сили', 'force'],
+    emoji: '🧲',
+    uk: { title: 'Сила', body: 'Сила — це міра взаємодії тіл, що змінює їхній стан руху або форму. Вона векторна (має величину й напрям), вимірюється в ньютонах (Н), а її дію описують закони Ньютона.' },
+    en: { title: 'Force', body: 'Force is a measure of interaction between bodies that changes their state of motion or shape. It is a vector (has magnitude and direction), measured in newtons (N), and its effects are described by Newton’s laws.' }
+  },
+  {
+    keys: ['атом', 'атома', 'атоми', 'atom'],
+    emoji: '⚛️',
+    uk: { title: 'Атом', body: 'Атом — найменша частинка хімічного елемента, що зберігає його властивості. Складається з ядра (протони й нейтрони) та електронів навколо нього; саме будова атома визначає хімічну поведінку речовини.' },
+    en: { title: 'Atom', body: 'An atom is the smallest particle of a chemical element that retains its properties. It consists of a nucleus (protons and neutrons) and surrounding electrons; the atomic structure determines a substance’s chemical behaviour.' }
+  },
+  {
+    keys: ['клітина', 'клітину', 'клітини', 'cell'],
+    emoji: '🦠',
+    uk: { title: 'Клітина', body: 'Клітина — це структурна й функціональна одиниця всіх живих організмів. Вона має мембрану, цитоплазму та органели (а в еукаріотів — ядро) і здатна до обміну речовин, росту та поділу.' },
+    en: { title: 'Cell', body: 'The cell is the structural and functional unit of all living organisms. It has a membrane, cytoplasm and organelles (and a nucleus in eukaryotes), and is capable of metabolism, growth and division.' }
+  }
+];
+
+// Return a general explanation when the question is a broad definitional one
+// whose subject is a known concept. Specific lookups (e.g. "що таке закон
+// Ома") have a multi-word core and fall through to formula/theory search.
+function detectConceptualAnswer(query, isUk) {
+  const c = matchConcept(query);
+  if (!c) return null;
+  const t = isUk ? c.uk : c.en;
+  return { text: `${c.emoji} **${t.title}**\n\n${t.body}`, suggestions: [] };
+}
+
 function localFallback(query, isUk) {
   // Help intent
   if (detectHelpIntent(query)) {
@@ -304,6 +396,11 @@ function localFallback(query, isUk) {
     };
   }
 
+  // Broad conceptual question (e.g. "що таке фізика?") — answer the concept
+  // generally instead of forcing the nearest specific formula.
+  const concept = detectConceptualAnswer(query, isUk);
+  if (concept) return concept;
+
   // Search-based response
   const results = smartSearch(query);
 
@@ -319,6 +416,18 @@ function localFallback(query, isUk) {
   }
 
   const top = results[0];
+
+  // A weak fuzzy match shouldn't masquerade as a confident answer card.
+  // Offer it as a suggestion instead of asserting it as THE answer.
+  if (top.score != null && top.score > 0.55) {
+    return {
+      text: isUk
+        ? `🤔 Точної відповіді на **"${query}"** не знайшов. Можливо, ви мали на увазі щось із наведеного нижче — або уточніть питання.`
+        : `🤔 I couldn't find an exact answer for **"${query}"**. You might mean one of the items below — or try rephrasing the question.`,
+      suggestions: results.slice(0, 3).map(r => (isUk ? r.name : (r.nameEn || r.name)))
+    };
+  }
+
   const others = results.slice(1, 4);
   const name = isUk ? top.name : (top.nameEn || top.name);
 
