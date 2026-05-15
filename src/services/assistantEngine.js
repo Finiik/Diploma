@@ -127,32 +127,173 @@ function isDefinitionalQuery(query) {
     .test(query.toLowerCase());
 }
 
-// Match a query against the general-concept knowledge base. Triggers only on
-// an exact concept word ("фізика", "energy"), so specific lookups like
-// "сила тяжіння" or "закон Ома" fall through to normal search.
-function matchConcept(query) {
-  const q = query.toLowerCase().replace(/[?!.]+$/, '').trim();
-  const core = extractSearchQuery(q);
-  for (const c of CONCEPTS) {
-    for (const k of c.keys) {
-      if (core === k || q === k) return c;
+// Normalize for tolerant concept matching: lowercase, drop punctuation and
+// apostrophes, fold ё→е, collapse whitespace.
+function normalizeConcept(s) {
+  return s
+    .toLowerCase()
+    .replace(/[?!.,;:()]+/g, ' ')
+    .replace(/['’ʼ`]/g, '')
+    .replace(/ё/g, 'е')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Levenshtein distance + a 0..1 similarity ratio, so small typos
+// ("Авагадро" → "Авогадро") and inflections still resolve to the concept.
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function similarity(a, b) {
+  const max = Math.max(a.length, b.length);
+  return max === 0 ? 1 : 1 - levenshtein(a, b) / max;
+}
+
+// Leading discourse fillers that bury the real subject ("А що таке…",
+// "Ну поясни…"). Stripped before intent words so "А що таке стала Авогадро"
+// reduces to "стала авогадро".
+const FILLER_WORDS = [
+  'а', 'і', 'й', 'та', 'ну', 'от', 'ось', 'тож', 'отже', 'тобто',
+  'well', 'so', 'and', 'hmm', 'ок', 'окей', 'ok', 'okay', 'hey', 'гей'
+];
+
+// Reduce a query to its bare subject for concept matching: strip a leading
+// run of fillers and intent phrases (looped, anywhere a prefix matches), so
+// the typo-tolerant comparison sees just the topic.
+function conceptCore(query) {
+  let s = normalizeConcept(query.replace(/[?!.]+$/, ''));
+  const intents = [...INTENT_WORDS_UK, ...INTENT_WORDS_EN]
+    .map(normalizeConcept)
+    .sort((a, b) => b.length - a.length);
+
+  let changed = true;
+  while (changed && s) {
+    changed = false;
+    for (const f of FILLER_WORDS) {
+      if (s === f) { s = ''; changed = true; break; }
+      if (s.startsWith(f + ' ')) { s = s.slice(f.length + 1).trim(); changed = true; break; }
+    }
+    if (changed) continue;
+    for (const w of intents) {
+      if (s === w) { s = ''; changed = true; break; }
+      if (s.startsWith(w + ' ')) { s = s.slice(w.length + 1).trim(); changed = true; break; }
     }
   }
-  return null;
+  return s || normalizeConcept(extractSearchQuery(query));
+}
+
+// Resolve a query to a concept in the field-agnostic knowledge base. Exact
+// key matches win; otherwise a WHOLE-string fuzzy match (short queries only)
+// tolerates typos/inflections. Whole-string — not substring — so specific
+// lookups like "сила тяжіння" aren't swallowed by the broad "сила" concept.
+function matchConcept(query) {
+  const raw = normalizeConcept(query.replace(/[?!.]+$/, ''));
+  const core = conceptCore(query);
+
+  for (const c of CONCEPTS) {
+    for (const k of c.keys) {
+      const nk = normalizeConcept(k);
+      if (core === nk || raw === nk) return c;
+    }
+  }
+
+  // Fuzzy whole-string match, short queries only, to avoid hijacking longer
+  // specific questions.
+  if (core.split(' ').filter(Boolean).length > 4) return null;
+
+  let best = null;
+  for (const c of CONCEPTS) {
+    for (const k of c.keys) {
+      const nk = normalizeConcept(k);
+      const s = Math.max(similarity(core, nk), similarity(raw, nk));
+      if (s >= 0.84 && (!best || s > best.s)) best = { c, s };
+    }
+  }
+  return best ? best.c : null;
 }
 
 // Broad conceptual = a definition request whose subject is a recognized
-// general concept (a whole field or core idea), e.g. "що таке фізика".
-// A specific definitional lookup like "що таке E=mc²?" is NOT broad, so it
-// still gets its platform context injected for Gemini.
+// concept that has no curated links (a whole field like "фізика"). Those
+// inject nothing so weak fuzzy hits can't bias the model.
 function isBroadConceptualQuery(query) {
   return isDefinitionalQuery(query) && matchConcept(query) !== null;
 }
 
-// Search for platform content to OPTIONALLY reference in the Gemini prompt.
-// Only strong matches are injected, and broad conceptual questions inject
-// nothing — so weak fuzzy hits can't bias the model toward a random formula.
+// Index every platform item by id so a concept's "related" list resolves to
+// real names + navigation targets. Field-agnostic: covers all subjects.
+let _itemsById = null;
+function itemsById() {
+  if (_itemsById) return _itemsById;
+  const idx = {};
+  [
+    [getAllFormulas(), 'physics'],
+    [getAllChemFormulas(), 'chemistry'],
+    [getAllBioFormulas(), 'biology']
+  ].forEach(([list, subject]) =>
+    list.forEach(f => { idx[f.id] = { ...f, type: 'formula', subject: f.subject || subject }; })
+  );
+  theoryData.forEach(t => { idx[t.id] = { ...t, type: 'theory' }; });
+  problemsData.forEach(p => { idx[p.id] = { ...p, type: 'problem' }; });
+  _itemsById = idx;
+  return idx;
+}
+
+function resolveRelated(concept) {
+  if (!concept?.related) return [];
+  const idx = itemsById();
+  return concept.related.map(id => idx[id]).filter(Boolean);
+}
+
+// Serialize one platform item into the Gemini prompt context.
+function formatItemContext(item, isUk) {
+  const name = isUk ? item.name : (item.nameEn || item.name);
+  if (item.type === 'formula') {
+    const desc = isUk ? item.description : item.descriptionEn;
+    const vars = item.variables ? item.variables.map(v =>
+      `${v.symbol} (${isUk ? v.name : v.nameEn}, ${v.unit})`
+    ).join(', ') : '';
+    return `\nFORMULA: ${name}\nLaTeX: ${item.latex}\nDescription: ${desc}\nVariables: ${vars}\nID: ${item.id}\nSubject: ${item.subject}\n`;
+  }
+  if (item.type === 'theory') {
+    const content = isUk ? item.content : item.contentEn;
+    return `\nTHEORY: ${name}\nContent: ${content}\nRelated formulas: ${(item.relatedFormulas || []).join(', ')}\n`;
+  }
+  if (item.type === 'problem') {
+    const desc = isUk ? item.description : item.descriptionEn;
+    const steps = item.steps ? item.steps.map((s, i) =>
+      `Step ${i + 1}: ${isUk ? s.text : s.textEn}`
+    ).join('\n') : '';
+    const answer = isUk ? item.answer : item.answerEn;
+    return `\nPROBLEM: ${name}\nDescription: ${desc}\n${steps}\nAnswer: ${answer}\nRelated formula: ${item.relatedFormula || 'none'}\n`;
+  }
+  return '';
+}
+
+// Build platform context for the Gemini prompt. A recognized concept pulls in
+// its curated cross-topic materials (e.g. Avogadro → mole, molarity, ideal
+// gas) so the model connects topics instead of answering in isolation. Broad
+// fields with no curated links inject nothing; everything else falls back to
+// fuzzy search, keeping only strong matches.
 function findRelevantContent(query, isUk) {
+  const related = resolveRelated(matchConcept(query));
+  if (related.length > 0) {
+    let context = '\n\n--- RELATED PLATFORM MATERIALS (the question connects to these; weave them together and tell the student they can open them) ---\n';
+    related.forEach(item => { context += formatItemContext(item, isUk); });
+    return context;
+  }
+
   if (isBroadConceptualQuery(query)) return '';
 
   const results = smartSearch(query)
@@ -161,28 +302,7 @@ function findRelevantContent(query, isUk) {
   if (results.length === 0) return '';
 
   let context = '\n\n--- POSSIBLY RELATED PLATFORM ITEMS (reference these ONLY if they directly help answer the question; ignore them otherwise) ---\n';
-
-  results.forEach(item => {
-    const name = isUk ? item.name : (item.nameEn || item.name);
-    if (item.type === 'formula') {
-      const desc = isUk ? item.description : item.descriptionEn;
-      const vars = item.variables ? item.variables.map(v =>
-        `${v.symbol} (${isUk ? v.name : v.nameEn}, ${v.unit})`
-      ).join(', ') : '';
-      context += `\nFORMULA: ${name}\nLaTeX: ${item.latex}\nDescription: ${desc}\nVariables: ${vars}\nID: ${item.id}\nSubject: ${item.subject}\n`;
-    } else if (item.type === 'theory') {
-      const content = isUk ? item.content : item.contentEn;
-      context += `\nTHEORY: ${name}\nContent: ${content}\nRelated formulas: ${(item.relatedFormulas || []).join(', ')}\n`;
-    } else if (item.type === 'problem') {
-      const desc = isUk ? item.description : item.descriptionEn;
-      const steps = item.steps ? item.steps.map((s, i) =>
-        `Step ${i + 1}: ${isUk ? s.text : s.textEn}`
-      ).join('\n') : '';
-      const answer = isUk ? item.answer : item.answerEn;
-      context += `\nPROBLEM: ${name}\nDescription: ${desc}\n${steps}\nAnswer: ${answer}\nRelated formula: ${item.relatedFormula || 'none'}\n`;
-    }
-  });
-
+  results.forEach(item => { context += formatItemContext(item, isUk); });
   return context;
 }
 
@@ -215,7 +335,7 @@ HOW TO ANSWER:
 1. ALWAYS respond in ${lang}.
 2. Answer the student's ACTUAL question first, directly and clearly, using your own knowledge.
 3. For broad or conceptual questions (e.g. "what is physics?", "why does X happen?", "what is energy?"), give a clear GENERAL explanation of the field or idea in plain language. Do NOT jump to a single specific formula unless the student explicitly asked for one.
-4. Bring up a specific platform formula/topic/problem ONLY when it genuinely helps answer THIS question. When you do, name it and say the student can open it on the platform. Never force an unrelated formula into the answer.
+4. Bring up a specific platform formula/topic/problem ONLY when it genuinely helps answer THIS question. When you do, name it and say the student can open it on the platform. Never force an unrelated formula into the answer. If a "RELATED PLATFORM MATERIALS" block is provided below, the question links several platform topics — connect them: explain how they relate and point the student to each listed material so they see the bigger picture.
 5. Keep it concise: 3-6 sentences for simple questions, a little more for explanations. Move from the general idea to specifics, not the other way around.
 6. Write formulas in LaTeX wrapped in $$...$$. Show calculation steps clearly when solving a problem.
 7. Be encouraging and educational. Use at most 1-2 emoji. Use **bold** for emphasis; do NOT use markdown headers (#).
@@ -292,59 +412,155 @@ function detectSubjectIntent(query) {
 // General-concept knowledge base for broad/definitional questions, so the
 // offline fallback answers "what is physics?" with an explanation of the
 // field instead of forcing the nearest specific formula. Extend as needed.
+// Field-agnostic concept knowledge base. Each entry can carry:
+//   related  — platform item ids (any subject) to surface as links/context
+//   seeAlso  — keys of sibling concepts, offered as follow-up suggestions
+// The matching/linking engine is generic; adding a concept for any field is
+// purely a data change here.
 const CONCEPTS = [
   {
     keys: ['фізика', 'фізику', 'фізики', 'physics'],
     emoji: '⚛️',
     uk: { title: 'Фізика', body: 'Фізика — це природнича наука, яка вивчає матерію, енергію та фундаментальні взаємодії, а також закони, за якими рухається і змінюється світ. Основні розділи: механіка, термодинаміка, електрика й магнетизм, оптика, коливання та хвилі, атомна і ядерна фізика.' },
-    en: { title: 'Physics', body: 'Physics is a natural science that studies matter, energy and the fundamental interactions, and the laws that govern how the world moves and changes. Main branches: mechanics, thermodynamics, electricity & magnetism, optics, oscillations & waves, and atomic & nuclear physics.' }
+    en: { title: 'Physics', body: 'Physics is a natural science that studies matter, energy and the fundamental interactions, and the laws that govern how the world moves and changes. Main branches: mechanics, thermodynamics, electricity & magnetism, optics, oscillations & waves, and atomic & nuclear physics.' },
+    seeAlso: ['енергія', 'сила', 'атом']
   },
   {
     keys: ['хімія', 'хімію', 'хімії', 'chemistry'],
     emoji: '🧪',
     uk: { title: 'Хімія', body: 'Хімія — це наука про речовини, їхній склад, будову, властивості та перетворення під час хімічних реакцій. Вона вивчає атоми й молекули, зв’язки між ними, розчини, кислоти та основи, а також енергію хімічних процесів.' },
-    en: { title: 'Chemistry', body: 'Chemistry is the science of substances — their composition, structure, properties and the transformations they undergo in chemical reactions. It studies atoms and molecules, bonds, solutions, acids and bases, and the energy of chemical processes.' }
+    en: { title: 'Chemistry', body: 'Chemistry is the science of substances — their composition, structure, properties and the transformations they undergo in chemical reactions. It studies atoms and molecules, bonds, solutions, acids and bases, and the energy of chemical processes.' },
+    seeAlso: ['моль', 'молярна концентрація', 'атом']
   },
   {
     keys: ['біологія', 'біологію', 'біології', 'biology'],
     emoji: '🧬',
     uk: { title: 'Біологія', body: 'Біологія — це наука про живі організми: їхню будову, функціонування, розвиток, спадковість та взаємодію із середовищем. Основні напрями: клітинна біологія, генетика, екологія, фізіологія та еволюція.' },
-    en: { title: 'Biology', body: 'Biology is the science of living organisms — their structure, function, growth, heredity and interaction with the environment. Main areas: cell biology, genetics, ecology, physiology and evolution.' }
+    en: { title: 'Biology', body: 'Biology is the science of living organisms — their structure, function, growth, heredity and interaction with the environment. Main areas: cell biology, genetics, ecology, physiology and evolution.' },
+    seeAlso: ['клітина', 'днк']
   },
   {
     keys: ['енергія', 'енергію', 'енергії', 'energy'],
     emoji: '⚡',
     uk: { title: 'Енергія', body: 'Енергія — це фізична величина, що характеризує здатність системи виконувати роботу. Вона буває кінетичною, потенціальною, тепловою, електричною, хімічною тощо; за законом збереження енергія не зникає, а лише переходить з однієї форми в іншу.' },
-    en: { title: 'Energy', body: 'Energy is a physical quantity describing a system’s ability to do work. It comes in kinetic, potential, thermal, electrical, chemical and other forms; by the conservation law it is never destroyed, only converted between forms.' }
+    en: { title: 'Energy', body: 'Energy is a physical quantity describing a system’s ability to do work. It comes in kinetic, potential, thermal, electrical, chemical and other forms; by the conservation law it is never destroyed, only converted between forms.' },
+    related: ['phys_kinetic_energy', 'phys_work', 'phys_mass_energy', 'theory_thermodynamics'],
+    seeAlso: ['сила', 'атом']
   },
   {
     keys: ['сила', 'силу', 'сили', 'force'],
     emoji: '🧲',
     uk: { title: 'Сила', body: 'Сила — це міра взаємодії тіл, що змінює їхній стан руху або форму. Вона векторна (має величину й напрям), вимірюється в ньютонах (Н), а її дію описують закони Ньютона.' },
-    en: { title: 'Force', body: 'Force is a measure of interaction between bodies that changes their state of motion or shape. It is a vector (has magnitude and direction), measured in newtons (N), and its effects are described by Newton’s laws.' }
+    en: { title: 'Force', body: 'Force is a measure of interaction between bodies that changes their state of motion or shape. It is a vector (has magnitude and direction), measured in newtons (N), and its effects are described by Newton’s laws.' },
+    related: ['phys_newton2', 'phys_weight', 'phys_gravity_law', 'theory_newton_laws'],
+    seeAlso: ['енергія']
   },
   {
     keys: ['атом', 'атома', 'атоми', 'atom'],
     emoji: '⚛️',
     uk: { title: 'Атом', body: 'Атом — найменша частинка хімічного елемента, що зберігає його властивості. Складається з ядра (протони й нейтрони) та електронів навколо нього; саме будова атома визначає хімічну поведінку речовини.' },
-    en: { title: 'Atom', body: 'An atom is the smallest particle of a chemical element that retains its properties. It consists of a nucleus (protons and neutrons) and surrounding electrons; the atomic structure determines a substance’s chemical behaviour.' }
+    en: { title: 'Atom', body: 'An atom is the smallest particle of a chemical element that retains its properties. It consists of a nucleus (protons and neutrons) and surrounding electrons; the atomic structure determines a substance’s chemical behaviour.' },
+    related: ['phys_mass_energy', 'phys_photon_energy', 'phys_radioactive_decay'],
+    seeAlso: ['стала авогадро', 'моль']
   },
   {
     keys: ['клітина', 'клітину', 'клітини', 'cell'],
     emoji: '🦠',
     uk: { title: 'Клітина', body: 'Клітина — це структурна й функціональна одиниця всіх живих організмів. Вона має мембрану, цитоплазму та органели (а в еукаріотів — ядро) і здатна до обміну речовин, росту та поділу.' },
-    en: { title: 'Cell', body: 'The cell is the structural and functional unit of all living organisms. It has a membrane, cytoplasm and organelles (and a nucleus in eukaryotes), and is capable of metabolism, growth and division.' }
+    en: { title: 'Cell', body: 'The cell is the structural and functional unit of all living organisms. It has a membrane, cytoplasm and organelles (and a nucleus in eukaryotes), and is capable of metabolism, growth and division.' },
+    related: ['bio_osmotic_pressure', 'theory_cell_biology'],
+    seeAlso: ['днк', 'біологія']
+  },
+  {
+    keys: ['днк', 'дезоксирибонуклеїнова кислота', 'dna', 'deoxyribonucleic acid'],
+    emoji: '🧬',
+    uk: { title: 'ДНК', body: 'ДНК (дезоксирибонуклеїнова кислота) — біополімер, що зберігає спадкову інформацію у послідовності нуклеотидів (A, T, G, C). Вона організована у подвійну спіраль, копіюється під час поділу клітини й через триплети-кодони задає синтез білків.' },
+    en: { title: 'DNA', body: 'DNA (deoxyribonucleic acid) is a biopolymer that stores hereditary information in a sequence of nucleotides (A, T, G, C). It is organised as a double helix, copied during cell division, and via three-letter codons directs protein synthesis.' },
+    related: ['bio_dna_length', 'bio_codon_count', 'bio_protein_mw', 'theory_cell_biology'],
+    seeAlso: ['клітина', 'біологія']
+  },
+  {
+    keys: ['стала авогадро', 'число авогадро', 'постійна авогадро', 'константа авогадро', 'авогадро',
+      "avogadro's number", 'avogadro number', 'avogadro constant', 'avogadro'],
+    emoji: '🧪',
+    uk: { title: 'Стала Авогадро', body: 'Стала (число) Авогадро Nₐ ≈ 6.022·10²³ моль⁻¹ — це кількість структурних частинок (атомів, молекул, йонів) в одному молі речовини. Саме вона пов’язує мікросвіт окремих частинок із макроскопічними величинами: переводить кількість речовини (моль) у число частинок, а молярну масу — у масу однієї молекули. Тому стала Авогадро лежить в основі розрахунків кількості речовини, молярної концентрації розчинів та рівняння стану ідеального газу.' },
+    en: { title: "Avogadro's Constant", body: "Avogadro's constant (number) Nₐ ≈ 6.022·10²³ mol⁻¹ is the number of structural particles (atoms, molecules, ions) in one mole of a substance. It bridges the microscopic world of single particles with macroscopic quantities: it converts amount of substance (moles) into a particle count and molar mass into the mass of one molecule. It therefore underpins calculations of amount of substance, solution molarity and the ideal-gas law." },
+    related: ['chem_molar_mass', 'chem_molarity', 'chem_ideal_gas', 'theory_solutions'],
+    seeAlso: ['моль', 'молярна концентрація', 'атом']
+  },
+  {
+    keys: ['моль', 'молі', 'моля', 'кількість речовини', 'mole', 'amount of substance'],
+    emoji: '🧪',
+    uk: { title: 'Моль і кількість речовини', body: 'Моль — одиниця кількості речовини, що містить рівно стільки частинок, скільки задає стала Авогадро (≈ 6.022·10²³). Кількість речовини обчислюють як n = m/M (маса поділена на молярну масу), і вона є вхідною величиною для молярної концентрації розчинів та рівняння стану ідеального газу.' },
+    en: { title: 'Mole and Amount of Substance', body: "The mole is the unit of amount of substance containing exactly as many particles as Avogadro's constant defines (≈ 6.022·10²³). Amount of substance is computed as n = m/M (mass over molar mass) and feeds into solution molarity and the ideal-gas law." },
+    related: ['chem_molar_mass', 'chem_molarity', 'chem_ideal_gas'],
+    seeAlso: ['стала авогадро', 'молярна концентрація']
+  },
+  {
+    keys: ['молярна концентрація', 'молярність', 'концентрація розчину', 'концентрація',
+      'molarity', 'molar concentration', 'concentration'],
+    emoji: '🧪',
+    uk: { title: 'Молярна концентрація', body: 'Молярна концентрація (молярність) — кількість молів розчиненої речовини в одному літрі розчину: C = n/V. Вона спирається на поняття молю (а отже й сталу Авогадро) і є базовою величиною для розрахунків розчинів, розбавлення та pH.' },
+    en: { title: 'Molarity', body: "Molarity is the number of moles of solute per litre of solution: C = n/V. It builds on the mole (and hence Avogadro's constant) and is the core quantity for solution, dilution and pH calculations." },
+    related: ['chem_molarity', 'chem_dilution', 'chem_mass_fraction', 'theory_solutions'],
+    seeAlso: ['моль', 'стала авогадро']
   }
 ];
 
 // Return a general explanation when the question is a broad definitional one
 // whose subject is a known concept. Specific lookups (e.g. "що таке закон
 // Ома") have a multi-word core and fall through to formula/theory search.
+// Display title of the concept owning a given key (for seeAlso suggestions).
+function conceptTitle(key, isUk) {
+  const nk = normalizeConcept(key);
+  for (const c of CONCEPTS) {
+    if (c.keys.some(k => normalizeConcept(k) === nk)) {
+      return isUk ? c.uk.title : c.en.title;
+    }
+  }
+  return key;
+}
+
+// Concept-graph navigation links (any subject), reused by the fallback and
+// the Gemini path so the topic still surfaces its connected materials.
+function buildConceptLinks(concept, isUk) {
+  return resolveRelated(concept).slice(0, 4).map(item => {
+    const label = isUk ? item.name : (item.nameEn || item.name);
+    if (item.type === 'formula') return { type: 'formula', id: item.id, label };
+    if (item.type === 'theory') return { type: 'theory', id: item.id, label };
+    if (item.type === 'problem') return { type: 'problems', id: item.id, label };
+    return null;
+  }).filter(Boolean);
+}
+
+function mergeLinks(primary, extra, cap = 5) {
+  const seen = new Set(primary.map(l => `${l.type}:${l.id}`));
+  const out = [...primary];
+  for (const l of extra) {
+    const key = `${l.type}:${l.id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(l);
+    if (out.length >= cap) break;
+  }
+  return out.slice(0, cap);
+}
+
 function detectConceptualAnswer(query, isUk) {
   const c = matchConcept(query);
   if (!c) return null;
   const t = isUk ? c.uk : c.en;
-  return { text: `${c.emoji} **${t.title}**\n\n${t.body}`, suggestions: [] };
+  let text = `${c.emoji} **${t.title}**\n\n${t.body}`;
+
+  // Show how this concept connects to other platform topics.
+  const related = resolveRelated(c);
+  if (related.length > 0) {
+    const names = related.map(r => (isUk ? r.name : (r.nameEn || r.name)));
+    text += `\n\n${isUk ? '🔗 На платформі це пов’язано з' : '🔗 On the platform this connects to'}: ${names.join(', ')}.`;
+  }
+
+  const suggestions = (c.seeAlso || []).map(k => conceptTitle(k, isUk)).slice(0, 3);
+  return { text, suggestions };
 }
 
 function localFallback(query, isUk) {
@@ -609,8 +825,14 @@ export async function processMessage(query, isUk = true) {
 
   // ---- GEMINI API (for complex questions) ----
 
-  // Extract navigation links using smart search
-  const links = extractLinks(trimmed, isUk);
+  // Navigation links: search hits first, then curated concept-graph links so
+  // a topic like "стала Авогадро" still surfaces its connected materials
+  // (mole, molarity, ideal-gas law) even with no direct search hit.
+  const conceptMatch = matchConcept(trimmed);
+  let links = extractLinks(trimmed, isUk);
+  if (conceptMatch) {
+    links = mergeLinks(links, buildConceptLinks(conceptMatch, isUk));
+  }
 
   if (GEMINI_API_KEY && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY') {
     try {
