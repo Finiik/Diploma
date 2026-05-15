@@ -56,6 +56,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 - Bilingual — responds in Ukrainian or English based on current language
 - Provides formula details, theory excerpts, and problem solutions
 - Direct navigation links to relevant platform content
+- **Field-agnostic concept knowledge graph** — typo- and inflection-tolerant matching links a concept (e.g. Avogadro's constant) to its related materials across *any* subject (mole, molarity, ideal-gas law), so a single answer connects multiple topics; works in both the Gemini and offline fallback paths
 
 ### 📊 Personalized Recommendations
 - **Collaborative filtering** engine using cosine similarity
@@ -103,6 +104,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 ### Design Decisions
 - **No CSS framework** — Custom design system with CSS custom properties for full control
 - **No external AI dependency** — Smart local fallback ensures the AI assistant works even without API
+- **Data-driven concept graph** — Cross-topic linking lives in one field-agnostic `CONCEPTS` table; covering a new topic in any subject is a pure data change, no engine code
 - **Code splitting** — 7 manual Vite chunks (React, Firebase, KaTeX, i18n, Fuse.js, Firestore, App) for optimal caching
 - **Firebase resilience** — App functions fully offline; cloud features are optional enhancements
 
