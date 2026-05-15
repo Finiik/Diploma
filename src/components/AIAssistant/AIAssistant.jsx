@@ -16,7 +16,11 @@ export default function AIAssistant() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const lastUserMsgRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Index of the most recent user message, so we can greet at it on open
+  const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
 
   // Show welcome message on first open
   useEffect(() => {
@@ -32,6 +36,20 @@ export default function AIAssistant() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
+
+  // On open, greet the user at their most recent message rather than the
+  // top of the (possibly long) history. Falls back to the bottom when
+  // there are no user messages yet.
+  useEffect(() => {
+    if (!isOpen) return;
+    setTimeout(() => {
+      if (lastUserMsgRef.current) {
+        lastUserMsgRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }
+    }, 50);
+  }, [isOpen]);
 
   // Focus input when opened
   useEffect(() => {
@@ -182,7 +200,11 @@ export default function AIAssistant() {
           {/* Messages */}
           <div className="ai-messages">
             {messages.map((msg, i) => (
-              <div key={i} className={`ai-msg ai-msg-${msg.role}`}>
+              <div
+                key={i}
+                ref={i === lastUserIndex ? lastUserMsgRef : null}
+                className={`ai-msg ai-msg-${msg.role}`}
+              >
                 {msg.role === 'bot' && <span className="ai-msg-avatar">🤖</span>}
                 <div className="ai-msg-bubble">
                   <div
