@@ -49,15 +49,26 @@ export default function Subject() {
 
         <div className="topics-list stagger-children">
           {subject.topics.map((topic) => (
-            <div key={topic.id} className="topic-section" id={`topic-${topic.id}`}>
+            <div
+              key={topic.id}
+              className="topic-section"
+              id={`topic-${topic.id}`}
+            >
               <h2 className="topic-title">{tr(topic, 'name')}</h2>
 
               {topic.subtopics.map((subtopic) => (
-                <div key={subtopic.id} className="subtopic-section" id={`subtopic-${subtopic.id}`}>
+                <div
+                  key={subtopic.id}
+                  className="subtopic-section"
+                  id={`subtopic-${subtopic.id}`}
+                >
                   <h3 className="subtopic-title">{tr(subtopic, 'name')}</h3>
                   <div className="formulas-grid">
                     {subtopic.formulas.map((formula) => (
-                      <FormulaCard key={formula.id} formula={{ ...formula, subject: subject.id }} />
+                      <FormulaCard
+                        key={formula.id}
+                        formula={{ ...formula, subject: subject.id }}
+                      />
                     ))}
                   </div>
                 </div>

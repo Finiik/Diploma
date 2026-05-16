@@ -16,7 +16,10 @@ import type { ResponderResult } from '@/types/domain';
 // connected theory article (already prose in the data); if none, it stitches
 // a summary from the connected formulas. Follow-up chips are sibling topics
 // in the same subject. When Gemini is up this path is unused.
-export function detectConceptualAnswer(query: string, isUk: boolean): ResponderResult | null {
+export function detectConceptualAnswer(
+  query: string,
+  isUk: boolean
+): ResponderResult | null {
   const c = matchConcept(query);
   if (!c) return null;
   const related = resolveRelated(c);
@@ -29,7 +32,8 @@ export function detectConceptualAnswer(query: string, isUk: boolean): ResponderR
   let body;
   if (theory) {
     const content = (isUk ? theory.content : theory.contentEn) || '';
-    body = content.length > 700 ? `${content.slice(0, 700).trimEnd()}…` : content;
+    body =
+      content.length > 700 ? `${content.slice(0, 700).trimEnd()}…` : content;
   } else {
     body = related
       .filter((r) => r.type === 'formula')
@@ -49,7 +53,9 @@ export function detectConceptualAnswer(query: string, isUk: boolean): ResponderR
 
   const { concepts } = buildCourseGraph();
   const suggestions = concepts
-    .filter((o) => o.subject === c.subject && o.label !== c.label && o.itemIds.length)
+    .filter(
+      (o) => o.subject === c.subject && o.label !== c.label && o.itemIds.length
+    )
     .slice(0, 3)
     .map((o) => (isUk ? o.label : o.labelEn));
 

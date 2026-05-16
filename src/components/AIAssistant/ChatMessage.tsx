@@ -32,7 +32,11 @@ const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
         {message.role === 'bot' && message.links.length > 0 && (
           <div className="ai-msg-links">
             {message.links.map((link, j) => (
-              <button key={j} className="ai-link-btn" onClick={() => onLinkClick(link)}>
+              <button
+                key={j}
+                className="ai-link-btn"
+                onClick={() => onLinkClick(link)}
+              >
                 {LINK_ICON[link.type]} {link.label}
               </button>
             ))}
@@ -41,7 +45,11 @@ const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
         {message.role === 'bot' && message.suggestions.length > 0 && (
           <div className="ai-msg-suggestions">
             {message.suggestions.map((sug, j) => (
-              <button key={j} className="ai-suggestion-chip" onClick={() => onSuggestion(sug)}>
+              <button
+                key={j}
+                className="ai-suggestion-chip"
+                onClick={() => onSuggestion(sug)}
+              >
                 {sug}
               </button>
             ))}

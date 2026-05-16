@@ -35,7 +35,8 @@ export async function logInteraction(
 
   if (snap.exists()) {
     const data = snap.data();
-    const interactions: Record<string, InteractionCounters> = data.interactions || {};
+    const interactions: Record<string, InteractionCounters> =
+      data.interactions || {};
     const current: InteractionCounters = interactions[formulaId] || {
       views: 0,
       calculations: 0,
@@ -95,7 +96,10 @@ export async function addBookmarkFirebase(
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
-    await updateDoc(ref, { formulaIds: arrayUnion(formulaId), updatedAt: serverTimestamp() });
+    await updateDoc(ref, {
+      formulaIds: arrayUnion(formulaId),
+      updatedAt: serverTimestamp()
+    });
   } else {
     await setDoc(ref, {
       formulaIds: [formulaId],
@@ -112,10 +116,15 @@ export async function removeBookmarkFirebase(
 ): Promise<void> {
   if (!userId) return;
   const ref = doc(db, 'bookmarks', userId);
-  await updateDoc(ref, { formulaIds: arrayRemove(formulaId), updatedAt: serverTimestamp() });
+  await updateDoc(ref, {
+    formulaIds: arrayRemove(formulaId),
+    updatedAt: serverTimestamp()
+  });
 }
 
-export async function getBookmarksFirebase(userId: string | undefined): Promise<string[]> {
+export async function getBookmarksFirebase(
+  userId: string | undefined
+): Promise<string[]> {
   if (!userId) return [];
   const ref = doc(db, 'bookmarks', userId);
   const snap = await getDoc(ref);

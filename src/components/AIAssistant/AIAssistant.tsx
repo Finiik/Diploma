@@ -24,9 +24,19 @@ export default function AIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, input, setInput, isTyping, send, sendSuggestion, seedWelcome } =
-    useChatSession();
-  const { messagesEndRef, lastUserMsgRef } = useChatScroll(isOpen, [messages, isTyping]);
+  const {
+    messages,
+    input,
+    setInput,
+    isTyping,
+    send,
+    sendSuggestion,
+    seedWelcome
+  } = useChatSession();
+  const { messagesEndRef, lastUserMsgRef } = useChatScroll(isOpen, [
+    messages,
+    isTyping
+  ]);
   useAutoFocus(inputRef, isOpen, 300);
 
   // Greet on first open. Deps are complete and honest: seedWelcome is stable
@@ -45,7 +55,11 @@ export default function AIAssistant() {
 
   return (
     <>
-      <ChatFab isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} label={t('a11y.assistant')} />
+      <ChatFab
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        label={t('a11y.assistant')}
+      />
 
       {isOpen && (
         <div className="ai-panel animate-scale-in" id="ai-assistant-panel">
@@ -58,7 +72,12 @@ export default function AIAssistant() {
             onLinkClick={handleLinkClick}
             onSuggestion={sendSuggestion}
           />
-          <ChatInput value={input} onChange={setInput} onSend={send} inputRef={inputRef} />
+          <ChatInput
+            value={input}
+            onChange={setInput}
+            onSend={send}
+            inputRef={inputRef}
+          />
         </div>
       )}
     </>

@@ -12,7 +12,8 @@ export const theoryData: TheoryItem[] = [
     subject: 'physics',
     difficulty: 1,
     topic: 'Механіка',
-    description: 'Три фундаментальні закони механіки, що описують рух тіл під дією сил.',
+    description:
+      'Три фундаментальні закони механіки, що описують рух тіл під дією сил.',
     descriptionEn:
       'Three fundamental laws of mechanics that describe the motion of objects under the action of forces.',
     content: `**Перший закон Ньютона (закон інерції):** Тіло зберігає стан спокою або рівномірного прямолінійного руху, якщо на нього не діють інші тіла або дія інших тіл скомпенсована.
@@ -34,7 +35,8 @@ export const theoryData: TheoryItem[] = [
     subject: 'chemistry',
     difficulty: 1,
     topic: 'Загальна хімія',
-    description: 'Основні поняття розчинів: типи розчинів, способи вираження концентрації.',
+    description:
+      'Основні поняття розчинів: типи розчинів, способи вираження концентрації.',
     descriptionEn:
       'Basic concepts of solutions: types of solutions, methods of expressing concentration.',
     content: `**Розчин** — однорідна суміш двох або більше речовин. Складається з розчинника (зазвичай рідина) та розчиненої речовини.
@@ -111,7 +113,11 @@ export const theoryData: TheoryItem[] = [
 **Second Law:** Heat cannot spontaneously flow from a colder body to a hotter one. Entropy of an isolated system never decreases.
 
 **Heat engine efficiency** is always less than 100%. Maximum efficiency is defined by the Carnot cycle: η = 1 - T₂/T₁.`,
-    relatedFormulas: ['phys_heat_energy', 'phys_thermal_efficiency', 'phys_carnot']
+    relatedFormulas: [
+      'phys_heat_energy',
+      'phys_thermal_efficiency',
+      'phys_carnot'
+    ]
   },
   {
     id: 'theory_electricity',
@@ -121,7 +127,8 @@ export const theoryData: TheoryItem[] = [
     difficulty: 3,
     topic: 'Електрика',
     description: 'Основні поняття електричних кіл: струм, напруга, опір.',
-    descriptionEn: 'Basic concepts of electric circuits: current, voltage, resistance.',
+    descriptionEn:
+      'Basic concepts of electric circuits: current, voltage, resistance.',
     content: `**Електричний струм** — впорядкований рух заряджених частинок. Сила струму (I) вимірюється в амперах (А).
 
 **Закон Ома для ділянки кола:** I = U/R — сила струму прямо пропорційна напрузі та обернено пропорційна опору.
@@ -149,8 +156,10 @@ export const theoryData: TheoryItem[] = [
     subject: 'chemistry',
     difficulty: 2,
     topic: 'Хімічні реакції',
-    description: 'Вивчення швидкості хімічних реакцій та факторів, що на неї впливають.',
-    descriptionEn: 'Study of the rates of chemical reactions and factors that affect them.',
+    description:
+      'Вивчення швидкості хімічних реакцій та факторів, що на неї впливають.',
+    descriptionEn:
+      'Study of the rates of chemical reactions and factors that affect them.',
     content: `**Швидкість хімічної реакції** — зміна концентрації реагенту або продукту за одиницю часу: v = ΔC/Δt.
 
 **Фактори, що впливають на швидкість:**
@@ -171,7 +180,11 @@ export const theoryData: TheoryItem[] = [
 5. **Surface area** — for heterogeneous reactions
 
 **Chemical equilibrium** occurs when forward and reverse reaction rates are equal.`,
-    relatedFormulas: ['chem_reaction_rate', 'chem_arrhenius', 'chem_equilibrium']
+    relatedFormulas: [
+      'chem_reaction_rate',
+      'chem_arrhenius',
+      'chem_equilibrium'
+    ]
   },
   {
     id: 'theory_ph',
@@ -213,8 +226,10 @@ export const theoryData: TheoryItem[] = [
     subject: 'biology',
     difficulty: 1,
     topic: 'Екологія',
-    description: 'Основні екологічні концепції: екосистеми, біорізноманіття, популяційна динаміка.',
-    descriptionEn: 'Key ecological concepts: ecosystems, biodiversity, population dynamics.',
+    description:
+      'Основні екологічні концепції: екосистеми, біорізноманіття, популяційна динаміка.',
+    descriptionEn:
+      'Key ecological concepts: ecosystems, biodiversity, population dynamics.',
     content: `**Екосистема** — сукупність живих організмів та середовища їх існування, що функціонує як єдина система.
 
 **Біорізноманіття** вимірюється різними індексами:
@@ -246,8 +261,10 @@ export const theoryData: TheoryItem[] = [
     subject: 'biology',
     difficulty: 3,
     topic: 'Біохімія',
-    description: 'Механізми роботи ферментів та кінетика ферментативних реакцій.',
-    descriptionEn: 'Mechanisms of enzyme action and kinetics of enzymatic reactions.',
+    description:
+      'Механізми роботи ферментів та кінетика ферментативних реакцій.',
+    descriptionEn:
+      'Mechanisms of enzyme action and kinetics of enzymatic reactions.',
     content: `**Ферменти** — біологічні каталізатори білкової природи, що прискорюють хімічні реакції в організмі.
 
 **Модель Міхаеліса-Ментен:** v = (V_max · [S]) / (K_m + [S])
@@ -279,8 +296,10 @@ export const theoryData: TheoryItem[] = [
     subject: 'physics',
     difficulty: 1,
     topic: 'Оптика',
-    description: 'Закони заломлення та відбивання світла, лінзи та оптичні прилади.',
-    descriptionEn: 'Laws of refraction and reflection of light, lenses and optical instruments.',
+    description:
+      'Закони заломлення та відбивання світла, лінзи та оптичні прилади.',
+    descriptionEn:
+      'Laws of refraction and reflection of light, lenses and optical instruments.',
     content: `**Закон відбивання:** Кут падіння дорівнює куту відбивання.
 
 **Закон заломлення (Снелліуса):** n₁·sin(θ₁) = n₂·sin(θ₂). При переході з оптично менш щільного середовища в більш щільне промінь наближається до нормалі.
@@ -346,7 +365,8 @@ export const theoryData: TheoryItem[] = [
     difficulty: 3,
     topic: 'Електрохімія',
     description: "Зв'язок між хімічними реакціями та електричним струмом.",
-    descriptionEn: 'The relationship between chemical reactions and electric current.',
+    descriptionEn:
+      'The relationship between chemical reactions and electric current.',
     content: `**Електроліз** — процес розкладання речовини електричним струмом.
 
 **Закони Фарадея:**
@@ -400,7 +420,11 @@ export const theoryData: TheoryItem[] = [
 **Heat of combustion** — heat released when 1 mole of substance is completely burned.
 
 **Amount of substance:** n = m/M — fundamental relation for stoichiometric calculations.`,
-    relatedFormulas: ['chem_enthalpy', 'chem_combustion_heat', 'chem_molar_mass']
+    relatedFormulas: [
+      'chem_enthalpy',
+      'chem_combustion_heat',
+      'chem_molar_mass'
+    ]
   },
   {
     id: 'theory_cell_biology',
@@ -409,8 +433,10 @@ export const theoryData: TheoryItem[] = [
     subject: 'biology',
     difficulty: 2,
     topic: 'Клітинна біологія',
-    description: 'Будова клітини, транспорт через мембрану, мікробіологічні методи.',
-    descriptionEn: 'Cell structure, membrane transport, microbiological methods.',
+    description:
+      'Будова клітини, транспорт через мембрану, мікробіологічні методи.',
+    descriptionEn:
+      'Cell structure, membrane transport, microbiological methods.',
     content: `**Клітина** — структурна та функціональна одиниця живого організму.
 
 **Осмос** — переміщення молекул розчинника через напівпроникну мембрану від менш концентрованого до більш концентрованого розчину.

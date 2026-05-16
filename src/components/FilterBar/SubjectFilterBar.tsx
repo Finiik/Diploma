@@ -8,7 +8,10 @@ interface SubjectFilterBarProps {
 }
 
 /** The "All / Physics / Chemistry / Biology" pill row (shared by Theory & Problems). */
-export default function SubjectFilterBar({ value, onChange }: SubjectFilterBarProps) {
+export default function SubjectFilterBar({
+  value,
+  onChange
+}: SubjectFilterBarProps) {
   const { t } = useTranslation();
   return (
     <div className="filter-bar">

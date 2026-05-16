@@ -45,7 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(() => clearTimeout(authTimeout))
       .catch((error) => {
         clearTimeout(authTimeout);
-        console.warn('Anonymous auth failed, app will work in offline mode:', error);
+        console.warn(
+          'Anonymous auth failed, app will work in offline mode:',
+          error
+        );
         setUser({ uid: 'local_user', isAnonymous: true, offline: true });
         setLoading(false);
       });
@@ -56,7 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <AuthContext.Provider value={{ user, loading }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

@@ -10,7 +10,12 @@ import DifficultyFilterBar, {
 } from '@/components/FilterBar/DifficultyFilterBar';
 import './Problems.css';
 
-const DIFF_STARS: Record<string, string> = { all: '', 1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐' };
+const DIFF_STARS: Record<string, string> = {
+  all: '',
+  1: '⭐',
+  2: '⭐⭐',
+  3: '⭐⭐⭐'
+};
 const DIFF_OPTIONS: DifficultyOption[] = [
   { value: 'all', labelKey: 'difficulty.all' },
   { value: '1', icon: '⭐', labelKey: 'problems.diff_1' },
@@ -45,12 +50,21 @@ export default function Problems() {
         </div>
 
         <div className="problems-list stagger-children">
-          {filtered.length === 0 && <p className="no-results">{t('common.no_results')}</p>}
+          {filtered.length === 0 && (
+            <p className="no-results">{t('common.no_results')}</p>
+          )}
           {filtered.map((prob) => (
-            <article key={prob.id} className="problem-card" id={`problem-${prob.id}`}>
+            <article
+              key={prob.id}
+              className="problem-card"
+              id={`problem-${prob.id}`}
+            >
               <div className="problem-header">
                 <h2 className="problem-title">{tr(prob, 'name')}</h2>
-                <span className="problem-difficulty" title={t(`problems.diff_${prob.difficulty}`)}>
+                <span
+                  className="problem-difficulty"
+                  title={t(`problems.diff_${prob.difficulty}`)}
+                >
                   {DIFF_STARS[prob.difficulty]}
                 </span>
               </div>
@@ -63,7 +77,11 @@ export default function Problems() {
                 id={`solution-toggle-${prob.id}`}
               >
                 {t(SOLUTION_TOGGLE_KEY[isOpen(prob.id) ? 'true' : 'false'])}
-                <span className={`toggle-arrow ${isOpen(prob.id) ? 'open' : ''}`}>▼</span>
+                <span
+                  className={`toggle-arrow ${isOpen(prob.id) ? 'open' : ''}`}
+                >
+                  ▼
+                </span>
               </button>
 
               {isOpen(prob.id) && (
@@ -80,7 +98,10 @@ export default function Problems() {
                     <strong>{t('formula.result')}:</strong> {tr(prob, 'answer')}
                   </div>
                   {prob.relatedFormula && (
-                    <Link to={`/formula/${prob.relatedFormula}`} className="problem-formula-link">
+                    <Link
+                      to={`/formula/${prob.relatedFormula}`}
+                      className="problem-formula-link"
+                    >
                       {t('problems.go_to_formula')}
                     </Link>
                   )}

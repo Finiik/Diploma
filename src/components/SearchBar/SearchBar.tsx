@@ -68,7 +68,11 @@ export default function SearchBar() {
       {isOpen && results.length > 0 && (
         <div className="search-dropdown animate-scale-in">
           {results.map((item) => (
-            <button key={item.id} className="search-result-item" onClick={() => handleSelect(item)}>
+            <button
+              key={item.id}
+              className="search-result-item"
+              onClick={() => handleSelect(item)}
+            >
               <div className="search-result-info">
                 <span className="search-result-name">{tr(item, 'name')}</span>
                 <span className="search-result-desc">

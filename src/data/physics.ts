@@ -32,8 +32,20 @@ export const physicsData: SubjectData = {
               descriptionEn:
                 'Force equals mass times acceleration. This is a fundamental law of mechanics describing the relationship between force, mass, and acceleration.',
               variables: [
-                { symbol: 'F', name: 'Сила', nameEn: 'Force', unit: 'Н (N)', type: 'result' },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'кг (kg)', type: 'input' },
+                {
+                  symbol: 'F',
+                  name: 'Сила',
+                  nameEn: 'Force',
+                  unit: 'Н (N)',
+                  type: 'result'
+                },
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'кг (kg)',
+                  type: 'input'
+                },
                 {
                   symbol: 'a',
                   name: 'Прискорення',
@@ -44,7 +56,11 @@ export const physicsData: SubjectData = {
               ],
               compute: (values) => values.m * values.a,
               resultVar: 'F',
-              derivedFormulas: ['phys_weight', 'phys_momentum', 'phys_kinetic_energy'],
+              derivedFormulas: [
+                'phys_weight',
+                'phys_momentum',
+                'phys_kinetic_energy'
+              ],
               topic: 'Механіка',
               subtopic: 'Динаміка'
             },
@@ -65,7 +81,13 @@ export const physicsData: SubjectData = {
                   unit: 'Н (N)',
                   type: 'result'
                 },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'кг (kg)', type: 'input' },
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'кг (kg)',
+                  type: 'input'
+                },
                 {
                   symbol: 'g',
                   name: 'Прискорення вільного падіння',
@@ -98,7 +120,13 @@ export const physicsData: SubjectData = {
                   unit: 'кг·м/с (kg·m/s)',
                   type: 'result'
                 },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'кг (kg)', type: 'input' },
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'кг (kg)',
+                  type: 'input'
+                },
                 {
                   symbol: 'v',
                   name: 'Швидкість',
@@ -137,7 +165,13 @@ export const physicsData: SubjectData = {
                   unit: 'Дж (J)',
                   type: 'result'
                 },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'кг (kg)', type: 'input' },
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'кг (kg)',
+                  type: 'input'
+                },
                 {
                   symbol: 'v',
                   name: 'Швидкість',
@@ -162,8 +196,20 @@ export const physicsData: SubjectData = {
               descriptionEn:
                 'Work is the scalar quantity equal to the product of force, displacement, and cosine of the angle between them.',
               variables: [
-                { symbol: 'A', name: 'Робота', nameEn: 'Work', unit: 'Дж (J)', type: 'result' },
-                { symbol: 'F', name: 'Сила', nameEn: 'Force', unit: 'Н (N)', type: 'input' },
+                {
+                  symbol: 'A',
+                  name: 'Робота',
+                  nameEn: 'Work',
+                  unit: 'Дж (J)',
+                  type: 'result'
+                },
+                {
+                  symbol: 'F',
+                  name: 'Сила',
+                  nameEn: 'Force',
+                  unit: 'Н (N)',
+                  type: 'input'
+                },
                 {
                   symbol: 's',
                   name: 'Переміщення',
@@ -180,7 +226,8 @@ export const physicsData: SubjectData = {
                   defaultValue: 0
                 }
               ],
-              compute: (values) => values.F * values.s * Math.cos((values['α'] * Math.PI) / 180),
+              compute: (values) =>
+                values.F * values.s * Math.cos((values['α'] * Math.PI) / 180),
               resultVar: 'A',
               derivedFormulas: ['phys_kinetic_energy', 'phys_newton2'],
               topic: 'Механіка',
@@ -217,8 +264,20 @@ export const physicsData: SubjectData = {
                   unit: 'А (A)',
                   type: 'result'
                 },
-                { symbol: 'U', name: 'Напруга', nameEn: 'Voltage', unit: 'В (V)', type: 'input' },
-                { symbol: 'R', name: 'Опір', nameEn: 'Resistance', unit: 'Ом (Ω)', type: 'input' }
+                {
+                  symbol: 'U',
+                  name: 'Напруга',
+                  nameEn: 'Voltage',
+                  unit: 'В (V)',
+                  type: 'input'
+                },
+                {
+                  symbol: 'R',
+                  name: 'Опір',
+                  nameEn: 'Resistance',
+                  unit: 'Ом (Ω)',
+                  type: 'input'
+                }
               ],
               compute: (values) => values.U / values.R,
               resultVar: 'I',
@@ -243,7 +302,13 @@ export const physicsData: SubjectData = {
                   unit: 'Вт (W)',
                   type: 'result'
                 },
-                { symbol: 'U', name: 'Напруга', nameEn: 'Voltage', unit: 'В (V)', type: 'input' },
+                {
+                  symbol: 'U',
+                  name: 'Напруга',
+                  nameEn: 'Voltage',
+                  unit: 'В (V)',
+                  type: 'input'
+                },
                 {
                   symbol: 'I',
                   name: 'Сила струму',
@@ -296,7 +361,13 @@ export const physicsData: SubjectData = {
                   unit: 'Дж/(кг·°C)',
                   type: 'input'
                 },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'кг (kg)', type: 'input' },
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'кг (kg)',
+                  type: 'input'
+                },
                 {
                   symbol: 'ΔT',
                   name: 'Зміна температури',
@@ -335,7 +406,13 @@ export const physicsData: SubjectData = {
                   unit: 'Дж/кг (J/kg)',
                   type: 'input'
                 },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'кг (kg)', type: 'input' }
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'кг (kg)',
+                  type: 'input'
+                }
               ],
               compute: (values) => values.L * values.m,
               resultVar: 'Q',
@@ -360,7 +437,13 @@ export const physicsData: SubjectData = {
               descriptionEn:
                 'Thermal efficiency is the ratio of work done to heat received, expressed as a percentage.',
               variables: [
-                { symbol: 'η', name: 'ККД', nameEn: 'Efficiency', unit: '%', type: 'result' },
+                {
+                  symbol: 'η',
+                  name: 'ККД',
+                  nameEn: 'Efficiency',
+                  unit: '%',
+                  type: 'result'
+                },
                 {
                   symbol: 'A',
                   name: 'Виконана робота',
@@ -475,7 +558,10 @@ export const physicsData: SubjectData = {
                 }
               ],
               compute: (v) =>
-                (Math.asin((v['n₁'] * Math.sin((v['θ₁'] * Math.PI) / 180)) / v['n₂']) * 180) /
+                (Math.asin(
+                  (v['n₁'] * Math.sin((v['θ₁'] * Math.PI) / 180)) / v['n₂']
+                ) *
+                  180) /
                 Math.PI,
               resultVar: 'θ₂',
               derivedFormulas: ['phys_thin_lens'],
@@ -577,7 +663,8 @@ export const physicsData: SubjectData = {
               name: 'Швидкість хвилі',
               nameEn: 'Wave Speed',
               latex: 'v = \\lambda \\cdot f',
-              description: 'Швидкість хвилі дорівнює добутку довжини хвилі на частоту.',
+              description:
+                'Швидкість хвилі дорівнює добутку довжини хвилі на частоту.',
               descriptionEn: 'Wave speed equals wavelength times frequency.',
               variables: [
                 {
@@ -618,7 +705,13 @@ export const physicsData: SubjectData = {
               descriptionEn:
                 'Period is the time for one complete oscillation. Inversely proportional to frequency.',
               variables: [
-                { symbol: 'T', name: 'Період', nameEn: 'Period', unit: 'с (s)', type: 'result' },
+                {
+                  symbol: 'T',
+                  name: 'Період',
+                  nameEn: 'Period',
+                  unit: 'с (s)',
+                  type: 'result'
+                },
                 {
                   symbol: 'f',
                   name: 'Частота',
@@ -643,7 +736,13 @@ export const physicsData: SubjectData = {
               descriptionEn:
                 'The period of a simple pendulum depends only on the string length and gravitational acceleration.',
               variables: [
-                { symbol: 'T', name: 'Період', nameEn: 'Period', unit: 'с (s)', type: 'result' },
+                {
+                  symbol: 'T',
+                  name: 'Період',
+                  nameEn: 'Period',
+                  unit: 'с (s)',
+                  type: 'result'
+                },
                 {
                   symbol: 'l',
                   name: 'Довжина маятника',
@@ -705,9 +804,27 @@ export const physicsData: SubjectData = {
                   type: 'input',
                   defaultValue: 6.674e-11
                 },
-                { symbol: 'm₁', name: 'Маса 1', nameEn: 'Mass 1', unit: 'кг', type: 'input' },
-                { symbol: 'm₂', name: 'Маса 2', nameEn: 'Mass 2', unit: 'кг', type: 'input' },
-                { symbol: 'r', name: 'Відстань', nameEn: 'Distance', unit: 'м', type: 'input' }
+                {
+                  symbol: 'm₁',
+                  name: 'Маса 1',
+                  nameEn: 'Mass 1',
+                  unit: 'кг',
+                  type: 'input'
+                },
+                {
+                  symbol: 'm₂',
+                  name: 'Маса 2',
+                  nameEn: 'Mass 2',
+                  unit: 'кг',
+                  type: 'input'
+                },
+                {
+                  symbol: 'r',
+                  name: 'Відстань',
+                  nameEn: 'Distance',
+                  unit: 'м',
+                  type: 'input'
+                }
               ],
               compute: (v) => (v.G * v['m₁'] * v['m₂']) / (v.r * v.r),
               resultVar: 'F',
@@ -722,7 +839,8 @@ export const physicsData: SubjectData = {
               latex: 'v_1 = \\sqrt{\\frac{GM}{R}}',
               description:
                 'Мінімальна швидкість для виходу на навколоземну орбіту. Для Землі ≈ 7.9 км/с.',
-              descriptionEn: 'Minimum speed to enter orbit around a body. For Earth ≈ 7.9 km/s.',
+              descriptionEn:
+                'Minimum speed to enter orbit around a body. For Earth ≈ 7.9 km/s.',
               variables: [
                 {
                   symbol: 'v₁',
@@ -834,8 +952,20 @@ export const physicsData: SubjectData = {
               descriptionEn:
                 "Einstein's famous equation: energy equals mass times the speed of light squared.",
               variables: [
-                { symbol: 'E', name: 'Енергія', nameEn: 'Energy', unit: 'Дж (J)', type: 'result' },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'кг (kg)', type: 'input' },
+                {
+                  symbol: 'E',
+                  name: 'Енергія',
+                  nameEn: 'Energy',
+                  unit: 'Дж (J)',
+                  type: 'result'
+                },
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'кг (kg)',
+                  type: 'input'
+                },
                 {
                   symbol: 'c',
                   name: 'Швидкість світла',
@@ -875,7 +1005,13 @@ export const physicsData: SubjectData = {
                   unit: '',
                   type: 'input'
                 },
-                { symbol: 't', name: 'Час', nameEn: 'Time', unit: '', type: 'input' },
+                {
+                  symbol: 't',
+                  name: 'Час',
+                  nameEn: 'Time',
+                  unit: '',
+                  type: 'input'
+                },
                 {
                   symbol: 'T½',
                   name: 'Період напіврозпаду',
@@ -953,7 +1089,13 @@ export const physicsData: SubjectData = {
               descriptionEn:
                 'Conservation of energy in fluid flow: sum of pressure, kinetic, and potential energy is constant.',
               variables: [
-                { symbol: 'P', name: 'Тиск', nameEn: 'Pressure', unit: 'Па (Pa)', type: 'input' },
+                {
+                  symbol: 'P',
+                  name: 'Тиск',
+                  nameEn: 'Pressure',
+                  unit: 'Па (Pa)',
+                  type: 'input'
+                },
                 {
                   symbol: 'ρ',
                   name: 'Густина рідини',
@@ -976,7 +1118,13 @@ export const physicsData: SubjectData = {
                   type: 'input',
                   defaultValue: 9.81
                 },
-                { symbol: 'h', name: 'Висота', nameEn: 'Height', unit: 'м (m)', type: 'input' },
+                {
+                  symbol: 'h',
+                  name: 'Висота',
+                  nameEn: 'Height',
+                  unit: 'м (m)',
+                  type: 'input'
+                },
                 {
                   symbol: 'E_total',
                   name: 'Повна енергія',
@@ -985,7 +1133,8 @@ export const physicsData: SubjectData = {
                   type: 'result'
                 }
               ],
-              compute: (v) => v.P + 0.5 * v['ρ'] * v.v * v.v + v['ρ'] * v.g * v.h,
+              compute: (v) =>
+                v.P + 0.5 * v['ρ'] * v.v * v.v + v['ρ'] * v.g * v.h,
               resultVar: 'E_total',
               derivedFormulas: ['phys_archimedes'],
               topic: 'Механіка рідин',
@@ -1141,7 +1290,8 @@ export const physicsData: SubjectData = {
               name: 'Ефект Доплера',
               nameEn: 'Doppler Effect',
               latex: "f' = f \\cdot \\frac{v \\pm v_o}{v \\mp v_s}",
-              description: 'Зміна частоти хвилі внаслідок руху джерела або спостерігача.',
+              description:
+                'Зміна частоти хвилі внаслідок руху джерела або спостерігача.',
               descriptionEn:
                 'Change in wave frequency due to relative motion of source or observer.',
               variables: [
@@ -1208,13 +1358,32 @@ export const physicsData: SubjectData = {
               name: 'Момент сили',
               nameEn: 'Torque',
               latex: '\\tau = r \\cdot F \\cdot \\sin\\theta',
-              description: 'Момент сили — міра здатності сили обертати тіло навколо осі.',
+              description:
+                'Момент сили — міра здатності сили обертати тіло навколо осі.',
               descriptionEn:
                 'Torque measures the ability of a force to cause rotational motion about an axis.',
               variables: [
-                { symbol: 'τ', name: 'Момент сили', nameEn: 'Torque', unit: 'Н·м', type: 'result' },
-                { symbol: 'r', name: 'Плече сили', nameEn: 'Lever arm', unit: 'м', type: 'input' },
-                { symbol: 'F', name: 'Сила', nameEn: 'Force', unit: 'Н', type: 'input' },
+                {
+                  symbol: 'τ',
+                  name: 'Момент сили',
+                  nameEn: 'Torque',
+                  unit: 'Н·м',
+                  type: 'result'
+                },
+                {
+                  symbol: 'r',
+                  name: 'Плече сили',
+                  nameEn: 'Lever arm',
+                  unit: 'м',
+                  type: 'input'
+                },
+                {
+                  symbol: 'F',
+                  name: 'Сила',
+                  nameEn: 'Force',
+                  unit: 'Н',
+                  type: 'input'
+                },
                 {
                   symbol: 'θ',
                   name: 'Кут',

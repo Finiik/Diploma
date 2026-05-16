@@ -20,7 +20,11 @@ describe('mergeLinks', () => {
     ];
     const merged = mergeLinks(a, b, 5);
     expect(merged).toHaveLength(3);
-    expect(merged.map((l) => `${l.type}:${l.id}`)).toEqual(['formula:x', 'theory:y', 'problems:z']);
+    expect(merged.map((l) => `${l.type}:${l.id}`)).toEqual([
+      'formula:x',
+      'theory:y',
+      'problems:z'
+    ]);
   });
 
   it('respects the cap', () => {

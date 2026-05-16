@@ -19,7 +19,13 @@ import {
   getAllBioFormulas
 } from './subjects';
 import { normalizeConcept, conceptCore, similarity } from './text';
-import type { Concept, CourseGraph, GraphItem, Subject, SubjectData } from '@/types/domain';
+import type {
+  Concept,
+  CourseGraph,
+  GraphItem,
+  Subject,
+  SubjectData
+} from '@/types/domain';
 
 // Concept under construction: itemIds is a Set while we accumulate, then
 // frozen to the array `Concept` declares once the graph is finalized.
@@ -89,7 +95,8 @@ export function buildCourseGraph(): CourseGraph {
   Object.values(byId).forEach((item) => {
     const derived = item.type === 'formula' ? item.derivedFormulas : undefined;
     const related = item.type !== 'problem' ? item.relatedFormulas : undefined;
-    const relatedOne = item.type === 'problem' ? item.relatedFormula : undefined;
+    const relatedOne =
+      item.type === 'problem' ? item.relatedFormula : undefined;
     (derived || []).forEach((id) => link(item.id, id));
     (related || []).forEach((id) => link(item.id, id));
     if (relatedOne) link(item.id, relatedOne);
@@ -104,7 +111,12 @@ export function buildCourseGraph(): CourseGraph {
     labelEn: string | undefined,
     subject: Subject
   ): ConceptBuilder => {
-    const c: ConceptBuilder = { label, labelEn: labelEn || label, subject, itemIds: new Set() };
+    const c: ConceptBuilder = {
+      label,
+      labelEn: labelEn || label,
+      subject,
+      itemIds: new Set()
+    };
     concepts.push(c);
     return c;
   };
@@ -144,7 +156,10 @@ export function buildCourseGraph(): CourseGraph {
     topics: (data.topics || []).map((t) => ({
       name: t.name,
       nameEn: t.nameEn,
-      subtopics: (t.subtopics || []).map((s) => ({ name: s.name, nameEn: s.nameEn }))
+      subtopics: (t.subtopics || []).map((s) => ({
+        name: s.name,
+        nameEn: s.nameEn
+      }))
     }))
   }));
 
@@ -194,7 +209,11 @@ export function resolveRelated(concept: Concept | null): GraphItem[] {
     const ns = edges[id];
     if (ns) ns.forEach((n) => ids.add(n));
   });
-  const order: Record<GraphItem['type'], number> = { theory: 0, formula: 1, problem: 2 };
+  const order: Record<GraphItem['type'], number> = {
+    theory: 0,
+    formula: 1,
+    problem: 2
+  };
   return [...ids]
     .map((id) => byId[id])
     .filter((item): item is GraphItem => Boolean(item))

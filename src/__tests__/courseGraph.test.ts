@@ -2,7 +2,11 @@
    The graph is built from the static course data, so it is fully
    deterministic. We pin structural invariants + concept resolution. */
 import { describe, it, expect } from 'vitest';
-import { buildCourseGraph, matchConcept, resolveRelated } from '@/services/assistant/courseGraph';
+import {
+  buildCourseGraph,
+  matchConcept,
+  resolveRelated
+} from '@/services/assistant/courseGraph';
 
 describe('buildCourseGraph', () => {
   const g = buildCourseGraph();
@@ -18,7 +22,11 @@ describe('buildCourseGraph', () => {
 
   it('derives concepts and a 3-subject outline from the data', () => {
     expect(g.concepts.length).toBeGreaterThan(0);
-    expect(g.outline.map((s) => s.subject)).toEqual(['physics', 'chemistry', 'biology']);
+    expect(g.outline.map((s) => s.subject)).toEqual([
+      'physics',
+      'chemistry',
+      'biology'
+    ]);
     for (const c of g.concepts) {
       expect(Array.isArray(c.keys)).toBe(true);
       expect(Array.isArray(c.itemIds)).toBe(true);
@@ -67,7 +75,13 @@ describe('resolveRelated', () => {
   it('returns [] for a null/empty concept', () => {
     expect(resolveRelated(null)).toEqual([]);
     expect(
-      resolveRelated({ label: '', labelEn: '', subject: 'physics', keys: [], itemIds: [] })
+      resolveRelated({
+        label: '',
+        labelEn: '',
+        subject: 'physics',
+        keys: [],
+        itemIds: []
+      })
     ).toEqual([]);
   });
 });

@@ -48,7 +48,11 @@ export const biologyData: SubjectData = {
               ],
               compute: (values) => {
                 const q = 1 - values.p;
-                return { 'p²': values.p * values.p, '2pq': 2 * values.p * q, 'q²': q * q };
+                return {
+                  'p²': values.p * values.p,
+                  '2pq': 2 * values.p * q,
+                  'q²': q * q
+                };
               },
               resultVar: 'p²',
               multiResult: true,
@@ -87,7 +91,13 @@ export const biologyData: SubjectData = {
                   unit: '',
                   type: 'input'
                 },
-                { symbol: 't', name: 'Час', nameEn: 'Time', unit: '', type: 'input' }
+                {
+                  symbol: 't',
+                  name: 'Час',
+                  nameEn: 'Time',
+                  unit: '',
+                  type: 'input'
+                }
               ],
               compute: (values) => values.N_0 * Math.exp(values.r * values.t),
               resultVar: 'N_t',
@@ -148,7 +158,8 @@ export const biologyData: SubjectData = {
                   type: 'input'
                 }
               ],
-              compute: (values) => (values.V_max * values.S) / (values.K_m + values.S),
+              compute: (values) =>
+                (values.V_max * values.S) / (values.K_m + values.S),
               resultVar: 'v',
               derivedFormulas: ['bio_bmi'],
               topic: 'Біохімія',
@@ -185,7 +196,13 @@ export const biologyData: SubjectData = {
                   unit: 'кг (kg)',
                   type: 'input'
                 },
-                { symbol: 'h', name: 'Зріст', nameEn: 'Height', unit: 'м (m)', type: 'input' }
+                {
+                  symbol: 'h',
+                  name: 'Зріст',
+                  nameEn: 'Height',
+                  unit: 'м (m)',
+                  type: 'input'
+                }
               ],
               compute: (values) => values.m / (values.h * values.h),
               resultVar: 'BMI',
@@ -211,7 +228,8 @@ export const biologyData: SubjectData = {
               id: 'bio_logistic_growth',
               name: 'Логістичне зростання популяції',
               nameEn: 'Logistic Population Growth',
-              latex: '\\frac{dN}{dt} = r \\cdot N \\cdot \\left(1 - \\frac{N}{K}\\right)',
+              latex:
+                '\\frac{dN}{dt} = r \\cdot N \\cdot \\left(1 - \\frac{N}{K}\\right)',
               description:
                 'Модель логістичного зростання враховує обмеженість ресурсів. K — ємність середовища (максимальний розмір популяції).',
               descriptionEn:
@@ -246,7 +264,8 @@ export const biologyData: SubjectData = {
                   type: 'input'
                 }
               ],
-              compute: (values) => values.r * values.N * (1 - values.N / values.K),
+              compute: (values) =>
+                values.r * values.N * (1 - values.N / values.K),
               resultVar: 'dN/dt',
               derivedFormulas: ['bio_population_growth'],
               topic: 'Екологія',
@@ -343,7 +362,8 @@ export const biologyData: SubjectData = {
                   type: 'input'
                 }
               ],
-              compute: (values) => 1 - (values['p₁'] ** 2 + values['p₂'] ** 2 + values['p₃'] ** 2),
+              compute: (values) =>
+                1 - (values['p₁'] ** 2 + values['p₂'] ** 2 + values['p₃'] ** 2),
               resultVar: 'D',
               derivedFormulas: ['bio_shannon'],
               topic: 'Екологія',
@@ -541,8 +561,20 @@ export const biologyData: SubjectData = {
                   unit: 'кг (kg)',
                   type: 'input'
                 },
-                { symbol: 'h', name: 'Зріст', nameEn: 'Height', unit: 'см (cm)', type: 'input' },
-                { symbol: 'a', name: 'Вік', nameEn: 'Age', unit: 'років', type: 'input' }
+                {
+                  symbol: 'h',
+                  name: 'Зріст',
+                  nameEn: 'Height',
+                  unit: 'см (cm)',
+                  type: 'input'
+                },
+                {
+                  symbol: 'a',
+                  name: 'Вік',
+                  nameEn: 'Age',
+                  unit: 'років',
+                  type: 'input'
+                }
               ],
               compute: (v) => 88.362 + 13.397 * v.m + 4.799 * v.h - 5.677 * v.a,
               resultVar: 'BMR',
@@ -675,7 +707,13 @@ export const biologyData: SubjectData = {
                   unit: 'л',
                   type: 'input'
                 },
-                { symbol: 'V_O₂', name: "Об'єм O₂", nameEn: 'O₂ volume', unit: 'л', type: 'input' }
+                {
+                  symbol: 'V_O₂',
+                  name: "Об'єм O₂",
+                  nameEn: 'O₂ volume',
+                  unit: 'л',
+                  type: 'input'
+                }
               ],
               compute: (v) => v['V_CO₂'] / v['V_O₂'],
               resultVar: 'RQ',
@@ -729,7 +767,8 @@ export const biologyData: SubjectData = {
               latex: 'W = 0.6 \\cdot m',
               description:
                 'Загальний вміст води в організмі людини становить приблизно 60% від маси тіла.',
-              descriptionEn: 'Total body water is approximately 60% of body weight.',
+              descriptionEn:
+                'Total body water is approximately 60% of body weight.',
               variables: [
                 {
                   symbol: 'W',
@@ -738,7 +777,13 @@ export const biologyData: SubjectData = {
                   unit: 'кг (L)',
                   type: 'result'
                 },
-                { symbol: 'm', name: 'Маса тіла', nameEn: 'Body mass', unit: 'кг', type: 'input' }
+                {
+                  symbol: 'm',
+                  name: 'Маса тіла',
+                  nameEn: 'Body mass',
+                  unit: 'кг',
+                  type: 'input'
+                }
               ],
               compute: (v) => 0.6 * v.m,
               resultVar: 'W',
@@ -924,9 +969,12 @@ export const biologyData: SubjectData = {
               id: 'bio_prevalence',
               name: 'Поширеність захворювання',
               nameEn: 'Disease Prevalence',
-              latex: 'P = \\frac{\\text{хворих}}{\\text{популяція}} \\times 100\\%',
-              description: 'Частка населення, що має захворювання на певний момент часу.',
-              descriptionEn: 'Proportion of a population that has a disease at a given time point.',
+              latex:
+                'P = \\frac{\\text{хворих}}{\\text{популяція}} \\times 100\\%',
+              description:
+                'Частка населення, що має захворювання на певний момент часу.',
+              descriptionEn:
+                'Proportion of a population that has a disease at a given time point.',
               variables: [
                 {
                   symbol: 'P',
@@ -942,7 +990,13 @@ export const biologyData: SubjectData = {
                   unit: '',
                   type: 'input'
                 },
-                { symbol: 'pop', name: 'Популяція', nameEn: 'Population', unit: '', type: 'input' }
+                {
+                  symbol: 'pop',
+                  name: 'Популяція',
+                  nameEn: 'Population',
+                  unit: '',
+                  type: 'input'
+                }
               ],
               compute: (v) => (v.cases / v.pop) * 100,
               resultVar: 'P',
@@ -996,7 +1050,8 @@ export const biologyData: SubjectData = {
               latex: 't_d = \\frac{\\ln 2}{r}',
               description:
                 'Час, необхідний для подвоєння чисельності популяції при сталій швидкості росту.',
-              descriptionEn: 'Time required for a population to double at a constant growth rate.',
+              descriptionEn:
+                'Time required for a population to double at a constant growth rate.',
               variables: [
                 {
                   symbol: 't_d',

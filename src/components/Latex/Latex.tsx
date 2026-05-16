@@ -19,5 +19,7 @@ interface LatexProps {
  */
 export default function Latex({ tex, display = false, className }: LatexProps) {
   const html = useMemo(() => renderLatex(tex, display), [tex, display]);
-  return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <div className={className} dangerouslySetInnerHTML={{ __html: html }} />
+  );
 }

@@ -57,7 +57,9 @@ export default function Calculator({ formula }: CalculatorProps) {
 
   const formatResult = (val: number): string => {
     if (typeof val === 'number') {
-      return Number.isInteger(val) ? val.toString() : val.toFixed(4).replace(/\.?0+$/, '');
+      return Number.isInteger(val)
+        ? val.toString()
+        : val.toFixed(4).replace(/\.?0+$/, '');
     }
     return val;
   };
@@ -90,7 +92,11 @@ export default function Calculator({ formula }: CalculatorProps) {
 
       {error && <p className="calc-error">{error}</p>}
 
-      <button className="calc-button" onClick={handleCalculate} id="calc-button">
+      <button
+        className="calc-button"
+        onClick={handleCalculate}
+        id="calc-button"
+      >
         {t('formula.calculate')}
       </button>
 
@@ -110,7 +116,9 @@ export default function Calculator({ formula }: CalculatorProps) {
             <div className="calc-result-row">
               <span className="calc-result-key">{resultVar?.symbol}</span>
               <span className="calc-result-value">
-                {formatResult(typeof result === 'number' ? result : Number(result))}{' '}
+                {formatResult(
+                  typeof result === 'number' ? result : Number(result)
+                )}{' '}
                 {resultVar?.unit}
               </span>
             </div>

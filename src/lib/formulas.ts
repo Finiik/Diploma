@@ -17,7 +17,11 @@ export type SubjectFormula = Formula & { subject: Subject };
 
 /** Every formula across all subjects (each tagged with its `subject`). */
 export function getAllFormulas(): SubjectFormula[] {
-  return [...getPhysFormulas(), ...getChemFormulas(), ...getBioFormulas()] as SubjectFormula[];
+  return [
+    ...getPhysFormulas(),
+    ...getChemFormulas(),
+    ...getBioFormulas()
+  ] as SubjectFormula[];
 }
 
 /** First formula matching `id` across all subjects, or undefined. */

@@ -72,8 +72,12 @@ describe('conceptCore', () => {
 
 describe('exported word lists', () => {
   it('intent/filler lists are non-empty arrays', () => {
-    expect(Array.isArray(INTENT_WORDS_UK) && INTENT_WORDS_UK.length).toBeTruthy();
-    expect(Array.isArray(INTENT_WORDS_EN) && INTENT_WORDS_EN.length).toBeTruthy();
+    expect(
+      Array.isArray(INTENT_WORDS_UK) && INTENT_WORDS_UK.length
+    ).toBeTruthy();
+    expect(
+      Array.isArray(INTENT_WORDS_EN) && INTENT_WORDS_EN.length
+    ).toBeTruthy();
     expect(FILLER_WORDS).toContain('а');
   });
 });

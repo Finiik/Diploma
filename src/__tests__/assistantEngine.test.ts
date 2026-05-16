@@ -51,7 +51,9 @@ describe('instant responders', () => {
   it('pure-subject query returns the subject overview with a subject link', async () => {
     const r = await processMessage('Формули фізики');
     expect(r.text).toContain('30');
-    expect(r.links.some((l) => l.type === 'subject' && l.id === 'physics')).toBe(true);
+    expect(
+      r.links.some((l) => l.type === 'subject' && l.id === 'physics')
+    ).toBe(true);
   });
 });
 

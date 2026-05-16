@@ -21,10 +21,15 @@ import type { AssistantResponse } from '@/types/domain';
 // ============================================
 // Main entry point — async
 // ============================================
-export async function processMessage(query: string, isUk = true): Promise<AssistantResponse> {
+export async function processMessage(
+  query: string,
+  isUk = true
+): Promise<AssistantResponse> {
   if (!query || query.trim().length === 0) {
     return finalizeResponse({
-      text: isUk ? 'Будь ласка, напишіть ваше питання.' : 'Please type your question.'
+      text: isUk
+        ? 'Будь ласка, напишіть ваше питання.'
+        : 'Please type your question.'
     });
   }
 
@@ -37,6 +42,8 @@ export async function processMessage(query: string, isUk = true): Promise<Assist
 
   // Unreachable: the terminal 'ai' responder always returns a response.
   return finalizeResponse({
-    text: isUk ? 'Вибачте, не вдалося обробити запит.' : 'Sorry, could not process the request.'
+    text: isUk
+      ? 'Вибачте, не вдалося обробити запит.'
+      : 'Sorry, could not process the request.'
   });
 }

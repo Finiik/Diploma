@@ -39,7 +39,10 @@ export default function Header() {
           <span className="logo-text">{t('app.title')}</span>
         </Link>
 
-        <nav className={`header-nav ${mobileMenuOpen ? 'mobile-open' : ''}`} id="header-nav">
+        <nav
+          className={`header-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}
+          id="header-nav"
+        >
           <Link to="/subject/physics" className="nav-link nav-physics">
             <span className="nav-icon">⚛️</span>
             {t('nav.physics')}
@@ -69,7 +72,10 @@ export default function Header() {
 
         {/* Backdrop overlay for mobile menu */}
         {mobileMenuOpen && (
-          <div className="mobile-backdrop" onClick={() => setMobileMenuOpen(false)} />
+          <div
+            className="mobile-backdrop"
+            onClick={() => setMobileMenuOpen(false)}
+          />
         )}
 
         <div className="header-actions">
@@ -82,7 +88,11 @@ export default function Header() {
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-          <button className="action-btn lang-toggle" onClick={toggleLanguage} id="lang-toggle">
+          <button
+            className="action-btn lang-toggle"
+            onClick={toggleLanguage}
+            id="lang-toggle"
+          >
             {t('language.toggle')}
           </button>
           <button

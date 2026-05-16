@@ -103,7 +103,10 @@ export async function getRecommendations(
       ])) as InteractionsByUser;
       allInteractions = { ...allInteractions, ...firebaseInteractions };
     } catch (e) {
-      console.warn('Using demo data for recommendations:', e instanceof Error ? e.message : e);
+      console.warn(
+        'Using demo data for recommendations:',
+        e instanceof Error ? e.message : e
+      );
     }
   }
 
@@ -114,10 +117,9 @@ export async function getRecommendations(
   } else {
     // Check localStorage for local user interactions
     try {
-      const local = JSON.parse(localStorage.getItem('userInteractions') || '{}') as Record<
-        string,
-        Interaction
-      >;
+      const local = JSON.parse(
+        localStorage.getItem('userInteractions') || '{}'
+      ) as Record<string, Interaction>;
       userInteractions = local;
     } catch {
       userInteractions = {};
@@ -143,7 +145,11 @@ export async function getRecommendations(
     const otherVector = buildUserVector(otherInteractions, allFormulaIds);
     const sim = cosineSimilarity(userVector, otherVector);
     if (sim > 0) {
-      similarities.push({ userId: otherId, similarity: sim, interactions: otherInteractions });
+      similarities.push({
+        userId: otherId,
+        similarity: sim,
+        interactions: otherInteractions
+      });
     }
   }
 
@@ -169,11 +175,15 @@ export async function getRecommendations(
   return findFormulasByIds(sorted);
 }
 
-function getPopularFormulas(allInteractions: InteractionsByUser, topN: number): Formula[] {
+function getPopularFormulas(
+  allInteractions: InteractionsByUser,
+  topN: number
+): Formula[] {
   const popularity: Record<string, number> = {};
   for (const interactions of Object.values(allInteractions)) {
     for (const [formulaId, interaction] of Object.entries(interactions)) {
-      popularity[formulaId] = (popularity[formulaId] || 0) + interactionScore(interaction);
+      popularity[formulaId] =
+        (popularity[formulaId] || 0) + interactionScore(interaction);
     }
   }
 

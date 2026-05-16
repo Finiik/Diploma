@@ -200,7 +200,10 @@ export interface AssistantResponse {
 /** One link in the chain-of-responsibility. */
 export interface Responder {
   id: string;
-  run: (query: string, isUk: boolean) => ResponderResult | null | Promise<ResponderResult | null>;
+  run: (
+    query: string,
+    isUk: boolean
+  ) => ResponderResult | null | Promise<ResponderResult | null>;
 }
 
 // --- Recommendations ------------------------------------------------------

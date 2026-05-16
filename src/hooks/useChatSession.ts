@@ -18,16 +18,28 @@ export function useChatSession() {
 
   const run = useCallback(
     async (text: string, errorKey: string) => {
-      setMessages((prev) => [...prev, { role: 'user', text, timestamp: Date.now() }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'user', text, timestamp: Date.now() }
+      ]);
       setInput('');
       setIsTyping(true);
       try {
         const response = await processMessage(text, isUk);
-        setMessages((prev) => [...prev, { role: 'bot', ...response, timestamp: Date.now() }]);
+        setMessages((prev) => [
+          ...prev,
+          { role: 'bot', ...response, timestamp: Date.now() }
+        ]);
       } catch {
         setMessages((prev) => [
           ...prev,
-          { role: 'bot', text: t(errorKey), links: [], suggestions: [], timestamp: Date.now() }
+          {
+            role: 'bot',
+            text: t(errorKey),
+            links: [],
+            suggestions: [],
+            timestamp: Date.now()
+          }
         ]);
       } finally {
         setIsTyping(false);
@@ -41,7 +53,10 @@ export function useChatSession() {
     if (query) run(query, 'assistant.error');
   }, [input, run]);
 
-  const sendSuggestion = useCallback((text: string) => run(text, 'assistant.error_short'), [run]);
+  const sendSuggestion = useCallback(
+    (text: string) => run(text, 'assistant.error_short'),
+    [run]
+  );
 
   // Guards a second concurrent seed if the panel is reopened while the first
   // welcome request is still in flight.
@@ -75,5 +90,13 @@ export function useChatSession() {
     }
   }, [isUk, t]);
 
-  return { messages, input, setInput, isTyping, send, sendSuggestion, seedWelcome };
+  return {
+    messages,
+    input,
+    setInput,
+    isTyping,
+    send,
+    sendSuggestion,
+    seedWelcome
+  };
 }

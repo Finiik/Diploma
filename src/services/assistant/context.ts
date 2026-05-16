@@ -19,7 +19,9 @@ export function buildPlatformContext(isUk: boolean) {
   const formulaList = allFormulas
     .map((f) => {
       const name = isUk ? f.name : f.nameEn;
-      const desc = isUk ? (f.description || '').slice(0, 80) : (f.descriptionEn || '').slice(0, 80);
+      const desc = isUk
+        ? (f.description || '').slice(0, 80)
+        : (f.descriptionEn || '').slice(0, 80);
       return `- ${name} (id: ${f.id}, LaTeX: ${f.latex}): ${desc}`;
     })
     .join('\n');
@@ -27,7 +29,9 @@ export function buildPlatformContext(isUk: boolean) {
   const theoryList = theoryData
     .map((t) => {
       const name = isUk ? t.name : t.nameEn;
-      const content = isUk ? (t.content || '').slice(0, 120) : (t.contentEn || '').slice(0, 120);
+      const content = isUk
+        ? (t.content || '').slice(0, 120)
+        : (t.contentEn || '').slice(0, 120);
       return `- ${name} (${t.subject}, difficulty: ${t.difficulty}): ${content}`;
     })
     .join('\n');
@@ -35,7 +39,9 @@ export function buildPlatformContext(isUk: boolean) {
   const problemList = problemsData
     .map((p) => {
       const name = isUk ? p.name : p.nameEn;
-      const desc = isUk ? (p.description || '').slice(0, 80) : (p.descriptionEn || '').slice(0, 80);
+      const desc = isUk
+        ? (p.description || '').slice(0, 80)
+        : (p.descriptionEn || '').slice(0, 80);
       return `- ${name} (${p.subject}, difficulty: ${p.difficulty}⭐): ${desc}`;
     })
     .join('\n');
@@ -50,7 +56,9 @@ export function buildPlatformContext(isUk: boolean) {
       const topics = s.topics
         .map((t) => {
           const tn = isUk ? t.name : t.nameEn;
-          const subs = t.subtopics.map((x) => (isUk ? x.name : x.nameEn)).filter(Boolean);
+          const subs = t.subtopics
+            .map((x) => (isUk ? x.name : x.nameEn))
+            .filter(Boolean);
           return subs.length ? `  • ${tn}: ${subs.join(', ')}` : `  • ${tn}`;
         })
         .join('\n');
@@ -58,7 +66,13 @@ export function buildPlatformContext(isUk: boolean) {
     })
     .join('\n');
 
-  return { formulaList, theoryList, problemList, topicOutline, totalFormulas: allFormulas.length };
+  return {
+    formulaList,
+    theoryList,
+    problemList,
+    topicOutline,
+    totalFormulas: allFormulas.length
+  };
 }
 
 // Serialize one platform item into the Gemini prompt context.
@@ -67,7 +81,9 @@ export function formatItemContext(item: GraphItem, isUk: boolean): string {
   if (item.type === 'formula') {
     const desc = isUk ? item.description : item.descriptionEn;
     const vars = item.variables
-      ? item.variables.map((v) => `${v.symbol} (${isUk ? v.name : v.nameEn}, ${v.unit})`).join(', ')
+      ? item.variables
+          .map((v) => `${v.symbol} (${isUk ? v.name : v.nameEn}, ${v.unit})`)
+          .join(', ')
       : '';
     return `\nFORMULA: ${name}\nLaTeX: ${item.latex}\nDescription: ${desc}\nVariables: ${vars}\nID: ${item.id}\nSubject: ${item.subject}\n`;
   }
@@ -78,7 +94,9 @@ export function formatItemContext(item: GraphItem, isUk: boolean): string {
   if (item.type === 'problem') {
     const desc = isUk ? item.description : item.descriptionEn;
     const steps = item.steps
-      ? item.steps.map((s, i) => `Step ${i + 1}: ${isUk ? s.text : s.textEn}`).join('\n')
+      ? item.steps
+          .map((s, i) => `Step ${i + 1}: ${isUk ? s.text : s.textEn}`)
+          .join('\n')
       : '';
     const answer = isUk ? item.answer : item.answerEn;
     return `\nPROBLEM: ${name}\nDescription: ${desc}\n${steps}\nAnswer: ${answer}\nRelated formula: ${item.relatedFormula || 'none'}\n`;
@@ -127,11 +145,19 @@ const LINK_EMOJI: Record<GraphItem['type'], string> = {
   theory: '📖',
   problem: '📝'
 };
-function itemToLink(item: GraphItem, isUk: boolean, withEmoji = false): NavLink | null {
+function itemToLink(
+  item: GraphItem,
+  isUk: boolean,
+  withEmoji = false
+): NavLink | null {
   const type = LINK_TYPE[item.type];
   if (!type) return null;
   const name = localizedName(item, isUk);
-  return { type, id: item.id, label: withEmoji ? `${LINK_EMOJI[item.type]} ${name}` : name };
+  return {
+    type,
+    id: item.id,
+    label: withEmoji ? `${LINK_EMOJI[item.type]} ${name}` : name
+  };
 }
 
 // Build navigation links from search results
@@ -144,7 +170,10 @@ export function extractLinks(query: string, isUk: boolean): NavLink[] {
 
 // Concept-graph navigation links (any subject), reused by the fallback and
 // the Gemini path so the topic still surfaces its connected materials.
-export function buildConceptLinks(concept: Concept | null, isUk: boolean): NavLink[] {
+export function buildConceptLinks(
+  concept: Concept | null,
+  isUk: boolean
+): NavLink[] {
   return resolveRelated(concept)
     .slice(0, 4)
     .map((item) => itemToLink(item, isUk))

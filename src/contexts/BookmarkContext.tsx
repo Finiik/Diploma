@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback
+} from 'react';
 import type { ReactNode } from 'react';
 import {
   getBookmarks,
@@ -15,7 +21,9 @@ type BookmarkContextValue = {
   loadBookmarks: () => Promise<void>;
 };
 
-const BookmarkContext = createContext<BookmarkContextValue | undefined>(undefined);
+const BookmarkContext = createContext<BookmarkContextValue | undefined>(
+  undefined
+);
 
 export function BookmarkProvider({ children }: { children: ReactNode }) {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
@@ -52,7 +60,9 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <BookmarkContext.Provider value={{ bookmarks, toggleBookmark, isBookmarked, loadBookmarks }}>
+    <BookmarkContext.Provider
+      value={{ bookmarks, toggleBookmark, isBookmarked, loadBookmarks }}
+    >
       {children}
     </BookmarkContext.Provider>
   );
@@ -60,6 +70,7 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
 
 export function useBookmarks() {
   const context = useContext(BookmarkContext);
-  if (!context) throw new Error('useBookmarks must be used within BookmarkProvider');
+  if (!context)
+    throw new Error('useBookmarks must be used within BookmarkProvider');
   return context;
 }

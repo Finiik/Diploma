@@ -3,8 +3,14 @@
    ============================================ */
 
 import { physicsData, getAllFormulas } from '@/data/physics';
-import { chemistryData, getAllFormulas as getAllChemFormulas } from '@/data/chemistry';
-import { biologyData, getAllFormulas as getAllBioFormulas } from '@/data/biology';
+import {
+  chemistryData,
+  getAllFormulas as getAllChemFormulas
+} from '@/data/chemistry';
+import {
+  biologyData,
+  getAllFormulas as getAllBioFormulas
+} from '@/data/biology';
 import type { Formula, Subject } from '@/types/domain';
 
 export {
@@ -47,6 +53,9 @@ export function getSubjectLabel(subject: Subject, isUk: boolean): string {
 }
 
 // The repeated `isUk ? x.name : (x.nameEn || x.name)` pick, in one place.
-export function localizedName(item: { name: string; nameEn?: string }, isUk: boolean): string {
+export function localizedName(
+  item: { name: string; nameEn?: string },
+  isUk: boolean
+): string {
   return isUk ? item.name : item.nameEn || item.name;
 }

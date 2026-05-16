@@ -15,7 +15,11 @@ interface DifficultyBadge {
   icon: string;
 }
 
-const SUBJECT_ICON: Record<string, string> = { physics: '⚛️', chemistry: '🧪', biology: '🧬' };
+const SUBJECT_ICON: Record<string, string> = {
+  physics: '⚛️',
+  chemistry: '🧪',
+  biology: '🧬'
+};
 const DIFF_BADGE: Record<string, DifficultyBadge> = {
   1: { key: 'difficulty.beginner', cls: 'diff-beginner', icon: '🟢' },
   2: { key: 'difficulty.intermediate', cls: 'diff-intermediate', icon: '🟡' },
@@ -35,7 +39,8 @@ export default function Theory() {
     useContentFilters(theoryData);
 
   const getSubjectIcon = (s: string) => SUBJECT_ICON[s] || '📚';
-  const getDifficultyBadge = (level: number): DifficultyBadge => DIFF_BADGE[level] || DIFF_BADGE[1];
+  const getDifficultyBadge = (level: number): DifficultyBadge =>
+    DIFF_BADGE[level] || DIFF_BADGE[1];
 
   return (
     <div className="theory-page">
@@ -53,13 +58,20 @@ export default function Theory() {
         </div>
 
         <div className="theory-list stagger-children">
-          {filtered.length === 0 && <p className="no-results">{t('common.no_results')}</p>}
+          {filtered.length === 0 && (
+            <p className="no-results">{t('common.no_results')}</p>
+          )}
           {filtered.map((th) => {
             const badge = getDifficultyBadge(th.difficulty);
             return (
-              <article key={th.id} className={`theory-card subject-${th.subject}`}>
+              <article
+                key={th.id}
+                className={`theory-card subject-${th.subject}`}
+              >
                 <div className="theory-card-header">
-                  <span className="theory-icon">{getSubjectIcon(th.subject)}</span>
+                  <span className="theory-icon">
+                    {getSubjectIcon(th.subject)}
+                  </span>
                   <div>
                     <h2 className="theory-card-title">{tr(th, 'name')}</h2>
                     <p className="theory-card-topic">{th.topic}</p>
@@ -85,9 +97,15 @@ export default function Theory() {
                 </div>
                 {th.relatedFormulas && th.relatedFormulas.length > 0 && (
                   <div className="theory-related">
-                    <span className="theory-related-label">{t('theory.related_formulas')}</span>
+                    <span className="theory-related-label">
+                      {t('theory.related_formulas')}
+                    </span>
                     {th.relatedFormulas.map((fId) => (
-                      <Link key={fId} to={`/formula/${fId}`} className="theory-related-link">
+                      <Link
+                        key={fId}
+                        to={`/formula/${fId}`}
+                        className="theory-related-link"
+                      >
                         {fId.replace(/^(phys_|chem_|bio_)/, '')}
                       </Link>
                     ))}

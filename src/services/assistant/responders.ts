@@ -34,9 +34,14 @@ import {
   detectSubjectIntent
 } from './intents';
 import { localFallback } from './fallback';
-import type { AssistantResponse, Responder, ResponderResult } from '@/types/domain';
+import type {
+  AssistantResponse,
+  Responder,
+  ResponderResult
+} from '@/types/domain';
 
-const GREETING_RE = /^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i;
+const GREETING_RE =
+  /^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i;
 
 // Normalize any responder's partial result into the full response contract.
 export function finalizeResponse(partial: ResponderResult): AssistantResponse {
@@ -99,7 +104,13 @@ function list(query: string, isUk: boolean): ResponderResult | null {
       .join('\n');
     return {
       text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}** — ${fBySubject.length} ${isUk ? 'формул' : 'formulas'}:\n\n${names}${fBySubject.length > 10 ? `\n\n...${isUk ? 'та ще' : 'and'} ${fBySubject.length - 10} ${isUk ? 'більше' : 'more'}` : ''}`,
-      links: [{ type: 'subject', id: subj, label: isUk ? 'Переглянути всі' : 'View all' }]
+      links: [
+        {
+          type: 'subject',
+          id: subj,
+          label: isUk ? 'Переглянути всі' : 'View all'
+        }
+      ]
     };
   }
 
@@ -121,7 +132,13 @@ function pureSubject(query: string, isUk: boolean): ResponderResult | null {
   const topics = [...new Set(fBySubject.map((f) => f.topic))].filter(Boolean);
   return {
     text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}**\n\n${isUk ? 'Доступно' : 'Available'}: ${fBySubject.length} ${isUk ? 'формул' : 'formulas'} ${isUk ? 'з' : 'in'} ${topics.length} ${isUk ? 'тем' : 'topics'}:\n${topics.map((t) => `• ${t}`).join('\n')}\n\n${isUk ? 'Запитайте конкретну формулу або тему!' : 'Ask about a specific formula or topic!'}`,
-    links: [{ type: 'subject', id: subj, label: isUk ? 'Відкрити предмет' : 'Open subject' }],
+    links: [
+      {
+        type: 'subject',
+        id: subj,
+        label: isUk ? 'Відкрити предмет' : 'Open subject'
+      }
+    ],
     suggestions: isUk
       ? [`Формули ${getSubjectLabel(subj, true).toLowerCase()}`]
       : [`${getSubjectLabel(subj, false)} formulas`]
@@ -131,7 +148,10 @@ function pureSubject(query: string, isUk: boolean): ResponderResult | null {
 // --- Terminal responder: Gemini, then rich local fallback -------------------
 // Always returns a response, so the chain never falls through.
 
-async function aiOrFallback(query: string, isUk: boolean): Promise<ResponderResult> {
+async function aiOrFallback(
+  query: string,
+  isUk: boolean
+): Promise<ResponderResult> {
   // Navigation links: search hits first, then curated concept-graph links so
   // a topic like "стала Авогадро" still surfaces its connected materials
   // (mole, molarity, ideal-gas law) even with no direct search hit.
@@ -154,7 +174,11 @@ async function aiOrFallback(query: string, isUk: boolean): Promise<ResponderResu
   }
 
   const fallback = localFallback(query, isUk);
-  return { text: fallback.text, links, suggestions: fallback.suggestions || [] };
+  return {
+    text: fallback.text,
+    links,
+    suggestions: fallback.suggestions || []
+  };
 }
 
 // Ordered chain. First responder to return non-null answers the query.

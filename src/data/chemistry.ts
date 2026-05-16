@@ -28,7 +28,8 @@ export const chemistryData: SubjectData = {
               latex: 'C_M = \\frac{n}{V}',
               description:
                 'Молярна концентрація — кількість молів розчиненої речовини в одному літрі розчину.',
-              descriptionEn: 'Molarity is the number of moles of solute per liter of solution.',
+              descriptionEn:
+                'Molarity is the number of moles of solute per liter of solution.',
               variables: [
                 {
                   symbol: 'C_M',
@@ -107,7 +108,8 @@ export const chemistryData: SubjectData = {
               id: 'chem_mass_fraction',
               name: 'Масова частка',
               nameEn: 'Mass Fraction',
-              latex: 'w = \\frac{m_{\\text{речовини}}}{m_{\\text{розчину}}} \\times 100\\%',
+              latex:
+                'w = \\frac{m_{\\text{речовини}}}{m_{\\text{розчину}}} \\times 100\\%',
               description:
                 'Масова частка — відношення маси розчиненої речовини до загальної маси розчину, виражене у відсотках.',
               descriptionEn:
@@ -158,7 +160,13 @@ export const chemistryData: SubjectData = {
               descriptionEn:
                 'The ideal gas law relates pressure, volume, amount of substance, and temperature. R = 8.314 J/(mol·K).',
               variables: [
-                { symbol: 'P', name: 'Тиск', nameEn: 'Pressure', unit: 'Па (Pa)', type: 'result' },
+                {
+                  symbol: 'P',
+                  name: 'Тиск',
+                  nameEn: 'Pressure',
+                  unit: 'Па (Pa)',
+                  type: 'result'
+                },
                 {
                   symbol: 'n',
                   name: 'Кількість речовини',
@@ -181,7 +189,13 @@ export const chemistryData: SubjectData = {
                   unit: 'К (K)',
                   type: 'input'
                 },
-                { symbol: 'V', name: "Об'єм", nameEn: 'Volume', unit: 'м³ (m³)', type: 'input' }
+                {
+                  symbol: 'V',
+                  name: "Об'єм",
+                  nameEn: 'Volume',
+                  unit: 'м³ (m³)',
+                  type: 'input'
+                }
               ],
               compute: (values) => (values.n * values.R * values.T) / values.V,
               resultVar: 'P',
@@ -320,7 +334,8 @@ export const chemistryData: SubjectData = {
                 }
               ],
               compute: (values) =>
-                values['v₁'] * Math.pow(values['γ'], (values['t₂'] - values['t₁']) / 10),
+                values['v₁'] *
+                Math.pow(values['γ'], (values['t₂'] - values['t₁']) / 10),
               resultVar: 'v₂',
               derivedFormulas: ['chem_reaction_rate'],
               topic: 'Хімічні реакції',
@@ -380,7 +395,8 @@ export const chemistryData: SubjectData = {
                 }
               ],
               compute: (values) =>
-                (values['[C]'] * values['[D]']) / (values['[A]'] * values['[B]']),
+                (values['[C]'] * values['[D]']) /
+                (values['[A]'] * values['[B]']),
               resultVar: 'K_c',
               derivedFormulas: ['chem_reaction_rate'],
               topic: 'Хімічні реакції',
@@ -431,7 +447,13 @@ export const chemistryData: SubjectData = {
                   unit: 'А (A)',
                   type: 'input'
                 },
-                { symbol: 't', name: 'Час', nameEn: 'Time', unit: 'с (s)', type: 'input' },
+                {
+                  symbol: 't',
+                  name: 'Час',
+                  nameEn: 'Time',
+                  unit: 'с (s)',
+                  type: 'input'
+                },
                 {
                   symbol: 'n',
                   name: 'Кількість електронів',
@@ -517,7 +539,8 @@ export const chemistryData: SubjectData = {
                   type: 'input'
                 }
               ],
-              compute: (v) => v['E⁰'] - ((v.R * v.T) / (v.n * v.F)) * Math.log(v.Q),
+              compute: (v) =>
+                v['E⁰'] - ((v.R * v.T) / (v.n * v.F)) * Math.log(v.Q),
               resultVar: 'E',
               derivedFormulas: ['chem_faraday'],
               topic: 'Електрохімія',
@@ -541,7 +564,8 @@ export const chemistryData: SubjectData = {
               id: 'chem_enthalpy',
               name: 'Зміна ентальпії реакції',
               nameEn: 'Reaction Enthalpy Change',
-              latex: '\\Delta H = \\sum H_{\\text{прод}} - \\sum H_{\\text{реаг}}',
+              latex:
+                '\\Delta H = \\sum H_{\\text{прод}} - \\sum H_{\\text{реаг}}',
               description:
                 'Зміна ентальпії реакції — різниця між сумами ентальпій утворення продуктів і реагентів.',
               descriptionEn:
@@ -620,7 +644,8 @@ export const chemistryData: SubjectData = {
               latex: 'n = \\frac{m}{M}',
               description:
                 'Кількість речовини (в молях) дорівнює відношенню маси речовини до її молярної маси.',
-              descriptionEn: 'Amount of substance (in moles) equals mass divided by molar mass.',
+              descriptionEn:
+                'Amount of substance (in moles) equals mass divided by molar mass.',
               variables: [
                 {
                   symbol: 'n',
@@ -629,7 +654,13 @@ export const chemistryData: SubjectData = {
                   unit: 'моль (mol)',
                   type: 'result'
                 },
-                { symbol: 'm', name: 'Маса', nameEn: 'Mass', unit: 'г (g)', type: 'input' },
+                {
+                  symbol: 'm',
+                  name: 'Маса',
+                  nameEn: 'Mass',
+                  unit: 'г (g)',
+                  type: 'input'
+                },
                 {
                   symbol: 'M',
                   name: 'Молярна маса',
@@ -859,9 +890,12 @@ export const chemistryData: SubjectData = {
               id: 'chem_yield',
               name: 'Вихід продукту реакції',
               nameEn: 'Reaction Yield',
-              latex: '\\eta = \\frac{m_{\\text{практ}}}{m_{\\text{теор}}} \\cdot 100\\%',
-              description: 'Відношення реально отриманої маси продукту до теоретично можливої.',
-              descriptionEn: 'Ratio of actual product mass to theoretically possible mass.',
+              latex:
+                '\\eta = \\frac{m_{\\text{практ}}}{m_{\\text{теор}}} \\cdot 100\\%',
+              description:
+                'Відношення реально отриманої маси продукту до теоретично можливої.',
+              descriptionEn:
+                'Ratio of actual product mass to theoretically possible mass.',
               variables: [
                 {
                   symbol: 'η',
@@ -965,8 +999,10 @@ export const chemistryData: SubjectData = {
               name: 'Підвищення температури кипіння',
               nameEn: 'Boiling Point Elevation',
               latex: '\\Delta T_b = i \\cdot K_b \\cdot m',
-              description: 'Додавання розчиненої речовини підвищує температуру кипіння розчинника.',
-              descriptionEn: 'Adding solute raises the boiling point of the solvent.',
+              description:
+                'Додавання розчиненої речовини підвищує температуру кипіння розчинника.',
+              descriptionEn:
+                'Adding solute raises the boiling point of the solvent.',
               variables: [
                 {
                   symbol: 'ΔT_b',
@@ -1012,7 +1048,8 @@ export const chemistryData: SubjectData = {
               latex: '\\Delta T_f = i \\cdot K_f \\cdot m',
               description:
                 'Додавання розчиненої речовини знижує температуру замерзання розчинника.',
-              descriptionEn: 'Adding solute lowers the freezing point of the solvent.',
+              descriptionEn:
+                'Adding solute lowers the freezing point of the solvent.',
               variables: [
                 {
                   symbol: 'ΔT_f',
@@ -1162,7 +1199,8 @@ export const chemistryData: SubjectData = {
               latex: 'C_1 V_1 = C_2 V_2',
               description:
                 'У точці еквівалентності кількість молів кислоти дорівнює кількості молів основи.',
-              descriptionEn: 'At the equivalence point, moles of acid equal moles of base.',
+              descriptionEn:
+                'At the equivalence point, moles of acid equal moles of base.',
               variables: [
                 {
                   symbol: 'C₁',
@@ -1171,7 +1209,13 @@ export const chemistryData: SubjectData = {
                   unit: 'моль/л',
                   type: 'input'
                 },
-                { symbol: 'V₁', name: "Об'єм 1", nameEn: 'Volume 1', unit: 'мл', type: 'input' },
+                {
+                  symbol: 'V₁',
+                  name: "Об'єм 1",
+                  nameEn: 'Volume 1',
+                  unit: 'мл',
+                  type: 'input'
+                },
                 {
                   symbol: 'C₂',
                   name: 'Концентрація 2',
@@ -1179,7 +1223,13 @@ export const chemistryData: SubjectData = {
                   unit: 'моль/л',
                   type: 'input'
                 },
-                { symbol: 'V₂', name: "Об'єм 2", nameEn: 'Volume 2', unit: 'мл', type: 'result' }
+                {
+                  symbol: 'V₂',
+                  name: "Об'єм 2",
+                  nameEn: 'Volume 2',
+                  unit: 'мл',
+                  type: 'result'
+                }
               ],
               compute: (v) => (v['C₁'] * v['V₁']) / v['C₂'],
               resultVar: 'V₂',
@@ -1235,7 +1285,8 @@ export const chemistryData: SubjectData = {
                   defaultValue: 1
                 }
               ],
-              compute: (v) => Math.pow(v['[A⁺]'], v.m) * Math.pow(v['[B⁻]'], v.n),
+              compute: (v) =>
+                Math.pow(v['[A⁺]'], v.m) * Math.pow(v['[B⁻]'], v.n),
               resultVar: 'K_sp',
               derivedFormulas: ['chem_equilibrium'],
               topic: 'Аналітична хімія',

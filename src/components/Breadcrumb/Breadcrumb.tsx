@@ -25,12 +25,16 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
           {index > 0 && <span className="breadcrumb-separator">›</span>}
           {item.to ? (
             <Link to={item.to} className="breadcrumb-link">
-              {item.icon && <span className="breadcrumb-icon">{item.icon}</span>}
+              {item.icon && (
+                <span className="breadcrumb-icon">{item.icon}</span>
+              )}
               {tr(item, 'label')}
             </Link>
           ) : (
             <span className="breadcrumb-current">
-              {item.icon && <span className="breadcrumb-icon">{item.icon}</span>}
+              {item.icon && (
+                <span className="breadcrumb-icon">{item.icon}</span>
+              )}
               {tr(item, 'label')}
             </span>
           )}

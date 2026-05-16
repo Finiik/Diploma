@@ -17,11 +17,9 @@ const subjects = [
 export default function Home() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: recommendations, loading: recsLoading } = useAsyncResource<Formula[]>(
-    () => getRecommendations(user?.uid, 6),
-    [user],
-    []
-  );
+  const { data: recommendations, loading: recsLoading } = useAsyncResource<
+    Formula[]
+  >(() => getRecommendations(user?.uid, 6), [user], []);
 
   return (
     <div className="home-page">

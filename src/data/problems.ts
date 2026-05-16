@@ -26,7 +26,10 @@ export const problemsData: ProblemItem[] = [
         text: 'Підставимо значення: F = 1500 кг · 2 м/с²',
         textEn: 'Substitute values: F = 1500 kg · 2 m/s²'
       },
-      { text: 'Обчислимо: F = 3000 Н = 3 кН', textEn: 'Calculate: F = 3000 N = 3 kN' }
+      {
+        text: 'Обчислимо: F = 3000 Н = 3 кН',
+        textEn: 'Calculate: F = 3000 N = 3 kN'
+      }
     ],
     answer: 'F = 3000 Н',
     answerEn: 'F = 3000 N'
@@ -73,13 +76,22 @@ export const problemsData: ProblemItem[] = [
       'In a population, 16% of individuals have the recessive phenotype (aa). Determine allele and genotype frequencies.',
     relatedFormula: 'bio_hardy_weinberg',
     steps: [
-      { text: 'q² = 0.16, отже q = √0.16 = 0.4', textEn: 'q² = 0.16, hence q = √0.16 = 0.4' },
-      { text: 'p = 1 - q = 1 - 0.4 = 0.6', textEn: 'p = 1 - q = 1 - 0.4 = 0.6' },
+      {
+        text: 'q² = 0.16, отже q = √0.16 = 0.4',
+        textEn: 'q² = 0.16, hence q = √0.16 = 0.4'
+      },
+      {
+        text: 'p = 1 - q = 1 - 0.4 = 0.6',
+        textEn: 'p = 1 - q = 1 - 0.4 = 0.6'
+      },
       {
         text: 'p² (AA) = 0.36, 2pq (Aa) = 0.48, q² (aa) = 0.16',
         textEn: 'p² (AA) = 0.36, 2pq (Aa) = 0.48, q² (aa) = 0.16'
       },
-      { text: 'Перевірка: 0.36 + 0.48 + 0.16 = 1 ✓', textEn: 'Check: 0.36 + 0.48 + 0.16 = 1 ✓' }
+      {
+        text: 'Перевірка: 0.36 + 0.48 + 0.16 = 1 ✓',
+        textEn: 'Check: 0.36 + 0.48 + 0.16 = 1 ✓'
+      }
     ],
     answer: 'p = 0.6, q = 0.4; AA = 36%, Aa = 48%, aa = 16%',
     answerEn: 'p = 0.6, q = 0.4; AA = 36%, Aa = 48%, aa = 16%'
@@ -97,9 +109,18 @@ export const problemsData: ProblemItem[] = [
       'How much heat is needed to warm 2 kg of water from 20°C to 80°C? Specific heat of water c = 4200 J/(kg·°C).',
     relatedFormula: 'phys_heat_energy',
     steps: [
-      { text: 'Запишемо формулу: Q = c · m · ΔT', textEn: 'Write the formula: Q = c · m · ΔT' },
-      { text: 'Знайдемо ΔT = 80 - 20 = 60°C', textEn: 'Find ΔT = 80 - 20 = 60°C' },
-      { text: 'Підставимо: Q = 4200 · 2 · 60', textEn: 'Substitute: Q = 4200 · 2 · 60' },
+      {
+        text: 'Запишемо формулу: Q = c · m · ΔT',
+        textEn: 'Write the formula: Q = c · m · ΔT'
+      },
+      {
+        text: 'Знайдемо ΔT = 80 - 20 = 60°C',
+        textEn: 'Find ΔT = 80 - 20 = 60°C'
+      },
+      {
+        text: 'Підставимо: Q = 4200 · 2 · 60',
+        textEn: 'Substitute: Q = 4200 · 2 · 60'
+      },
       { text: 'Q = 504 000 Дж = 504 кДж', textEn: 'Q = 504,000 J = 504 kJ' }
     ],
     answer: 'Q = 504 000 Дж = 504 кДж',
@@ -149,7 +170,10 @@ export const problemsData: ProblemItem[] = [
     steps: [
       { text: 'C₁V₁ = C₂V₂', textEn: 'C₁V₁ = C₂V₂' },
       { text: '2 · 0.2 = 0.5 · V₂', textEn: '2 · 0.2 = 0.5 · V₂' },
-      { text: 'V₂ = 0.4/0.5 = 0.8 л = 800 мл', textEn: 'V₂ = 0.4/0.5 = 0.8 L = 800 mL' }
+      {
+        text: 'V₂ = 0.4/0.5 = 0.8 л = 800 мл',
+        textEn: 'V₂ = 0.4/0.5 = 0.8 L = 800 mL'
+      }
     ],
     answer: 'V₂ = 800 мл',
     answerEn: 'V₂ = 800 mL'
@@ -161,15 +185,22 @@ export const problemsData: ProblemItem[] = [
     subject: 'chemistry',
     topic: 'Загальна хімія',
     difficulty: 2,
-    description: 'Визначте pH розчину, в якому концентрація іонів водню [H⁺] = 0.00001 моль/л.',
+    description:
+      'Визначте pH розчину, в якому концентрація іонів водню [H⁺] = 0.00001 моль/л.',
     descriptionEn:
       'Determine the pH of a solution where hydrogen ion concentration [H⁺] = 0.00001 mol/L.',
     relatedFormula: 'chem_ph',
     steps: [
       { text: 'pH = -log[H⁺]', textEn: 'pH = -log[H⁺]' },
-      { text: 'pH = -log(0.00001) = -log(10⁻⁵)', textEn: 'pH = -log(0.00001) = -log(10⁻⁵)' },
+      {
+        text: 'pH = -log(0.00001) = -log(10⁻⁵)',
+        textEn: 'pH = -log(0.00001) = -log(10⁻⁵)'
+      },
       { text: 'pH = -(-5) = 5', textEn: 'pH = -(-5) = 5' },
-      { text: 'pH = 5 (кисле середовище)', textEn: 'pH = 5 (acidic environment)' }
+      {
+        text: 'pH = 5 (кисле середовище)',
+        textEn: 'pH = 5 (acidic environment)'
+      }
     ],
     answer: 'pH = 5',
     answerEn: 'pH = 5'
@@ -187,7 +218,10 @@ export const problemsData: ProblemItem[] = [
       'Deer population: N = 500, r = 0.1, carrying capacity K = 2000. Determine the growth rate.',
     relatedFormula: 'bio_logistic_growth',
     steps: [
-      { text: 'Формула: dN/dt = r · N · (1 - N/K)', textEn: 'Formula: dN/dt = r · N · (1 - N/K)' },
+      {
+        text: 'Формула: dN/dt = r · N · (1 - N/K)',
+        textEn: 'Formula: dN/dt = r · N · (1 - N/K)'
+      },
       {
         text: 'Підставимо: dN/dt = 0.1 · 500 · (1 - 500/2000)',
         textEn: 'Substitute: dN/dt = 0.1 · 500 · (1 - 500/2000)'
@@ -211,14 +245,22 @@ export const problemsData: ProblemItem[] = [
     subject: 'biology',
     topic: 'Біохімія',
     difficulty: 1,
-    description: 'Людина має масу 75 кг і зріст 1.80 м. Визначте ІМТ та оцініть його.',
-    descriptionEn: 'A person weighs 75 kg and is 1.80 m tall. Calculate BMI and evaluate it.',
+    description:
+      'Людина має масу 75 кг і зріст 1.80 м. Визначте ІМТ та оцініть його.',
+    descriptionEn:
+      'A person weighs 75 kg and is 1.80 m tall. Calculate BMI and evaluate it.',
     relatedFormula: 'bio_bmi',
     steps: [
       { text: 'Формула: BMI = m/h²', textEn: 'Formula: BMI = m/h²' },
-      { text: 'BMI = 75 / (1.80)² = 75 / 3.24', textEn: 'BMI = 75 / (1.80)² = 75 / 3.24' },
+      {
+        text: 'BMI = 75 / (1.80)² = 75 / 3.24',
+        textEn: 'BMI = 75 / (1.80)² = 75 / 3.24'
+      },
       { text: 'BMI ≈ 23.1', textEn: 'BMI ≈ 23.1' },
-      { text: '23.1 — у межах норми (18.5-24.9)', textEn: '23.1 — within normal range (18.5-24.9)' }
+      {
+        text: '23.1 — у межах норми (18.5-24.9)',
+        textEn: '23.1 — within normal range (18.5-24.9)'
+      }
     ],
     answer: 'BMI ≈ 23.1 (нормальна вага)',
     answerEn: 'BMI ≈ 23.1 (normal weight)'
@@ -252,13 +294,26 @@ export const problemsData: ProblemItem[] = [
     difficulty: 2,
     description:
       'Яку довжину повинен мати маятник годинника, щоб його період дорівнював 2 с? (g = 9.81 м/с²)',
-    descriptionEn: 'What length should a clock pendulum have for a period of 2 s? (g = 9.81 m/s²)',
+    descriptionEn:
+      'What length should a clock pendulum have for a period of 2 s? (g = 9.81 m/s²)',
     relatedFormula: 'phys_pendulum',
     steps: [
-      { text: 'T = 2π√(l/g) → l = g·T²/(4π²)', textEn: 'T = 2π√(l/g) → l = g·T²/(4π²)' },
-      { text: 'l = 9.81 · 4 / (4 · 9.87)', textEn: 'l = 9.81 · 4 / (4 · 9.87)' },
-      { text: 'l = 39.24 / 39.48 ≈ 0.994 м', textEn: 'l = 39.24 / 39.48 ≈ 0.994 m' },
-      { text: 'l ≈ 1 м (секундний маятник)', textEn: 'l ≈ 1 m (seconds pendulum)' }
+      {
+        text: 'T = 2π√(l/g) → l = g·T²/(4π²)',
+        textEn: 'T = 2π√(l/g) → l = g·T²/(4π²)'
+      },
+      {
+        text: 'l = 9.81 · 4 / (4 · 9.87)',
+        textEn: 'l = 9.81 · 4 / (4 · 9.87)'
+      },
+      {
+        text: 'l = 39.24 / 39.48 ≈ 0.994 м',
+        textEn: 'l = 39.24 / 39.48 ≈ 0.994 m'
+      },
+      {
+        text: 'l ≈ 1 м (секундний маятник)',
+        textEn: 'l ≈ 1 m (seconds pendulum)'
+      }
     ],
     answer: 'l ≈ 0.994 м ≈ 1 м',
     answerEn: 'l ≈ 0.994 m ≈ 1 m'
@@ -278,8 +333,14 @@ export const problemsData: ProblemItem[] = [
     steps: [
       { text: 'm = M·I·t / (n·F)', textEn: 'm = M·I·t / (n·F)' },
       { text: 't = 30 хв = 1800 с', textEn: 't = 30 min = 1800 s' },
-      { text: 'm = 64 · 5 · 1800 / (2 · 96485)', textEn: 'm = 64 · 5 · 1800 / (2 · 96485)' },
-      { text: 'm = 576000 / 192970 ≈ 2.99 г', textEn: 'm = 576000 / 192970 ≈ 2.99 g' }
+      {
+        text: 'm = 64 · 5 · 1800 / (2 · 96485)',
+        textEn: 'm = 64 · 5 · 1800 / (2 · 96485)'
+      },
+      {
+        text: 'm = 576000 / 192970 ≈ 2.99 г',
+        textEn: 'm = 576000 / 192970 ≈ 2.99 g'
+      }
     ],
     answer: 'm ≈ 2.99 г Cu',
     answerEn: 'm ≈ 2.99 g Cu'
@@ -293,7 +354,8 @@ export const problemsData: ProblemItem[] = [
     difficulty: 1,
     description:
       'Скільки молів міститься в 90 г глюкози (C₆H₁₂O₆)? Молярна маса глюкози M = 180 г/моль.',
-    descriptionEn: 'How many moles are in 90 g of glucose (C₆H₁₂O₆)? Molar mass M = 180 g/mol.',
+    descriptionEn:
+      'How many moles are in 90 g of glucose (C₆H₁₂O₆)? Molar mass M = 180 g/mol.',
     relatedFormula: 'chem_molar_mass',
     steps: [
       { text: 'n = m / M', textEn: 'n = m / M' },
@@ -318,7 +380,10 @@ export const problemsData: ProblemItem[] = [
     steps: [
       { text: 'Π = i·C·R·T', textEn: 'Π = i·C·R·T' },
       { text: 'T = 37 + 273 = 310 К', textEn: 'T = 37 + 273 = 310 K' },
-      { text: 'Π = 2 · 0.15 · 8.314 · 310', textEn: 'Π = 2 · 0.15 · 8.314 · 310' },
+      {
+        text: 'Π = 2 · 0.15 · 8.314 · 310',
+        textEn: 'Π = 2 · 0.15 · 8.314 · 310'
+      },
       { text: 'Π ≈ 771.5 кПа ≈ 7.6 атм', textEn: 'Π ≈ 771.5 kPa ≈ 7.6 atm' }
     ],
     answer: 'Π ≈ 771.5 кПа',
@@ -339,7 +404,10 @@ export const problemsData: ProblemItem[] = [
     steps: [
       { text: 'CO = SV × HR / 1000', textEn: 'CO = SV × HR / 1000' },
       { text: 'CO = 100 × 55 / 1000', textEn: 'CO = 100 × 55 / 1000' },
-      { text: 'CO = 5500 / 1000 = 5.5 л/хв', textEn: 'CO = 5500 / 1000 = 5.5 L/min' },
+      {
+        text: 'CO = 5500 / 1000 = 5.5 л/хв',
+        textEn: 'CO = 5500 / 1000 = 5.5 L/min'
+      },
       {
         text: 'Це норма для тренованого спортсмена',
         textEn: 'This is normal for a trained athlete'
@@ -421,8 +489,14 @@ export const problemsData: ProblemItem[] = [
         text: "Ефект Доплера: f' = f · v/(v - v_s)",
         textEn: "Doppler effect: f' = f · v/(v - v_s)"
       },
-      { text: "f' = 800 · 343/(343 - 30)", textEn: "f' = 800 · 343/(343 - 30)" },
-      { text: "f' = 800 · 343/313 ≈ 876.7 Гц", textEn: "f' = 800 · 343/313 ≈ 876.7 Hz" },
+      {
+        text: "f' = 800 · 343/(343 - 30)",
+        textEn: "f' = 800 · 343/(343 - 30)"
+      },
+      {
+        text: "f' = 800 · 343/313 ≈ 876.7 Гц",
+        textEn: "f' = 800 · 343/313 ≈ 876.7 Hz"
+      },
       {
         text: 'Частота зростає, бо джерело наближається',
         textEn: 'Frequency increases because the source is approaching'
@@ -438,7 +512,8 @@ export const problemsData: ProblemItem[] = [
     subject: 'chemistry',
     topic: 'Колігативні властивості',
     difficulty: 2,
-    description: 'Знайдіть осмотичний тиск 0.1 М розчину глюкози (неелектроліт) при 37°C.',
+    description:
+      'Знайдіть осмотичний тиск 0.1 М розчину глюкози (неелектроліт) при 37°C.',
     descriptionEn:
       'Find the osmotic pressure of a 0.1 M glucose solution (nonelectrolyte) at 37°C.',
     relatedFormula: 'chem_osmotic_pressure',
@@ -475,7 +550,10 @@ export const problemsData: ProblemItem[] = [
         textEn: 'Henderson-Hasselbalch: pH = pKa + log([A⁻]/[HA])'
       },
       { text: 'pH = 4.75 + log(0.2/0.1)', textEn: 'pH = 4.75 + log(0.2/0.1)' },
-      { text: 'pH = 4.75 + log(2) = 4.75 + 0.301', textEn: 'pH = 4.75 + log(2) = 4.75 + 0.301' },
+      {
+        text: 'pH = 4.75 + log(2) = 4.75 + 0.301',
+        textEn: 'pH = 4.75 + log(2) = 4.75 + 0.301'
+      },
       { text: 'pH ≈ 5.05', textEn: 'pH ≈ 5.05' }
     ],
     answer: 'pH ≈ 5.05',
@@ -494,7 +572,10 @@ export const problemsData: ProblemItem[] = [
       'To titrate 25 mL of HCl solution, 30 mL of 0.1 M NaOH was needed. Find the concentration of HCl.',
     relatedFormula: 'chem_titration',
     steps: [
-      { text: 'У точці еквівалентності: C₁V₁ = C₂V₂', textEn: 'At equivalence: C₁V₁ = C₂V₂' },
+      {
+        text: 'У точці еквівалентності: C₁V₁ = C₂V₂',
+        textEn: 'At equivalence: C₁V₁ = C₂V₂'
+      },
       { text: 'C₁ · 25 = 0.1 · 30', textEn: 'C₁ · 25 = 0.1 · 30' },
       { text: 'C₁ = 3/25 = 0.12 М', textEn: 'C₁ = 3/25 = 0.12 M' }
     ],
@@ -508,7 +589,8 @@ export const problemsData: ProblemItem[] = [
     subject: 'biology',
     topic: 'Молекулярна біологія',
     difficulty: 1,
-    description: 'Ген кодує білок із 300 амінокислот. Знайдіть довжину цього гена в нанометрах.',
+    description:
+      'Ген кодує білок із 300 амінокислот. Знайдіть довжину цього гена в нанометрах.',
     descriptionEn:
       'A gene encodes a protein of 300 amino acids. Find the gene length in nanometers.',
     relatedFormula: 'bio_dna_length',
@@ -569,12 +651,16 @@ export const problemsData: ProblemItem[] = [
       'Human insulin consists of 51 amino acids. Estimate its molecular weight (average amino acid mass: 128 Da).',
     relatedFormula: 'bio_protein_mw',
     steps: [
-      { text: 'Формула: M = n · m_aa - (n-1) · 18', textEn: 'Formula: M = n · m_aa - (n-1) · 18' },
+      {
+        text: 'Формула: M = n · m_aa - (n-1) · 18',
+        textEn: 'Formula: M = n · m_aa - (n-1) · 18'
+      },
       { text: 'M = 51 · 128 - 50 · 18', textEn: 'M = 51 · 128 - 50 · 18' },
       { text: 'M = 6528 - 900 = 5628 Да', textEn: 'M = 6528 - 900 = 5628 Da' },
       {
         text: 'Реальна маса інсуліну — ~5808 Да (різниця через різні бічні ланцюги)',
-        textEn: 'Actual insulin MW is ~5808 Da (difference due to varied side chains)'
+        textEn:
+          'Actual insulin MW is ~5808 Da (difference due to varied side chains)'
       }
     ],
     answer: 'M ≈ 5628 Да',
@@ -601,7 +687,8 @@ export const problemsData: ProblemItem[] = [
       { text: 's = 1 - 0.87 = 0.13', textEn: 's = 1 - 0.87 = 0.13' },
       {
         text: 'Це пояснює високу частоту алеля S у зонах малярії',
-        textEn: 'This explains the high frequency of the S allele in malaria zones'
+        textEn:
+          'This explains the high frequency of the S allele in malaria zones'
       }
     ],
     answer: 's ≈ 0.13 (13% зниження пристосованості)',

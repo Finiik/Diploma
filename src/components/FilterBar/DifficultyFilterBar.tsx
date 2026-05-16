@@ -35,7 +35,8 @@ export default function DifficultyFilterBar({
           className={`filter-btn diff-filter-btn ${value === o.value ? 'active' : ''}`}
           onClick={() => onChange(o.value)}
         >
-          {o.icon && <span className={iconClassName}>{o.icon}</span>} {t(o.labelKey)}
+          {o.icon && <span className={iconClassName}>{o.icon}</span>}{' '}
+          {t(o.labelKey)}
         </button>
       ))}
     </div>

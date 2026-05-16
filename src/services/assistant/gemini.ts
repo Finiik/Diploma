@@ -9,7 +9,8 @@ import { buildPlatformContext, findRelevantContent } from './context';
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 // Model is env-overridable (VITE_GEMINI_MODEL) so swapping models is config,
 // not a code change. Default: Gemini 3.1 Flash-Lite — low-latency, low-cost.
-const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.1-flash-lite';
+const GEMINI_MODEL =
+  import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.1-flash-lite';
 // Gemini 3 thinking allowance: "minimal" | "low" | "medium" | "high".
 // "low" keeps the tutor fast/cheap while leaving enough reasoning for the
 // SYNTHESIZE-the-materials task. Env-overridable like the model.
@@ -63,7 +64,10 @@ export function geminiConfigured(): boolean {
 }
 
 // Call Gemini API
-export async function callGemini(userMessage: string, isUk: boolean): Promise<string> {
+export async function callGemini(
+  userMessage: string,
+  isUk: boolean
+): Promise<string> {
   const { formulaList, theoryList, problemList, topicOutline, totalFormulas } =
     buildPlatformContext(isUk);
   const relevantContent = findRelevantContent(userMessage, isUk);

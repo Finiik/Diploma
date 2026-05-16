@@ -19,7 +19,10 @@ export function useChatScroll(isOpen: boolean, contentDeps: DependencyList) {
     if (!isOpen) return;
     const id = setTimeout(() => {
       if (lastUserMsgRef.current) {
-        lastUserMsgRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
+        lastUserMsgRef.current.scrollIntoView({
+          behavior: 'auto',
+          block: 'start'
+        });
       } else {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
       }

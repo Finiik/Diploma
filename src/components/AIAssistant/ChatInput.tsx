@@ -9,7 +9,12 @@ interface ChatInputProps {
 }
 
 /** Text field + send button; Enter (without Shift) sends. */
-export default function ChatInput({ value, onChange, onSend, inputRef }: ChatInputProps) {
+export default function ChatInput({
+  value,
+  onChange,
+  onSend,
+  inputRef
+}: ChatInputProps) {
   const { t } = useTranslation();
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
