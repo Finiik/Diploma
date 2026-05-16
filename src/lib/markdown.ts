@@ -1,9 +1,20 @@
 import { renderLatex } from './katex';
 
 /**
+ * Sentinel wrapping a stashed-math index. It's a NUL char (built at runtime
+ * so the source stays plain ASCII) — NUL can't occur in chat text or KaTeX
+ * output, so the reinjection regex targets placeholders exactly. The old
+ * code matched bare `\d+`, which corrupted every literal number in the
+ * surrounding prose (a message with no math turned "78 formulas" into
+ * "undefined formulas").
+ */
+const SENTINEL = String.fromCharCode(0);
+const PLACEHOLDER = new RegExp(`${SENTINEL}(\\d+)${SENTINEL}`, 'g');
+
+/**
  * Render an assistant message to HTML: real KaTeX for `$$...$$` (block) and
  * `$...$` (inline), plus `**bold**` and newline handling for the surrounding
- * text. Math is stashed to numeric placeholders first so the markdown pass
+ * text. Math is stashed to sentinel placeholders first so the markdown pass
  * can't mangle the generated KaTeX markup.
  *
  * This is the assistant's only HTML-injection boundary — keep it pure and
@@ -15,7 +26,7 @@ export function formatMessage(text: string): string {
   const mathBlocks: string[] = [];
   const stash = (html: string): string => {
     mathBlocks.push(html);
-    return `${mathBlocks.length - 1}`;
+    return `${SENTINEL}${mathBlocks.length - 1}${SENTINEL}`;
   };
 
   let out = text
@@ -31,7 +42,7 @@ export function formatMessage(text: string): string {
     .replace(/\n/g, '<br/>');
 
   return out.replace(
-    /(\d+)/g,
-    (_m: string, i: string) => mathBlocks[Number(i)]
+    PLACEHOLDER,
+    (_m: string, i: string) => mathBlocks[Number(i)] ?? ''
   );
 }
