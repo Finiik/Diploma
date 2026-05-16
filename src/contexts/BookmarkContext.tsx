@@ -1,6 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { getBookmarks, addBookmark, removeBookmark, isBookmarked as checkBookmarked } from '@/services/bookmarks';
+import {
+  getBookmarks,
+  addBookmark,
+  removeBookmark,
+  isBookmarked as checkBookmarked
+} from '@/services/bookmarks';
 import { useAuth } from './AuthContext';
 
 type BookmarkContextValue = {
@@ -26,19 +31,25 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
     loadBookmarks();
   }, [loadBookmarks]);
 
-  const toggleBookmark = useCallback(async (formulaId: string) => {
-    if (bookmarks.includes(formulaId)) {
-      const updated = await removeBookmark(userId, formulaId);
-      setBookmarks(updated);
-    } else {
-      const updated = await addBookmark(userId, formulaId);
-      setBookmarks(updated);
-    }
-  }, [bookmarks, userId]);
+  const toggleBookmark = useCallback(
+    async (formulaId: string) => {
+      if (bookmarks.includes(formulaId)) {
+        const updated = await removeBookmark(userId, formulaId);
+        setBookmarks(updated);
+      } else {
+        const updated = await addBookmark(userId, formulaId);
+        setBookmarks(updated);
+      }
+    },
+    [bookmarks, userId]
+  );
 
-  const isBookmarked = useCallback((formulaId: string) => {
-    return bookmarks.includes(formulaId);
-  }, [bookmarks]);
+  const isBookmarked = useCallback(
+    (formulaId: string) => {
+      return bookmarks.includes(formulaId);
+    },
+    [bookmarks]
+  );
 
   return (
     <BookmarkContext.Provider value={{ bookmarks, toggleBookmark, isBookmarked, loadBookmarks }}>

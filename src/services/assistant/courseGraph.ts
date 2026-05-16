@@ -11,13 +11,15 @@
 import { theoryData } from '@/data/theory';
 import { problemsData } from '@/data/problems';
 import {
-  physicsData, chemistryData, biologyData,
-  getAllFormulas, getAllChemFormulas, getAllBioFormulas
+  physicsData,
+  chemistryData,
+  biologyData,
+  getAllFormulas,
+  getAllChemFormulas,
+  getAllBioFormulas
 } from './subjects';
 import { normalizeConcept, conceptCore, similarity } from './text';
-import type {
-  Concept, CourseGraph, GraphItem, Subject, SubjectData
-} from '@/types/domain';
+import type { Concept, CourseGraph, GraphItem, Subject, SubjectData } from '@/types/domain';
 
 // Concept under construction: itemIds is a Set while we accumulate, then
 // frozen to the array `Concept` declares once the graph is finalized.
@@ -37,27 +39,45 @@ export function buildCourseGraph(): CourseGraph {
     {
       key: 'physics',
       data: physicsData,
-      list: getAllFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'physics' as const }))
+      list: getAllFormulas().map((f) => ({
+        ...f,
+        type: 'formula' as const,
+        subject: 'physics' as const
+      }))
     },
     {
       key: 'chemistry',
       data: chemistryData,
-      list: getAllChemFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'chemistry' as const }))
+      list: getAllChemFormulas().map((f) => ({
+        ...f,
+        type: 'formula' as const,
+        subject: 'chemistry' as const
+      }))
     },
     {
       key: 'biology',
       data: biologyData,
-      list: getAllBioFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'biology' as const }))
+      list: getAllBioFormulas().map((f) => ({
+        ...f,
+        type: 'formula' as const,
+        subject: 'biology' as const
+      }))
     }
   ];
 
   // 1. Flat index of every platform item by id.
   const byId: Record<string, GraphItem> = {};
   subjects.forEach(({ list }) =>
-    list.forEach(f => { byId[f.id] = f; })
+    list.forEach((f) => {
+      byId[f.id] = f;
+    })
   );
-  theoryData.forEach(t => { byId[t.id] = { ...t, type: 'theory' as const }; });
-  problemsData.forEach(p => { byId[p.id] = { ...p, type: 'problem' as const }; });
+  theoryData.forEach((t) => {
+    byId[t.id] = { ...t, type: 'theory' as const };
+  });
+  problemsData.forEach((p) => {
+    byId[p.id] = { ...p, type: 'problem' as const };
+  });
 
   // 2. Undirected relationship edges from the data's own cross-links.
   const edges: Record<string, Set<string>> = {};
@@ -66,12 +86,12 @@ export function buildCourseGraph(): CourseGraph {
     (edges[a] = edges[a] || new Set()).add(b);
     (edges[b] = edges[b] || new Set()).add(a);
   };
-  Object.values(byId).forEach(item => {
+  Object.values(byId).forEach((item) => {
     const derived = item.type === 'formula' ? item.derivedFormulas : undefined;
     const related = item.type !== 'problem' ? item.relatedFormulas : undefined;
     const relatedOne = item.type === 'problem' ? item.relatedFormula : undefined;
-    (derived || []).forEach(id => link(item.id, id));
-    (related || []).forEach(id => link(item.id, id));
+    (derived || []).forEach((id) => link(item.id, id));
+    (related || []).forEach((id) => link(item.id, id));
     if (relatedOne) link(item.id, relatedOne);
   });
 
@@ -79,27 +99,36 @@ export function buildCourseGraph(): CourseGraph {
   //    that owns the items living under it. Theory/problems attach to the
   //    concept whose label matches their declared topic.
   const concepts: ConceptBuilder[] = [];
-  const addConcept = (label: string, labelEn: string | undefined, subject: Subject): ConceptBuilder => {
+  const addConcept = (
+    label: string,
+    labelEn: string | undefined,
+    subject: Subject
+  ): ConceptBuilder => {
     const c: ConceptBuilder = { label, labelEn: labelEn || label, subject, itemIds: new Set() };
     concepts.push(c);
     return c;
   };
   subjects.forEach(({ key, data }) => {
-    (data.topics || []).forEach(topic => {
+    (data.topics || []).forEach((topic) => {
       const tc = addConcept(topic.name, topic.nameEn, key);
-      (topic.subtopics || []).forEach(sub => {
+      (topic.subtopics || []).forEach((sub) => {
         const sc = addConcept(sub.name, sub.nameEn, key);
-        (sub.formulas || []).forEach(f => { tc.itemIds.add(f.id); sc.itemIds.add(f.id); });
+        (sub.formulas || []).forEach((f) => {
+          tc.itemIds.add(f.id);
+          sc.itemIds.add(f.id);
+        });
       });
     });
   });
   const conceptByLabel: Record<string, ConceptBuilder> = {};
-  concepts.forEach(c => { conceptByLabel[normalizeConcept(c.label)] = c; });
-  [...theoryData, ...problemsData].forEach(item => {
+  concepts.forEach((c) => {
+    conceptByLabel[normalizeConcept(c.label)] = c;
+  });
+  [...theoryData, ...problemsData].forEach((item) => {
     const c = conceptByLabel[normalizeConcept(item.topic || '')];
     if (c) c.itemIds.add(item.id);
   });
-  const finalConcepts: Concept[] = concepts.map(c => ({
+  const finalConcepts: Concept[] = concepts.map((c) => ({
     label: c.label,
     labelEn: c.labelEn,
     subject: c.subject,
@@ -112,10 +141,10 @@ export function buildCourseGraph(): CourseGraph {
     subject: key,
     label: data.name,
     labelEn: data.nameEn,
-    topics: (data.topics || []).map(t => ({
+    topics: (data.topics || []).map((t) => ({
       name: t.name,
       nameEn: t.nameEn,
-      subtopics: (t.subtopics || []).map(s => ({ name: s.name, nameEn: s.nameEn }))
+      subtopics: (t.subtopics || []).map((s) => ({ name: s.name, nameEn: s.nameEn }))
     }))
   }));
 
@@ -161,13 +190,13 @@ export function resolveRelated(concept: Concept | null): GraphItem[] {
   if (!concept?.itemIds?.length) return [];
   const { byId, edges } = buildCourseGraph();
   const ids = new Set(concept.itemIds);
-  concept.itemIds.forEach(id => {
+  concept.itemIds.forEach((id) => {
     const ns = edges[id];
-    if (ns) ns.forEach(n => ids.add(n));
+    if (ns) ns.forEach((n) => ids.add(n));
   });
   const order: Record<GraphItem['type'], number> = { theory: 0, formula: 1, problem: 2 };
   return [...ids]
-    .map(id => byId[id])
+    .map((id) => byId[id])
     .filter((item): item is GraphItem => Boolean(item))
     .sort((a, b) => (order[a.type] ?? 3) - (order[b.type] ?? 3))
     .slice(0, 6);

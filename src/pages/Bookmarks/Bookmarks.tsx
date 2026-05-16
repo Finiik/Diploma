@@ -23,7 +23,7 @@ export default function Bookmarks() {
           </div>
         ) : (
           <div className="formulas-grid stagger-children">
-            {bookmarkedFormulas.map(formula => (
+            {bookmarkedFormulas.map((formula) => (
               <FormulaCard key={formula.id} formula={formula} />
             ))}
           </div>

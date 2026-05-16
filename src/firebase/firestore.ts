@@ -36,8 +36,11 @@ export async function logInteraction(
   if (snap.exists()) {
     const data = snap.data();
     const interactions: Record<string, InteractionCounters> = data.interactions || {};
-    const current: InteractionCounters =
-      interactions[formulaId] || { views: 0, calculations: 0, bookmarks: 0 };
+    const current: InteractionCounters = interactions[formulaId] || {
+      views: 0,
+      calculations: 0,
+      bookmarks: 0
+    };
 
     if (type === 'view') current.views += 1;
     if (type === 'calculation') current.calculations += 1;
@@ -52,7 +55,12 @@ export async function logInteraction(
       calculations: type === 'calculation' ? 1 : 0,
       bookmarks: type === 'bookmark' ? 1 : 0
     };
-    await setDoc(ref, { interactions, userId, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    await setDoc(ref, {
+      interactions,
+      userId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
   }
 }
 
@@ -89,7 +97,12 @@ export async function addBookmarkFirebase(
   if (snap.exists()) {
     await updateDoc(ref, { formulaIds: arrayUnion(formulaId), updatedAt: serverTimestamp() });
   } else {
-    await setDoc(ref, { formulaIds: [formulaId], userId, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    await setDoc(ref, {
+      formulaIds: [formulaId],
+      userId,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
   }
 }
 
@@ -102,9 +115,7 @@ export async function removeBookmarkFirebase(
   await updateDoc(ref, { formulaIds: arrayRemove(formulaId), updatedAt: serverTimestamp() });
 }
 
-export async function getBookmarksFirebase(
-  userId: string | undefined
-): Promise<string[]> {
+export async function getBookmarksFirebase(userId: string | undefined): Promise<string[]> {
   if (!userId) return [];
   const ref = doc(db, 'bookmarks', userId);
   const snap = await getDoc(ref);

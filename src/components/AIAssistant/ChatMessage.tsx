@@ -41,11 +41,7 @@ const ChatMessage = forwardRef<HTMLDivElement, ChatMessageProps>(
         {message.role === 'bot' && message.suggestions.length > 0 && (
           <div className="ai-msg-suggestions">
             {message.suggestions.map((sug, j) => (
-              <button
-                key={j}
-                className="ai-suggestion-chip"
-                onClick={() => onSuggestion(sug)}
-              >
+              <button key={j} className="ai-suggestion-chip" onClick={() => onSuggestion(sug)}>
                 {sug}
               </button>
             ))}

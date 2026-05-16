@@ -18,14 +18,14 @@ export function useChatSession() {
 
   const run = useCallback(
     async (text: string, errorKey: string) => {
-      setMessages(prev => [...prev, { role: 'user', text, timestamp: Date.now() }]);
+      setMessages((prev) => [...prev, { role: 'user', text, timestamp: Date.now() }]);
       setInput('');
       setIsTyping(true);
       try {
         const response = await processMessage(text, isUk);
-        setMessages(prev => [...prev, { role: 'bot', ...response, timestamp: Date.now() }]);
+        setMessages((prev) => [...prev, { role: 'bot', ...response, timestamp: Date.now() }]);
       } catch {
-        setMessages(prev => [
+        setMessages((prev) => [
           ...prev,
           { role: 'bot', text: t(errorKey), links: [], suggestions: [], timestamp: Date.now() }
         ]);
@@ -41,10 +41,7 @@ export function useChatSession() {
     if (query) run(query, 'assistant.error');
   }, [input, run]);
 
-  const sendSuggestion = useCallback(
-    (text: string) => run(text, 'assistant.error_short'),
-    [run]
-  );
+  const sendSuggestion = useCallback((text: string) => run(text, 'assistant.error_short'), [run]);
 
   /** Bot greeting shown the first time the panel is opened. */
   const seedWelcome = useCallback(async () => {

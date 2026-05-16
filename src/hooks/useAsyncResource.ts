@@ -18,10 +18,10 @@ export function useAsyncResource<T>(
     let active = true;
     setLoading(true);
     fetcher()
-      .then(result => {
+      .then((result) => {
         if (active) setData(result);
       })
-      .catch(e => {
+      .catch((e) => {
         console.warn('useAsyncResource: fetch failed', e);
       })
       .finally(() => {

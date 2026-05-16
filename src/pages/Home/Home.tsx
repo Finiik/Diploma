@@ -54,9 +54,7 @@ export default function Home() {
                 <div className="subject-icon">{subj.icon}</div>
                 <h2 className="subject-name">{t(`subjects.${subj.id}`)}</h2>
                 <p className="subject-desc">{t(`subjects.${subj.id}_desc`)}</p>
-                <span className="subject-cta">
-                  {t('home.explore')} →
-                </span>
+                <span className="subject-cta">{t('home.explore')} →</span>
               </Link>
             ))}
           </div>

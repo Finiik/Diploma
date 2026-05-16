@@ -57,10 +57,7 @@ export default function Subject() {
                   <h3 className="subtopic-title">{tr(subtopic, 'name')}</h3>
                   <div className="formulas-grid">
                     {subtopic.formulas.map((formula) => (
-                      <FormulaCard
-                        key={formula.id}
-                        formula={{ ...formula, subject: subject.id }}
-                      />
+                      <FormulaCard key={formula.id} formula={{ ...formula, subject: subject.id }} />
                     ))}
                   </div>
                 </div>

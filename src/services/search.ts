@@ -11,17 +11,17 @@ import type { GraphItem, SearchHit } from '@/types/domain';
 let fuseInstance: Fuse<GraphItem> | null = null;
 
 function buildSearchIndex(): Fuse<GraphItem> {
-  const formulas: GraphItem[] = getAllFormulas().map(f => ({
+  const formulas: GraphItem[] = getAllFormulas().map((f) => ({
     ...f,
     type: 'formula' as const
   }));
 
-  const theories: GraphItem[] = theoryData.map(t => ({
+  const theories: GraphItem[] = theoryData.map((t) => ({
     ...t,
     type: 'theory' as const
   }));
 
-  const problems: GraphItem[] = problemsData.map(p => ({
+  const problems: GraphItem[] = problemsData.map((p) => ({
     ...p,
     type: 'problem' as const
   }));
@@ -50,7 +50,7 @@ function buildSearchIndex(): Fuse<GraphItem> {
 export function search(queryStr: string): SearchHit[] {
   if (!queryStr || queryStr.trim().length < 2) return [];
   const fuse = fuseInstance ?? buildSearchIndex();
-  return fuse.search(queryStr).map(result => ({
+  return fuse.search(queryStr).map((result) => ({
     ...result.item,
     score: result.score,
     matches: result.matches

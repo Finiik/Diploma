@@ -29,14 +29,13 @@ export default function DifficultyFilterBar({
   const { t } = useTranslation();
   return (
     <div className="filter-bar difficulty-filter">
-      {options.map(o => (
+      {options.map((o) => (
         <button
           key={o.value}
           className={`filter-btn diff-filter-btn ${value === o.value ? 'active' : ''}`}
           onClick={() => onChange(o.value)}
         >
-          {o.icon && <span className={iconClassName}>{o.icon}</span>}{' '}
-          {t(o.labelKey)}
+          {o.icon && <span className={iconClassName}>{o.icon}</span>} {t(o.labelKey)}
         </button>
       ))}
     </div>

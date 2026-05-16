@@ -5,7 +5,10 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { processMessage } from '@/services/assistantEngine';
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new Error('no network in tests'))));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() => Promise.reject(new Error('no network in tests')))
+  );
 });
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -48,7 +51,7 @@ describe('instant responders', () => {
   it('pure-subject query returns the subject overview with a subject link', async () => {
     const r = await processMessage('Формули фізики');
     expect(r.text).toContain('30');
-    expect(r.links.some(l => l.type === 'subject' && l.id === 'physics')).toBe(true);
+    expect(r.links.some((l) => l.type === 'subject' && l.id === 'physics')).toBe(true);
   });
 });
 
@@ -57,7 +60,7 @@ describe('terminal AI responder → offline fallback', () => {
     const r = await processMessage('Другий закон Ньютона');
     expect(r.text).toContain('Ньютона');
     expect(r.text).toContain('F = m');
-    expect(r.links.some(l => l.id === 'phys_newton2')).toBe(true);
+    expect(r.links.some((l) => l.id === 'phys_newton2')).toBe(true);
   });
 
   it('a fully unmatched query yields the not-found message + suggestions, no links', async () => {

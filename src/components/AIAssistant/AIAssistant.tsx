@@ -43,11 +43,7 @@ export default function AIAssistant() {
 
   return (
     <>
-      <ChatFab
-        isOpen={isOpen}
-        onToggle={() => setIsOpen(!isOpen)}
-        label={t('a11y.assistant')}
-      />
+      <ChatFab isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} label={t('a11y.assistant')} />
 
       {isOpen && (
         <div className="ai-panel animate-scale-in" id="ai-assistant-panel">
@@ -60,12 +56,7 @@ export default function AIAssistant() {
             onLinkClick={handleLinkClick}
             onSuggestion={sendSuggestion}
           />
-          <ChatInput
-            value={input}
-            onChange={setInput}
-            onSend={send}
-            inputRef={inputRef}
-          />
+          <ChatInput value={input} onChange={setInput} onSend={send} inputRef={inputRef} />
         </div>
       )}
     </>

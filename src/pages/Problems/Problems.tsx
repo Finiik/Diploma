@@ -5,7 +5,9 @@ import { useLocalized } from '@/hooks/useLocalized';
 import { useExpandedSet } from '@/hooks/useExpandedSet';
 import { useContentFilters } from '@/hooks/useContentFilters';
 import SubjectFilterBar from '@/components/FilterBar/SubjectFilterBar';
-import DifficultyFilterBar, { type DifficultyOption } from '@/components/FilterBar/DifficultyFilterBar';
+import DifficultyFilterBar, {
+  type DifficultyOption
+} from '@/components/FilterBar/DifficultyFilterBar';
 import './Problems.css';
 
 const DIFF_STARS: Record<string, string> = { all: '', 1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐' };
@@ -43,23 +45,17 @@ export default function Problems() {
         </div>
 
         <div className="problems-list stagger-children">
-          {filtered.length === 0 && (
-            <p className="no-results">{t('common.no_results')}</p>
-          )}
-          {filtered.map(prob => (
+          {filtered.length === 0 && <p className="no-results">{t('common.no_results')}</p>}
+          {filtered.map((prob) => (
             <article key={prob.id} className="problem-card" id={`problem-${prob.id}`}>
               <div className="problem-header">
-                <h2 className="problem-title">
-                  {tr(prob, 'name')}
-                </h2>
+                <h2 className="problem-title">{tr(prob, 'name')}</h2>
                 <span className="problem-difficulty" title={t(`problems.diff_${prob.difficulty}`)}>
                   {DIFF_STARS[prob.difficulty]}
                 </span>
               </div>
 
-              <p className="problem-desc">
-                {tr(prob, 'description')}
-              </p>
+              <p className="problem-desc">{tr(prob, 'description')}</p>
 
               <button
                 className="solution-toggle"
@@ -74,13 +70,14 @@ export default function Problems() {
                 <div className="solution animate-slide-up">
                   {prob.steps.map((step, i) => (
                     <div key={i} className="solution-step">
-                      <span className="step-number">{t('problems.step')} {i + 1}</span>
+                      <span className="step-number">
+                        {t('problems.step')} {i + 1}
+                      </span>
                       <p className="step-text">{tr(step, 'text')}</p>
                     </div>
                   ))}
                   <div className="solution-answer">
-                    <strong>{t('formula.result')}:</strong>{' '}
-                    {tr(prob, 'answer')}
+                    <strong>{t('formula.result')}:</strong> {tr(prob, 'answer')}
                   </div>
                   {prob.relatedFormula && (
                     <Link to={`/formula/${prob.relatedFormula}`} className="problem-formula-link">

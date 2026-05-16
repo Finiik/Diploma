@@ -22,9 +22,7 @@ export function formatMessage(text: string): string {
     .replace(/\$\$([\s\S]+?)\$\$/g, (_m: string, tex: string) => stash(renderLatex(tex, true)))
     .replace(/\$([^$\n]+?)\$/g, (_m: string, tex: string) => stash(renderLatex(tex, false)));
 
-  out = out
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br/>');
+  out = out.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
 
   return out.replace(/(\d+)/g, (_m: string, i: string) => mathBlocks[Number(i)]);
 }

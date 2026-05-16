@@ -4,7 +4,9 @@ import { theoryData } from '@/data/theory';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useContentFilters } from '@/hooks/useContentFilters';
 import SubjectFilterBar from '@/components/FilterBar/SubjectFilterBar';
-import DifficultyFilterBar, { type DifficultyOption } from '@/components/FilterBar/DifficultyFilterBar';
+import DifficultyFilterBar, {
+  type DifficultyOption
+} from '@/components/FilterBar/DifficultyFilterBar';
 import './Theory.css';
 
 interface DifficultyBadge {
@@ -33,8 +35,7 @@ export default function Theory() {
     useContentFilters(theoryData);
 
   const getSubjectIcon = (s: string) => SUBJECT_ICON[s] || '📚';
-  const getDifficultyBadge = (level: number): DifficultyBadge =>
-    DIFF_BADGE[level] || DIFF_BADGE[1];
+  const getDifficultyBadge = (level: number): DifficultyBadge => DIFF_BADGE[level] || DIFF_BADGE[1];
 
   return (
     <div className="theory-page">
@@ -52,45 +53,40 @@ export default function Theory() {
         </div>
 
         <div className="theory-list stagger-children">
-          {filtered.length === 0 && (
-            <p className="no-results">{t('common.no_results')}</p>
-          )}
-          {filtered.map(th => {
+          {filtered.length === 0 && <p className="no-results">{t('common.no_results')}</p>}
+          {filtered.map((th) => {
             const badge = getDifficultyBadge(th.difficulty);
             return (
               <article key={th.id} className={`theory-card subject-${th.subject}`}>
                 <div className="theory-card-header">
                   <span className="theory-icon">{getSubjectIcon(th.subject)}</span>
                   <div>
-                    <h2 className="theory-card-title">
-                      {tr(th, 'name')}
-                    </h2>
-                    <p className="theory-card-topic">
-                      {th.topic}
-                    </p>
+                    <h2 className="theory-card-title">{tr(th, 'name')}</h2>
+                    <p className="theory-card-topic">{th.topic}</p>
                   </div>
                   <span className={`difficulty-badge ${badge.cls}`}>
                     {badge.icon} {t(badge.key)}
                   </span>
                 </div>
-                <p className="theory-card-desc">
-                  {tr(th, 'description')}
-                </p>
+                <p className="theory-card-desc">{tr(th, 'description')}</p>
                 <div className="theory-content">
-                  {tr(th, 'content').split('\n\n').map((para, i) => (
-                    <p key={i} dangerouslySetInnerHTML={{
-                      __html: para
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\n/g, '<br/>')
-                    }} />
-                  ))}
+                  {tr(th, 'content')
+                    .split('\n\n')
+                    .map((para, i) => (
+                      <p
+                        key={i}
+                        dangerouslySetInnerHTML={{
+                          __html: para
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\n/g, '<br/>')
+                        }}
+                      />
+                    ))}
                 </div>
                 {th.relatedFormulas && th.relatedFormulas.length > 0 && (
                   <div className="theory-related">
-                    <span className="theory-related-label">
-                      {t('theory.related_formulas')}
-                    </span>
-                    {th.relatedFormulas.map(fId => (
+                    <span className="theory-related-label">{t('theory.related_formulas')}</span>
+                    {th.relatedFormulas.map((fId) => (
                       <Link key={fId} to={`/formula/${fId}`} className="theory-related-link">
                         {fId.replace(/^(phys_|chem_|bio_)/, '')}
                       </Link>

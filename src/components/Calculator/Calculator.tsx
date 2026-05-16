@@ -17,12 +17,12 @@ interface CalculatorProps {
 export default function Calculator({ formula }: CalculatorProps) {
   const { t } = useTranslation();
   const tr = useLocalized();
-  const inputVars = formula.variables.filter(v => v.type === 'input');
-  const resultVar = formula.variables.find(v => v.type === 'result');
+  const inputVars = formula.variables.filter((v) => v.type === 'input');
+  const resultVar = formula.variables.find((v) => v.type === 'result');
 
   const [values, setValues] = useState<CalcValues>(() => {
     const init: CalcValues = {};
-    inputVars.forEach(v => {
+    inputVars.forEach((v) => {
       init[v.symbol] = v.defaultValue !== undefined ? v.defaultValue : '';
     });
     return init;
@@ -31,7 +31,7 @@ export default function Calculator({ formula }: CalculatorProps) {
   const [error, setError] = useState('');
 
   const handleChange = (symbol: string, value: string) => {
-    setValues(prev => ({ ...prev, [symbol]: value }));
+    setValues((prev) => ({ ...prev, [symbol]: value }));
     setError('');
   };
 
@@ -68,7 +68,7 @@ export default function Calculator({ formula }: CalculatorProps) {
       <Latex tex={formula.latex} display className="calculator-formula" />
 
       <div className="calculator-inputs">
-        {inputVars.map(v => (
+        {inputVars.map((v) => (
           <div key={v.symbol} className="calc-field">
             <label className="calc-label">
               <span className="calc-symbol">{v.symbol}</span>

@@ -27,7 +27,7 @@ export default function ChatInput({ value, onChange, onSend, inputRef }: ChatInp
         className="ai-input"
         placeholder={t('assistant.placeholder')}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         id="ai-input"
       />

@@ -72,7 +72,6 @@ export default function FormulaDetail() {
     );
   }
 
-
   const derivedFormulas = findFormulasByIds(formula.derivedFormulas || []);
 
   const handleCalculate = () => {
@@ -82,12 +81,8 @@ export default function FormulaDetail() {
   };
 
   // Build breadcrumb
-  const subjectData = formula.subject
-    ? subjectDataMap[formula.subject]
-    : undefined;
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: t('nav.home'), to: '/', icon: '🏠' }
-  ];
+  const subjectData = formula.subject ? subjectDataMap[formula.subject] : undefined;
+  const breadcrumbs: BreadcrumbItem[] = [{ label: t('nav.home'), to: '/', icon: '🏠' }];
   if (subjectData) {
     breadcrumbs.push({
       label: subjectData.name,
@@ -110,9 +105,7 @@ export default function FormulaDetail() {
 
         <div className="formula-detail animate-fade-in">
           <div className="formula-detail-header">
-            <h1 className="formula-detail-title">
-              {tr(formula, 'name')}
-            </h1>
+            <h1 className="formula-detail-title">{tr(formula, 'name')}</h1>
             <button
               className={`bookmark-btn-lg ${bookmarked ? 'bookmarked' : ''}`}
               onClick={() => toggleBookmark(formula.id)}
@@ -133,7 +126,7 @@ export default function FormulaDetail() {
           <div className="formula-detail-vars">
             <h2>{t('formula.variables')}</h2>
             <div className="vars-table">
-              {formula.variables.map(v => (
+              {formula.variables.map((v) => (
                 <div key={v.symbol} className="var-row">
                   <span className="var-symbol">{v.symbol}</span>
                   <span className="var-name">{tr(v, 'name')}</span>
@@ -148,16 +141,14 @@ export default function FormulaDetail() {
             <div className="derived-section">
               <h2>{t('formula.derived')}</h2>
               <div className="derived-grid">
-                {derivedFormulas.map(df => (
+                {derivedFormulas.map((df) => (
                   <Link
                     key={df.id}
                     to={`/formula/${df.id}`}
                     className="derived-card"
                     id={`derived-${df.id}`}
                   >
-                    <span className="derived-name">
-                      {tr(df, 'name')}
-                    </span>
+                    <span className="derived-name">{tr(df, 'name')}</span>
                     <Latex tex={df.latex} className="derived-latex" />
                   </Link>
                 ))}

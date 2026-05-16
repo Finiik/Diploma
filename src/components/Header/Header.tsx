@@ -41,32 +41,35 @@ export default function Header() {
 
         <nav className={`header-nav ${mobileMenuOpen ? 'mobile-open' : ''}`} id="header-nav">
           <Link to="/subject/physics" className="nav-link nav-physics">
-            <span className="nav-icon">⚛️</span>{t('nav.physics')}
+            <span className="nav-icon">⚛️</span>
+            {t('nav.physics')}
           </Link>
           <Link to="/subject/chemistry" className="nav-link nav-chemistry">
-            <span className="nav-icon">🧪</span>{t('nav.chemistry')}
+            <span className="nav-icon">🧪</span>
+            {t('nav.chemistry')}
           </Link>
           <Link to="/subject/biology" className="nav-link nav-biology">
-            <span className="nav-icon">🧬</span>{t('nav.biology')}
+            <span className="nav-icon">🧬</span>
+            {t('nav.biology')}
           </Link>
           <div className="nav-divider"></div>
           <Link to="/theory" className="nav-link">
-            <span className="nav-icon">📖</span>{t('nav.theory')}
+            <span className="nav-icon">📖</span>
+            {t('nav.theory')}
           </Link>
           <Link to="/problems" className="nav-link">
-            <span className="nav-icon">📝</span>{t('nav.problems')}
+            <span className="nav-icon">📝</span>
+            {t('nav.problems')}
           </Link>
           <Link to="/bookmarks" className="nav-link nav-bookmarks">
-            <span className="nav-icon">⭐</span>{t('nav.bookmarks')}
+            <span className="nav-icon">⭐</span>
+            {t('nav.bookmarks')}
           </Link>
         </nav>
 
         {/* Backdrop overlay for mobile menu */}
         {mobileMenuOpen && (
-          <div
-            className="mobile-backdrop"
-            onClick={() => setMobileMenuOpen(false)}
-          />
+          <div className="mobile-backdrop" onClick={() => setMobileMenuOpen(false)} />
         )}
 
         <div className="header-actions">
@@ -79,11 +82,7 @@ export default function Header() {
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-          <button
-            className="action-btn lang-toggle"
-            onClick={toggleLanguage}
-            id="lang-toggle"
-          >
+          <button className="action-btn lang-toggle" onClick={toggleLanguage} id="lang-toggle">
             {t('language.toggle')}
           </button>
           <button

@@ -16,20 +16,25 @@
 import { theoryData } from '@/data/theory';
 import { problemsData } from '@/data/problems';
 import {
-  getAllFormulasFlat, formulasBySubject,
-  getAllFormulas, getAllChemFormulas, getAllBioFormulas,
-  getSubjectEmoji, getSubjectLabel
+  getAllFormulasFlat,
+  formulasBySubject,
+  getAllFormulas,
+  getAllChemFormulas,
+  getAllBioFormulas,
+  getSubjectEmoji,
+  getSubjectLabel
 } from './subjects';
 import { matchConcept } from './courseGraph';
 import { extractLinks, buildConceptLinks, mergeLinks } from './context';
 import { callGemini, geminiConfigured } from './gemini';
 import {
-  detectHelpIntent, detectListIntent, detectThanksIntent, detectSubjectIntent
+  detectHelpIntent,
+  detectListIntent,
+  detectThanksIntent,
+  detectSubjectIntent
 } from './intents';
 import { localFallback } from './fallback';
-import type {
-  AssistantResponse, Responder, ResponderResult
-} from '@/types/domain';
+import type { AssistantResponse, Responder, ResponderResult } from '@/types/domain';
 
 const GREETING_RE = /^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i;
 
@@ -88,7 +93,10 @@ function list(query: string, isUk: boolean): ResponderResult | null {
   const subj = detectSubjectIntent(query);
   if (subj) {
     const fBySubject = formulasBySubject(subj);
-    const names = fBySubject.slice(0, 10).map(f => `• ${isUk ? f.name : f.nameEn}`).join('\n');
+    const names = fBySubject
+      .slice(0, 10)
+      .map((f) => `• ${isUk ? f.name : f.nameEn}`)
+      .join('\n');
     return {
       text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}** — ${fBySubject.length} ${isUk ? 'формул' : 'formulas'}:\n\n${names}${fBySubject.length > 10 ? `\n\n...${isUk ? 'та ще' : 'and'} ${fBySubject.length - 10} ${isUk ? 'більше' : 'more'}` : ''}`,
       links: [{ type: 'subject', id: subj, label: isUk ? 'Переглянути всі' : 'View all' }]
@@ -110,9 +118,9 @@ function pureSubject(query: string, isUk: boolean): ResponderResult | null {
   if (!subj || query.length >= 15) return null;
 
   const fBySubject = formulasBySubject(subj);
-  const topics = [...new Set(fBySubject.map(f => f.topic))].filter(Boolean);
+  const topics = [...new Set(fBySubject.map((f) => f.topic))].filter(Boolean);
   return {
-    text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}**\n\n${isUk ? 'Доступно' : 'Available'}: ${fBySubject.length} ${isUk ? 'формул' : 'formulas'} ${isUk ? 'з' : 'in'} ${topics.length} ${isUk ? 'тем' : 'topics'}:\n${topics.map(t => `• ${t}`).join('\n')}\n\n${isUk ? 'Запитайте конкретну формулу або тему!' : 'Ask about a specific formula or topic!'}`,
+    text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}**\n\n${isUk ? 'Доступно' : 'Available'}: ${fBySubject.length} ${isUk ? 'формул' : 'formulas'} ${isUk ? 'з' : 'in'} ${topics.length} ${isUk ? 'тем' : 'topics'}:\n${topics.map((t) => `• ${t}`).join('\n')}\n\n${isUk ? 'Запитайте конкретну формулу або тему!' : 'Ask about a specific formula or topic!'}`,
     links: [{ type: 'subject', id: subj, label: isUk ? 'Відкрити предмет' : 'Open subject' }],
     suggestions: isUk
       ? [`Формули ${getSubjectLabel(subj, true).toLowerCase()}`]

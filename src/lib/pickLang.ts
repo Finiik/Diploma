@@ -10,15 +10,9 @@
  * English falls back to the base (Ukrainian) value when the `*En` field is
  * missing or empty, so a partially-translated record never renders blank.
  */
-export type Localized<K extends string> = { [P in K]: string } & Partial<
-  Record<`${K}En`, string>
->;
+export type Localized<K extends string> = { [P in K]: string } & Partial<Record<`${K}En`, string>>;
 
-export function pickLang<K extends string>(
-  item: Localized<K>,
-  baseKey: K,
-  isUk: boolean
-): string {
+export function pickLang<K extends string>(item: Localized<K>, baseKey: K, isUk: boolean): string {
   const base = (item[baseKey] ?? '') as string;
   if (isUk) return base;
   const en = (item as Record<string, unknown>)[`${baseKey}En`];

@@ -16,7 +16,9 @@ export default function ChatHeader({ onClose }: ChatHeaderProps) {
           <span className="ai-header-status">{t('assistant.powered_by')}</span>
         </div>
       </div>
-      <button className="ai-close-btn" onClick={onClose}>✕</button>
+      <button className="ai-close-btn" onClick={onClose}>
+        ✕
+      </button>
     </div>
   );
 }

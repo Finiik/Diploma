@@ -16,7 +16,7 @@ export function useContentFilters<T extends Filterable>(items: T[]) {
   const [difficulty, setDifficulty] = useState('all');
 
   const filtered = items.filter(
-    it =>
+    (it) =>
       (subject === 'all' || it.subject === subject) &&
       (difficulty === 'all' || it.difficulty === Number(difficulty))
   );

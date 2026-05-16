@@ -25,18 +25,18 @@ export function detectConceptualAnswer(query: string, isUk: boolean): ResponderR
   const title = isUk ? c.label : c.labelEn;
   const emoji = getSubjectEmoji(c.subject);
 
-  const theory = related.find(r => r.type === 'theory');
+  const theory = related.find((r) => r.type === 'theory');
   let body;
   if (theory) {
     const content = (isUk ? theory.content : theory.contentEn) || '';
     body = content.length > 700 ? `${content.slice(0, 700).trimEnd()}…` : content;
   } else {
     body = related
-      .filter(r => r.type === 'formula')
+      .filter((r) => r.type === 'formula')
       .slice(0, 4)
-      .map(f => {
+      .map((f) => {
         const n = localizedName(f, isUk);
-        const d = isUk ? f.description : (f.descriptionEn || f.description);
+        const d = isUk ? f.description : f.descriptionEn || f.description;
         return `• **${n}** — $${f.latex}$${d ? ` — ${d}` : ''}`;
       })
       .join('\n');
@@ -44,14 +44,14 @@ export function detectConceptualAnswer(query: string, isUk: boolean): ResponderR
   if (!body) return null;
 
   let text = `${emoji} **${title}**\n\n${body}`;
-  const names = related.map(r => localizedName(r, isUk));
+  const names = related.map((r) => localizedName(r, isUk));
   text += `\n\n${isUk ? '🔗 На платформі це пов’язано з' : '🔗 On the platform this connects to'}: ${names.join(', ')}.`;
 
   const { concepts } = buildCourseGraph();
   const suggestions = concepts
-    .filter(o => o.subject === c.subject && o.label !== c.label && o.itemIds.length)
+    .filter((o) => o.subject === c.subject && o.label !== c.label && o.itemIds.length)
     .slice(0, 3)
-    .map(o => (isUk ? o.label : o.labelEn));
+    .map((o) => (isUk ? o.label : o.labelEn));
 
   return { text, suggestions };
 }
@@ -85,7 +85,7 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
       text: isUk
         ? `🤔 Точної відповіді на **"${query}"** не знайшов. Можливо, ви мали на увазі щось із наведеного нижче — або уточніть питання.`
         : `🤔 I couldn't find an exact answer for **"${query}"**. You might mean one of the items below — or try rephrasing the question.`,
-      suggestions: results.slice(0, 3).map(r => localizedName(r, isUk))
+      suggestions: results.slice(0, 3).map((r) => localizedName(r, isUk))
     };
   }
 
@@ -100,10 +100,12 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
   if (top.type === 'formula') {
     const desc = isUk ? top.description : top.descriptionEn;
     const vars = top.variables
-      ? top.variables.map(v => {
-          const vName = isUk ? v.name : v.nameEn;
-          return `  • **${v.symbol}** — ${vName} (${v.unit})`;
-        }).join('\n')
+      ? top.variables
+          .map((v) => {
+            const vName = isUk ? v.name : v.nameEn;
+            return `  • **${v.symbol}** — ${vName} (${v.unit})`;
+          })
+          .join('\n')
       : '';
     const subjEmoji = getSubjectEmoji(top.subject);
 
@@ -116,9 +118,9 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
     // Add related formulas
     if (others.length > 0) {
       const related = others
-        .filter(o => o.type === 'formula')
+        .filter((o) => o.type === 'formula')
         .slice(0, 2)
-        .map(o => isUk ? o.name : o.nameEn);
+        .map((o) => (isUk ? o.name : o.nameEn));
       if (related.length > 0) {
         text += `\n\n${isUk ? '🔗 Також дивіться' : '🔗 Also see'}: ${related.join(', ')}`;
       }
@@ -137,7 +139,7 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
     let text = `📖 **${name}** ${diffLabels[top.difficulty] || ''}\n\n${desc}\n\n${preview.slice(0, 300)}${content.length > 300 ? '...' : ''}`;
 
     if (top.relatedFormulas && top.relatedFormulas.length > 0) {
-      text += `\n\n${isUk ? '📐 Пов\'язані формули' : '📐 Related formulas'}: ${top.relatedFormulas.join(', ')}`;
+      text += `\n\n${isUk ? "📐 Пов'язані формули" : '📐 Related formulas'}: ${top.relatedFormulas.join(', ')}`;
     }
 
     return { text, suggestions: [] };
@@ -147,14 +149,17 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
   if (top.type === 'problem') {
     const desc = isUk ? top.description : top.descriptionEn;
     const stepsPreview = top.steps
-      ? top.steps.slice(0, 2).map((s, i) => {
-          const stepText = isUk ? s.text : s.textEn;
-          return `  ${i + 1}. ${stepText}`;
-        }).join('\n')
+      ? top.steps
+          .slice(0, 2)
+          .map((s, i) => {
+            const stepText = isUk ? s.text : s.textEn;
+            return `  ${i + 1}. ${stepText}`;
+          })
+          .join('\n')
       : '';
     const answer = isUk ? top.answer : top.answerEn;
 
-    let text = `📝 **${name}** ${'⭐'.repeat(top.difficulty || 1)}\n\n${desc}\n\n**${isUk ? 'Розв\'язок' : 'Solution'}:**\n${stepsPreview}`;
+    let text = `📝 **${name}** ${'⭐'.repeat(top.difficulty || 1)}\n\n${desc}\n\n**${isUk ? "Розв'язок" : 'Solution'}:**\n${stepsPreview}`;
     if (top.steps && top.steps.length > 2) {
       text += `\n  ... ${isUk ? 'ще' : 'more'} ${top.steps.length - 2} ${isUk ? 'кроків' : 'steps'}`;
     }
@@ -166,7 +171,7 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
   // Generic result (unreachable: the guards above cover every GraphItem
   // variant; kept as a defensive default identical to the original).
   return {
-    text: `🔍 **${name}**\n\n${isUk ? topItem.description : (topItem.descriptionEn || topItem.description)}`,
+    text: `🔍 **${name}**\n\n${isUk ? topItem.description : topItem.descriptionEn || topItem.description}`,
     suggestions: []
   };
 }

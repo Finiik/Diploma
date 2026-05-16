@@ -22,14 +22,20 @@ export default function FormulaCard({ formula }: FormulaCardProps) {
   const bookmarked = isBookmarked(formula.id);
 
   return (
-    <div className={`formula-card animate-fade-in subject-${formula.subject || 'default'}`} id={`formula-card-${formula.id}`}>
+    <div
+      className={`formula-card animate-fade-in subject-${formula.subject || 'default'}`}
+      id={`formula-card-${formula.id}`}
+    >
       <div className="formula-card-header">
         <Link to={`/formula/${formula.id}`} className="formula-card-title">
           {tr(formula, 'name')}
         </Link>
         <button
           className={`bookmark-btn ${bookmarked ? 'bookmarked' : ''}`}
-          onClick={(e) => { e.preventDefault(); toggleBookmark(formula.id); }}
+          onClick={(e) => {
+            e.preventDefault();
+            toggleBookmark(formula.id);
+          }}
           title={t(BOOKMARK_KEY[bookmarked ? 'true' : 'false'])}
         >
           {bookmarked ? '★' : '☆'}
@@ -37,9 +43,7 @@ export default function FormulaCard({ formula }: FormulaCardProps) {
       </div>
       <Link to={`/formula/${formula.id}`} className="formula-card-body">
         <Latex tex={formula.latex} display className="formula-latex" />
-        <p className="formula-desc">
-          {tr(formula, 'description')}
-        </p>
+        <p className="formula-desc">{tr(formula, 'description')}</p>
       </Link>
     </div>
   );

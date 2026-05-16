@@ -1,6 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { initTheme, toggleTheme as toggleThemeService, setTheme as setThemeService } from '@/services/theme';
+import {
+  initTheme,
+  toggleTheme as toggleThemeService,
+  setTheme as setThemeService
+} from '@/services/theme';
 
 type ThemeContextValue = { theme: string; toggleTheme: () => void };
 
@@ -14,14 +18,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

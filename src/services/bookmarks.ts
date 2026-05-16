@@ -33,7 +33,10 @@ export async function getBookmarks(userId?: string): Promise<string[]> {
   return getLocalBookmarks();
 }
 
-export async function addBookmark(userId: string | undefined, formulaId: string): Promise<string[]> {
+export async function addBookmark(
+  userId: string | undefined,
+  formulaId: string
+): Promise<string[]> {
   const bookmarks = getLocalBookmarks();
   if (!bookmarks.includes(formulaId)) {
     bookmarks.push(formulaId);
@@ -50,8 +53,11 @@ export async function addBookmark(userId: string | undefined, formulaId: string)
   return bookmarks;
 }
 
-export async function removeBookmark(userId: string | undefined, formulaId: string): Promise<string[]> {
-  let bookmarks = getLocalBookmarks().filter(id => id !== formulaId);
+export async function removeBookmark(
+  userId: string | undefined,
+  formulaId: string
+): Promise<string[]> {
+  let bookmarks = getLocalBookmarks().filter((id) => id !== formulaId);
   setLocalBookmarks(bookmarks);
   if (userId && isFirebaseConfigured()) {
     try {

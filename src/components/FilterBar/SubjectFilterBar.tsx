@@ -12,7 +12,7 @@ export default function SubjectFilterBar({ value, onChange }: SubjectFilterBarPr
   const { t } = useTranslation();
   return (
     <div className="filter-bar">
-      {SUBJECT_FILTERS.map(s => (
+      {SUBJECT_FILTERS.map((s) => (
         <button
           key={s}
           className={`filter-btn ${value === s ? 'active' : ''}`}

@@ -13,7 +13,8 @@ export const theoryData: TheoryItem[] = [
     difficulty: 1,
     topic: 'Механіка',
     description: 'Три фундаментальні закони механіки, що описують рух тіл під дією сил.',
-    descriptionEn: 'Three fundamental laws of mechanics that describe the motion of objects under the action of forces.',
+    descriptionEn:
+      'Three fundamental laws of mechanics that describe the motion of objects under the action of forces.',
     content: `**Перший закон Ньютона (закон інерції):** Тіло зберігає стан спокою або рівномірного прямолінійного руху, якщо на нього не діють інші тіла або дія інших тіл скомпенсована.
 
 **Другий закон Ньютона:** Прискорення тіла прямо пропорційне рівнодійній силі, що діє на тіло, та обернено пропорційне його масі: F = ma.
@@ -34,7 +35,8 @@ export const theoryData: TheoryItem[] = [
     difficulty: 1,
     topic: 'Загальна хімія',
     description: 'Основні поняття розчинів: типи розчинів, способи вираження концентрації.',
-    descriptionEn: 'Basic concepts of solutions: types of solutions, methods of expressing concentration.',
+    descriptionEn:
+      'Basic concepts of solutions: types of solutions, methods of expressing concentration.',
     content: `**Розчин** — однорідна суміш двох або більше речовин. Складається з розчинника (зазвичай рідина) та розчиненої речовини.
 
 **Способи вираження концентрації:**
@@ -91,8 +93,10 @@ export const theoryData: TheoryItem[] = [
     subject: 'physics',
     difficulty: 2,
     topic: 'Термодинаміка',
-    description: 'Основні закони термодинаміки, що описують теплові процеси та перетворення енергії.',
-    descriptionEn: 'Fundamental laws of thermodynamics describing heat processes and energy transformations.',
+    description:
+      'Основні закони термодинаміки, що описують теплові процеси та перетворення енергії.',
+    descriptionEn:
+      'Fundamental laws of thermodynamics describing heat processes and energy transformations.',
     content: `**Нульовий закон:** Якщо два тіла перебувають у тепловій рівновазі з третім, вони перебувають у рівновазі між собою.
 
 **Перший закон (закон збереження енергії):** Кількість теплоти, передана системі, дорівнює сумі зміни внутрішньої енергії та виконаної роботи: Q = ΔU + A.
@@ -112,7 +116,7 @@ export const theoryData: TheoryItem[] = [
   {
     id: 'theory_electricity',
     name: 'Електричне коло та закон Ома',
-    nameEn: 'Electric Circuits and Ohm\'s Law',
+    nameEn: "Electric Circuits and Ohm's Law",
     subject: 'physics',
     difficulty: 3,
     topic: 'Електрика',
@@ -341,7 +345,7 @@ export const theoryData: TheoryItem[] = [
     subject: 'chemistry',
     difficulty: 3,
     topic: 'Електрохімія',
-    description: 'Зв\'язок між хімічними реакціями та електричним струмом.',
+    description: "Зв'язок між хімічними реакціями та електричним струмом.",
     descriptionEn: 'The relationship between chemical reactions and electric current.',
     content: `**Електроліз** — процес розкладання речовини електричним струмом.
 
@@ -375,7 +379,7 @@ export const theoryData: TheoryItem[] = [
     difficulty: 3,
     topic: 'Термохімія',
     description: 'Тепловий ефект хімічних реакцій, закон Гесса.',
-    descriptionEn: 'Heat effects of chemical reactions, Hess\'s law.',
+    descriptionEn: "Heat effects of chemical reactions, Hess's law.",
     content: `**Ентальпія (H)** — термодинамічна функція, що характеризує теплоту реакції при постійному тиску.
 
 **Екзотермічна реакція:** ΔH < 0 (теплота виділяється)
@@ -473,9 +477,9 @@ BMR = 88.362 + 13.397×m + 4.799×h - 5.677×a`,
 ];
 
 export function getTheoryBySubject(subject: string): TheoryItem[] {
-  return theoryData.filter(t => t.subject === subject);
+  return theoryData.filter((t) => t.subject === subject);
 }
 
 export function getTheoryById(id: string): TheoryItem | undefined {
-  return theoryData.find(t => t.id === id);
+  return theoryData.find((t) => t.id === id);
 }

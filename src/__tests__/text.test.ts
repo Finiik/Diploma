@@ -35,14 +35,15 @@ describe('similarity', () => {
     expect(similarity('kitten', 'sitting')).toBeCloseTo(1 - 3 / 7, 5);
   });
   it('typo "Авагадро"/"Авогадро" stays above the 0.84 concept threshold', () => {
-    expect(similarity(normalizeConcept('Авагадро'), normalizeConcept('Авогадро')))
-      .toBeGreaterThanOrEqual(0.84);
+    expect(
+      similarity(normalizeConcept('Авагадро'), normalizeConcept('Авогадро'))
+    ).toBeGreaterThanOrEqual(0.84);
   });
 });
 
 describe('normalizeConcept', () => {
   it('lowercases, drops punctuation and apostrophes, folds ё→е', () => {
-    expect(normalizeConcept("Що таке Авогадро?")).toBe('що таке авогадро');
+    expect(normalizeConcept('Що таке Авогадро?')).toBe('що таке авогадро');
     expect(normalizeConcept("Don't!")).toBe('dont');
     expect(normalizeConcept('ёлка  тест')).toBe('елка тест');
   });

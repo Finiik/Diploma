@@ -15,8 +15,7 @@ export function useLocalized() {
   const { i18n } = useTranslation();
   const isUk = i18n.language === 'uk';
   return useCallback(
-    <K extends string>(item: Localized<K>, baseKey: K): string =>
-      pickLang(item, baseKey, isUk),
+    <K extends string>(item: Localized<K>, baseKey: K): string => pickLang(item, baseKey, isUk),
     [isUk]
   );
 }

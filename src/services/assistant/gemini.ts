@@ -39,8 +39,8 @@ function extractText(data: GeminiResponse): string {
   const parts = candidate?.content?.parts;
   if (Array.isArray(parts)) {
     const text = parts
-      .filter(p => p && typeof p.text === 'string' && p.thought !== true)
-      .map(p => p.text)
+      .filter((p) => p && typeof p.text === 'string' && p.thought !== true)
+      .map((p) => p.text)
       .join('')
       .trim();
     if (text) return text;
@@ -64,7 +64,8 @@ export function geminiConfigured(): boolean {
 
 // Call Gemini API
 export async function callGemini(userMessage: string, isUk: boolean): Promise<string> {
-  const { formulaList, theoryList, problemList, topicOutline, totalFormulas } = buildPlatformContext(isUk);
+  const { formulaList, theoryList, problemList, topicOutline, totalFormulas } =
+    buildPlatformContext(isUk);
   const relevantContent = findRelevantContent(userMessage, isUk);
 
   const lang = isUk ? 'Ukrainian' : 'English';

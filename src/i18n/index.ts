@@ -5,18 +5,16 @@ import en from '@/i18n/locales/en.json';
 
 const savedLang = localStorage.getItem('language') || 'uk';
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      uk: { translation: uk },
-      en: { translation: en }
-    },
-    lng: savedLang,
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false
-    }
-  });
+i18n.use(initReactI18next).init({
+  resources: {
+    uk: { translation: uk },
+    en: { translation: en }
+  },
+  lng: savedLang,
+  fallbackLng: 'en',
+  interpolation: {
+    escapeValue: false
+  }
+});
 
 export default i18n;

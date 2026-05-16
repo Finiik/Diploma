@@ -10,18 +10,28 @@ import { matchConcept } from '@/services/assistant/courseGraph';
 
 describe('mergeLinks', () => {
   it('dedupes by type:id and caps the result', () => {
-    const a = [{ type: 'formula', id: 'x' }, { type: 'theory', id: 'y' }];
-    const b = [{ type: 'formula', id: 'x' }, { type: 'problems', id: 'z' }];
+    const a = [
+      { type: 'formula', id: 'x' },
+      { type: 'theory', id: 'y' }
+    ];
+    const b = [
+      { type: 'formula', id: 'x' },
+      { type: 'problems', id: 'z' }
+    ];
     const merged = mergeLinks(a, b, 5);
     expect(merged).toHaveLength(3);
-    expect(merged.map(l => `${l.type}:${l.id}`)).toEqual([
-      'formula:x', 'theory:y', 'problems:z'
-    ]);
+    expect(merged.map((l) => `${l.type}:${l.id}`)).toEqual(['formula:x', 'theory:y', 'problems:z']);
   });
 
   it('respects the cap', () => {
-    const a = [{ type: 'formula', id: '1' }, { type: 'formula', id: '2' }];
-    const b = [{ type: 'formula', id: '3' }, { type: 'formula', id: '4' }];
+    const a = [
+      { type: 'formula', id: '1' },
+      { type: 'formula', id: '2' }
+    ];
+    const b = [
+      { type: 'formula', id: '3' },
+      { type: 'formula', id: '4' }
+    ];
     expect(mergeLinks(a, b, 3)).toHaveLength(3);
   });
 });
@@ -31,7 +41,7 @@ describe('extractLinks', () => {
     const links = extractLinks("Newton's second law", false);
     expect(links.length).toBeGreaterThan(0);
     expect(links.length).toBeLessThanOrEqual(4);
-    expect(links.some(l => l.id === 'phys_newton2')).toBe(true);
+    expect(links.some((l) => l.id === 'phys_newton2')).toBe(true);
     expect(links[0].label).toMatch(/^[📐📖📝]/u);
   });
 });

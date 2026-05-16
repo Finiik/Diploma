@@ -16,7 +16,7 @@ afterEach(() => {
 describe('getRecommendations — cold start (no user history)', () => {
   it('returns the demo-popularity top-N in a stable, pinned order', async () => {
     const recs = await getRecommendations(null, 6);
-    expect(recs.map(f => f.id)).toEqual([
+    expect(recs.map((f) => f.id)).toEqual([
       'chem_ideal_gas',
       'chem_molarity',
       'bio_hardy_weinberg',
@@ -39,8 +39,11 @@ describe('getRecommendations — cold start (no user history)', () => {
 describe('getRecommendations — collaborative path (known demo user)', () => {
   it('recommends formulas the user has NOT already interacted with', async () => {
     const already = new Set([
-      'phys_newton2', 'phys_kinetic_energy', 'phys_work',
-      'chem_ideal_gas', 'phys_momentum'
+      'phys_newton2',
+      'phys_kinetic_energy',
+      'phys_work',
+      'chem_ideal_gas',
+      'phys_momentum'
     ]);
     const recs = await getRecommendations('demo_user_1', 6);
     expect(recs.length).toBeGreaterThan(0);

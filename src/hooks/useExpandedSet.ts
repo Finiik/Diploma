@@ -10,7 +10,7 @@ export function useExpandedSet() {
   const isOpen = useCallback((id: string) => !!open[id], [open]);
 
   const toggle = useCallback((id: string) => {
-    setOpen(prev => ({ ...prev, [id]: !prev[id] }));
+    setOpen((prev) => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
   return { isOpen, toggle };

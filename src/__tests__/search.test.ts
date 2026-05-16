@@ -9,10 +9,10 @@ describe('search', () => {
     expect(search('a')).toEqual([]);
   });
 
-  it('finds Newton\'s second law by English name', () => {
+  it("finds Newton's second law by English name", () => {
     const results = search('Newton');
     expect(results.length).toBeGreaterThan(0);
-    expect(results.map(r => r.id)).toContain('phys_newton2');
+    expect(results.map((r) => r.id)).toContain('phys_newton2');
   });
 
   it('annotates each hit with score, matches, type and subject', () => {
@@ -25,6 +25,6 @@ describe('search', () => {
 
   it('rebuildIndex keeps search working', () => {
     rebuildIndex();
-    expect(search('Newton').map(r => r.id)).toContain('phys_newton2');
+    expect(search('Newton').map((r) => r.id)).toContain('phys_newton2');
   });
 });

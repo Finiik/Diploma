@@ -17,16 +17,12 @@ export type SubjectFormula = Formula & { subject: Subject };
 
 /** Every formula across all subjects (each tagged with its `subject`). */
 export function getAllFormulas(): SubjectFormula[] {
-  return [
-    ...getPhysFormulas(),
-    ...getChemFormulas(),
-    ...getBioFormulas()
-  ] as SubjectFormula[];
+  return [...getPhysFormulas(), ...getChemFormulas(), ...getBioFormulas()] as SubjectFormula[];
 }
 
 /** First formula matching `id` across all subjects, or undefined. */
 export function findFormulaById(id: string): SubjectFormula | undefined {
-  return getAllFormulas().find(f => f.id === id);
+  return getAllFormulas().find((f) => f.id === id);
 }
 
 /**
@@ -36,6 +32,6 @@ export function findFormulaById(id: string): SubjectFormula | undefined {
 export function findFormulasByIds(ids: string[]): SubjectFormula[] {
   const all = getAllFormulas();
   return ids
-    .map(id => all.find(f => f.id === id))
+    .map((id) => all.find((f) => f.id === id))
     .filter((f): f is SubjectFormula => f !== undefined);
 }

@@ -22,7 +22,7 @@ export default function MessageList({
   onLinkClick,
   onSuggestion
 }: MessageListProps) {
-  const lastUserIndex = messages.map(m => m.role).lastIndexOf('user');
+  const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
 
   return (
     <div className="ai-messages">

@@ -21,7 +21,7 @@ export function renderLatex(tex: string, display = false): string {
       displayMode: display
     });
   } catch {
-    const safe = tex.replace(/[&<>]/g, c => HTML_ESCAPE[c] ?? c);
+    const safe = tex.replace(/[&<>]/g, (c) => HTML_ESCAPE[c] ?? c);
     return `<code class="formula-inline">${safe}</code>`;
   }
 }
