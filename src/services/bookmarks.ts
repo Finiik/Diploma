@@ -3,12 +3,9 @@
    Only syncs to Firebase when it's configured
    ============================================ */
 
-const BOOKMARKS_KEY = 'bookmarks';
+import { isFirebaseConfigured } from '../lib/env';
 
-function isFirebaseConfigured() {
-  const key = import.meta.env.VITE_FIREBASE_API_KEY;
-  return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
-}
+const BOOKMARKS_KEY = 'bookmarks';
 
 function getLocalBookmarks(): string[] {
   try {

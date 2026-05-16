@@ -10,12 +10,7 @@ import { getAllFormulas as getAllBioFormulas } from '../data/biology';
 import type {
   Formula, Interaction, InteractionsByUser
 } from '../types/domain';
-
-// Check if Firebase is actually configured
-function isFirebaseConfigured() {
-  const key = import.meta.env.VITE_FIREBASE_API_KEY;
-  return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
-}
+import { isFirebaseConfigured } from '../lib/env';
 
 // Pre-seeded demo users for initial recommendations
 const DEMO_INTERACTIONS: InteractionsByUser = {

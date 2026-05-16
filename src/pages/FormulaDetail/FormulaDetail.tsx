@@ -10,6 +10,7 @@ import { physicsData, getFormulaById as getPhysFormula, getAllFormulas as getPhy
 import { chemistryData, getFormulaById as getChemFormula, getAllFormulas as getChemAll } from '../../data/chemistry';
 import { biologyData, getFormulaById as getBioFormula, getAllFormulas as getBioAll } from '../../data/biology';
 import type { Formula, Subject, SubjectData } from '../../types/domain';
+import { isFirebaseConfigured } from '../../lib/env';
 import './FormulaDetail.css';
 
 type InteractionType = 'view' | 'calculation' | 'bookmark';
@@ -24,11 +25,6 @@ const BOOKMARK_KEY: Record<'true' | 'false', string> = {
   true: 'formula.bookmark_remove',
   false: 'formula.bookmark_add'
 };
-
-function isFirebaseConfigured() {
-  const key = import.meta.env.VITE_FIREBASE_API_KEY;
-  return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
-}
 
 async function safeLogInteraction(
   userId: string | undefined,

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { auth } from '../firebase/config';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
+import { isFirebaseConfigured } from '../lib/env';
 
 /**
  * Either a real Firebase user or the synthetic offline user the app falls
@@ -15,12 +16,6 @@ type AppUser = User | OfflineUser;
 type AuthContextValue = { user: AppUser | null; loading: boolean };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-// Check if Firebase is actually configured (not placeholder values)
-function isFirebaseConfigured() {
-  const key = import.meta.env.VITE_FIREBASE_API_KEY;
-  return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
