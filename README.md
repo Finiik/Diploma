@@ -19,6 +19,7 @@
 - [Getting Started](#-getting-started)
 - [Content Database](#-content-database)
 - [AI Assistant](#-ai-assistant)
+- [Autonomous Course Evolution (Roadmap)](#-autonomous-course-evolution-roadmap)
 - [Recommendation Engine](#-recommendation-engine)
 - [Localization](#-localization)
 - [Deployment](#-deployment)
@@ -56,7 +57,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 - Bilingual — responds in Ukrainian or English based on current language
 - Provides formula details, theory excerpts, and problem solutions
 - Direct navigation links to relevant platform content
-- **Field-agnostic concept knowledge graph** — typo- and inflection-tolerant matching links a concept (e.g. Avogadro's constant) to its related materials across *any* subject (mole, molarity, ideal-gas law), so a single answer connects multiple topics; works in both the Gemini and offline fallback paths
+- **Auto-derived knowledge graph (graph/keyword RAG)** — concepts are not hardcoded; the platform's own topics/subtopics are the concepts and the data's own cross-links are the edges. The AI explains a concept by *synthesizing the course materials it actually connects to*, grounded in what the platform teaches — no hand-written definitions to maintain. Works in both the Gemini and offline-synthesis paths
 
 ### 📊 Personalized Recommendations
 - **Collaborative filtering** engine using cosine similarity
@@ -104,7 +105,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 ### Design Decisions
 - **No CSS framework** — Custom design system with CSS custom properties for full control
 - **No external AI dependency** — Smart local fallback ensures the AI assistant works even without API
-- **Data-driven concept graph** — Cross-topic linking lives in one field-agnostic `CONCEPTS` table; covering a new topic in any subject is a pure data change, no engine code
+- **Auto-derived concept graph (graph/keyword RAG)** — no hardcoded concept table; concepts/edges are computed from the course data itself, and the AI explains by synthesizing the connected materials. Covering a new topic in any subject is a pure content change, no engine code
 - **Code splitting** — 7 manual Vite chunks (React, Firebase, KaTeX, i18n, Fuse.js, Firestore, App) for optimal caching
 - **Firebase resilience** — App functions fully offline; cloud features are optional enhancements
 
@@ -334,38 +335,121 @@ VITE_GEMINI_API_KEY=your_gemini_api_key
 
 ## 🤖 AI Assistant
 
-The AI assistant is a floating chatbot (bottom-right corner) that combines **Google Gemini 2.0 Flash** with **intelligent local search** for hybrid responses.
+The AI assistant is a floating chatbot (bottom-right corner) that combines **Google Gemini 2.0 Flash** with an **auto-derived course knowledge graph** using a lightweight **graph/keyword RAG** (Retrieval-Augmented Generation) design, and degrades gracefully to an offline-synthesis fallback when the API is unavailable.
 
-### How It Works
+### Design Philosophy: No Hardcoded Concepts
+
+Earlier iterations carried a hand-maintained concept dictionary — each concept (e.g. *Avogadro's constant*) had explicitly authored Ukrainian/English definition text. That does not scale: every new concept demanded fresh prose, the explanations could drift from the actual course content, and the AI that the platform already integrates was not being used for what it is good at.
+
+The system now holds **zero hardcoded concept definitions**. Instead:
+
+- **The course data *is* the knowledge base.** Every topic and subtopic the platform teaches is treated as a concept; the data's own cross-links (`derivedFormulas`, `relatedFormulas`, `relatedFormula`) are the relationship edges. Curating a concept means editing course content — never the engine.
+- **The AI does the explaining.** Given the relevant slice of course materials as grounded context, Gemini synthesizes the explanation and connects the topics, instead of reciting a stored paragraph.
+
+### How It Works (Graph / Keyword RAG)
 
 ```
 User Question
      │
      ▼
-┌─ Greeting? ─── Yes ──► Return welcome + suggestion chips
+┌─ Instant intent? (greeting / help / thanks / list / pure subject) ── Yes ──► Templated reply + chips
 │
 No
 │
 ▼
-┌─ Gemini API available? ─── Yes ──► Send question + platform context to Gemini
-│                                     └── Return AI response + navigation links
+RETRIEVE  (graph / keyword)
+├── Auto-derived course graph (built once from the data files):
+│     • flat index of every formula / theory article / problem
+│     • undirected edge set from derivedFormulas / relatedFormulas / relatedFormula
+│     • concept index: every topic & subtopic name (UA + EN) → the items it owns
+│     • per-subject topic → subtopic outline
+├── matchConcept(): typo-/inflection-tolerant, whole-string match of the query
+│   core against the concept index (exact key wins; else Levenshtein ≥ 0.84,
+│   short queries only — so "сила тяжіння" isn't swallowed by the "Сила" topic)
+└── resolveRelated(): the matched concept's items, expanded one hop along the
+    edges, ordered theory → formula → problem, capped
+     │
+     ▼
+AUGMENT + GENERATE
+┌─ Gemini available? ── Yes ──► Prompt = COURSE TOPIC MAP + compact catalog +
+│                                 CONNECTED PLATFORM MATERIALS block, with an
+│                                 instruction to SYNTHESIZE those materials,
+│                                 ground every claim in them, and connect the
+│                                 topics. → AI answer + navigation links
 No (or rate-limited)
 │
 ▼
-Smart Local Fallback
-├── Strip intent words ("поясни", "explain", "що таке", etc.)
-├── Multi-level search: full query → cleaned → individual words
-├── Detect intent: help / list / formula / theory / problem
-└── Build rich response with variables, descriptions, links
+Offline synthesis fallback
+├── Lead with the connected theory article's own content (already prose in
+│   the data); if none, stitch a summary from the connected formulas
+├── Append "🔗 connects to …" + sibling-topic follow-up chips
+└── No hand-written prose anywhere — everything is synthesized from the data
 ```
 
+### Why graph/keyword RAG (and not LangChain + a vector store)
+
+This is genuine RAG — retrieval feeds grounded context into the model — but deliberately **without embeddings, a vector database, or LangChain**:
+
+| Factor | Implication |
+|---|---|
+| **Corpus is small & fully structured** (~78 formulas, 15 theory, 25 problems) | The whole catalog already fits in Gemini's context window; semantic vector search would add latency, cost and a build step for negligible recall gain |
+| **Data has explicit relationship edges** | Graph traversal over real edges is *more precise* than cosine similarity for "what connects to this concept" — vector RAG would be a downgrade in linking quality here |
+| **App is browser-only** (client-side React + Vite, no backend) | A vector store / embedding pipeline would force a server or hosted vector DB — an architectural shift, not a library swap |
+| **One model call, structured context** | LangChain's orchestration value (multi-tool agents, swappable retrievers) does not apply; it would be heavy dead weight |
+
+Embedding-based semantic RAG is documented below as the deliberate scale-up path once the corpus grows large or free-text (see *Autonomous Course Evolution*).
+
 ### Features
-- **Context injection** — Gemini receives all 78 formulas, 15 theory articles, and 25 problems as context
-- **Intent detection** — Recognizes greetings, help requests, formula lookups, theory explanations
-- **Smart query extraction** — Strips 40+ intent words in UA/EN to find the core search term
-- **Rich fallback** — Even without Gemini, provides formula details with variables and units
-- **Navigation links** — Clickable buttons that navigate to formulas, theory, or problems
-- **Bilingual** — Detects and responds in the active interface language
+- **Auto-derived graph** — concept index, edges and topic outline are computed once from the data files; adding coverage is a pure content change
+- **Grounded generation** — Gemini receives the course topic map + the connected materials and is instructed to explain *only* from what the platform covers, not to pad with outside facts
+- **Offline synthesis** — without Gemini, concept answers are stitched from the connected materials' own theory/formula text — never a hardcoded body
+- **Typo/inflection tolerance** — whole-string Levenshtein matching resolves "стала Авагадро" → the right concept without hijacking specific lookups
+- **Navigation links** — clickable buttons to the connected formulas, theory and problems
+- **Bilingual** — retrieves and responds in the active interface language
+
+---
+
+## 🧭 Autonomous Course Evolution (Roadmap)
+
+> **Status: planned — documented here for the thesis committee. Not yet implemented.**
+
+The graph/keyword RAG design above makes the assistant honest about its own scope: it explains strictly from what the course actually teaches. That same property enables a self-improving loop, where the platform learns *what it is missing* from real student usage and proposes its own growth — shifting maintenance from manual authoring toward an autonomous, increasingly personalised system.
+
+### 1. Coverage-gap detection
+
+When answering, the model already knows the course's scope (the COURSE TOPIC MAP) and the connected materials it was given. The roadmap adds an explicit signal: when the retrieved materials are **insufficient to fully cover the asked concept** (a low grounding/confidence verdict from the model, plus a thin retrieval result), the turn is flagged as a *coverage gap* instead of silently answering from outside knowledge.
+
+### 2. Structured improvement suggestion
+
+A flagged gap produces a structured suggestion — not free text — capturing:
+
+- the student's question and detected concept/topic,
+- which existing materials were retrieved (and why they fell short),
+- a concrete proposed addition: a new **formula**, **theory article**, or **problem**, drafted in the same schema the data files use,
+- the subject/topic/subtopic it should slot into.
+
+The suggestion is **emailed to the admin** and persisted to a Firestore `suggestions` collection (`status: new | accepted | rejected`, timestamps, frequency counter so repeatedly-requested gaps rank higher).
+
+### 3. Admin curation dashboard
+
+An admin-only view lists incoming suggestions, ranked by demand, with one-click **accept / edit / reject**. Accepting turns the drafted item into a real entry in the course data (review-gated — a human still approves what enters the curriculum).
+
+### 4. Self-improving loop
+
+```
+Students ask  ──►  Gaps detected  ──►  Suggestions queued + emailed
+     ▲                                          │
+     │                                          ▼
+Better, broader  ◄──  Course data grows  ◄──  Admin accepts (human-gated)
+ grounding for          (new formulas /
+ future answers          theory / problems)
+```
+
+As accepted suggestions enrich the data, retrieval gets richer, answers get better grounded, and the platform's interpretation of each subject becomes more complete and more personalised to what its students actually ask — with steadily less manual input required.
+
+### Architecture note: when embedding-RAG becomes the right call
+
+The current graph/keyword retrieval is optimal for today's small, structured corpus. Once this loop accumulates a large and increasingly free-text body of user-driven content, semantic recall starts to matter more than structural precision. **That is the deliberate trigger point** to introduce embedding-based retrieval and a proper vector store (and, if multi-step retrieval/agent orchestration is needed, a framework such as LangChain) — a backend-side evolution, not a rewrite of the client.
 
 ---
 
@@ -472,6 +556,8 @@ Step-by-step problem solutions with expandable sections, star difficulty ratings
 
 ## 🔮 Future Enhancements
 
+- [ ] **Autonomous Course Evolution** — AI coverage-gap detection → structured improvement suggestions emailed to the admin + stored in Firestore → admin curation dashboard → self-improving loop (see [Autonomous Course Evolution](#-autonomous-course-evolution-roadmap))
+- [ ] **Embedding-RAG scale-up** — semantic retrieval + vector store once the user-driven corpus grows large/free-text (deliberate successor to today's graph/keyword RAG)
 - [ ] **PWA** — Service workers for offline formula browsing
 - [ ] **Cloud Functions** — Server-side recommendation processing
 - [ ] **User profiles** — Learning progress tracking
