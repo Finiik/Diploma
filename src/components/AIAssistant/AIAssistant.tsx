@@ -1,113 +1,39 @@
-import type React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import 'katex/dist/katex.min.css';
-import { renderLatex } from '../../lib/katex';
-import { processMessage } from '../../services/assistantEngine';
-import type { NavLink, AssistantResponse } from '../../types/domain';
+import type { NavLink } from '../../types/domain';
 import { resolveNavPath } from '../../lib/navigation';
+import { useChatSession } from '../../hooks/useChatSession';
+import { useChatScroll } from '../../hooks/useChatScroll';
+import { useAutoFocus } from '../../hooks/useAutoFocus';
+import ChatFab from './ChatFab';
+import ChatHeader from './ChatHeader';
+import MessageList from './MessageList';
+import ChatInput from './ChatInput';
 import './AIAssistant.css';
 
-/** A message in the chat transcript: a user query or a bot answer. */
-type ChatMessage =
-  | { role: 'user'; text: string; timestamp: number }
-  | ({ role: 'bot'; timestamp: number } & AssistantResponse);
-
+/**
+ * Thin shell: owns only open/close, wires the chat hooks to the presentational
+ * pieces. Transcript state lives in useChatSession, scrolling in useChatScroll,
+ * message rendering/markdown in MessageList / lib/markdown.
+ */
 export default function AIAssistant() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const isUk = i18n.language === 'uk';
-
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const lastUserMsgRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Index of the most recent user message, so we can greet at it on open
-  const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
+  const { messages, input, setInput, isTyping, send, sendSuggestion, seedWelcome } =
+    useChatSession();
+  const { messagesEndRef, lastUserMsgRef } = useChatScroll(isOpen, [messages, isTyping]);
+  useAutoFocus(inputRef, isOpen, 300);
 
-  // Show welcome message on first open
+  // Greet the user the first time the panel opens.
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      (async () => {
-        const welcome = await processMessage('привіт', isUk);
-        setMessages([{ role: 'bot', ...welcome, timestamp: Date.now() }]);
-      })();
-    }
+    if (isOpen && messages.length === 0) seedWelcome();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-
-  // On open, greet the user at their most recent message rather than the
-  // top of the (possibly long) history. Falls back to the bottom when
-  // there are no user messages yet.
-  useEffect(() => {
-    if (!isOpen) return;
-    setTimeout(() => {
-      if (lastUserMsgRef.current) {
-        lastUserMsgRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
-      } else {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-      }
-    }, 50);
-  }, [isOpen]);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 300);
-    }
-  }, [isOpen]);
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userQuery = input.trim();
-    const userMsg: ChatMessage = { role: 'user', text: userQuery, timestamp: Date.now() };
-    setMessages(prev => [...prev, userMsg]);
-    setInput('');
-    setIsTyping(true);
-
-    try {
-      const response = await processMessage(userQuery, isUk);
-      setMessages(prev => [...prev, { role: 'bot', ...response, timestamp: Date.now() }]);
-    } catch (err) {
-      setMessages(prev => [...prev, {
-        role: 'bot',
-        text: t('assistant.error'),
-        links: [], suggestions: [], timestamp: Date.now()
-      }]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  const handleSuggestion = async (text: string) => {
-    setInput('');
-    const userMsg: ChatMessage = { role: 'user', text, timestamp: Date.now() };
-    setMessages(prev => [...prev, userMsg]);
-    setIsTyping(true);
-
-    try {
-      const response = await processMessage(text, isUk);
-      setMessages(prev => [...prev, { role: 'bot', ...response, timestamp: Date.now() }]);
-    } catch (err) {
-      setMessages(prev => [...prev, {
-        role: 'bot',
-        text: t('assistant.error_short'),
-        links: [], suggestions: [], timestamp: Date.now()
-      }]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
 
   const handleLinkClick = (link: NavLink) => {
     const path = resolveNavPath(link);
@@ -115,155 +41,31 @@ export default function AIAssistant() {
     setIsOpen(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  // Turn an assistant message into HTML: real KaTeX for $$...$$ (block) and
-  // $...$ (inline), plus **bold** and newlines for the surrounding text.
-  // Math is extracted to placeholders first so the markdown pass can't
-  // mangle the generated KaTeX markup.
-  const formatText = (text: string): string => {
-    if (!text) return '';
-
-    const mathBlocks: string[] = [];
-    const stash = (html: string): string => {
-      mathBlocks.push(html);
-      return `${mathBlocks.length - 1}`;
-    };
-
-    let out = text
-      .replace(/\$\$([\s\S]+?)\$\$/g, (_: string, tex: string) => stash(renderLatex(tex, true)))
-      .replace(/\$([^$\n]+?)\$/g, (_: string, tex: string) => stash(renderLatex(tex, false)));
-
-    out = out
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\n/g, '<br/>');
-
-    return out.replace(/(\d+)/g, (_: string, i: string) => mathBlocks[Number(i)]);
-  };
-
   return (
     <>
-      {/* Floating Button */}
-      <button
-        className={`ai-fab ${isOpen ? 'ai-fab-active' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label={t('a11y.assistant')}
-        id="ai-assistant-toggle"
-      >
-        {isOpen ? (
-          <span className="ai-fab-icon">✕</span>
-        ) : (
-          <>
-            <span className="ai-fab-icon">🤖</span>
-            <span className="ai-fab-pulse"></span>
-          </>
-        )}
-      </button>
+      <ChatFab
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        label={t('a11y.assistant')}
+      />
 
-      {/* Chat Panel */}
       {isOpen && (
         <div className="ai-panel animate-scale-in" id="ai-assistant-panel">
-          {/* Header */}
-          <div className="ai-panel-header">
-            <div className="ai-header-info">
-              <span className="ai-avatar">🤖</span>
-              <div>
-                <h3 className="ai-header-title">SciLearn AI</h3>
-                <span className="ai-header-status">
-                  {t('assistant.powered_by')}
-                </span>
-              </div>
-            </div>
-            <button className="ai-close-btn" onClick={() => setIsOpen(false)}>✕</button>
-          </div>
-
-          {/* Messages */}
-          <div className="ai-messages">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                ref={i === lastUserIndex ? lastUserMsgRef : null}
-                className={`ai-msg ai-msg-${msg.role}`}
-              >
-                {msg.role === 'bot' && <span className="ai-msg-avatar">🤖</span>}
-                <div className="ai-msg-bubble">
-                  <div
-                    className="ai-msg-text"
-                    dangerouslySetInnerHTML={{ __html: formatText(msg.text) }}
-                  />
-                  {/* Links */}
-                  {msg.role === 'bot' && msg.links && msg.links.length > 0 && (
-                    <div className="ai-msg-links">
-                      {msg.links.map((link, j) => (
-                        <button
-                          key={j}
-                          className="ai-link-btn"
-                          onClick={() => handleLinkClick(link)}
-                        >
-                          {link.type === 'formula' ? '📐' : link.type === 'theory' ? '📖' : '📝'}{' '}
-                          {link.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {/* Suggestions */}
-                  {msg.role === 'bot' && msg.suggestions && msg.suggestions.length > 0 && (
-                    <div className="ai-msg-suggestions">
-                      {msg.suggestions.map((sug, j) => (
-                        <button
-                          key={j}
-                          className="ai-suggestion-chip"
-                          onClick={() => handleSuggestion(sug)}
-                        >
-                          {sug}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {/* Typing indicator */}
-            {isTyping && (
-              <div className="ai-msg ai-msg-bot">
-                <span className="ai-msg-avatar">🤖</span>
-                <div className="ai-msg-bubble ai-typing">
-                  <span className="ai-dot"></span>
-                  <span className="ai-dot"></span>
-                  <span className="ai-dot"></span>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="ai-input-area">
-            <input
-              ref={inputRef}
-              type="text"
-              className="ai-input"
-              placeholder={t('assistant.placeholder')}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              id="ai-input"
-            />
-            <button
-              className="ai-send-btn"
-              onClick={handleSend}
-              disabled={!input.trim()}
-            >
-              ➤
-            </button>
-          </div>
+          <ChatHeader onClose={() => setIsOpen(false)} />
+          <MessageList
+            messages={messages}
+            isTyping={isTyping}
+            lastUserMsgRef={lastUserMsgRef}
+            messagesEndRef={messagesEndRef}
+            onLinkClick={handleLinkClick}
+            onSuggestion={sendSuggestion}
+          />
+          <ChatInput
+            value={input}
+            onChange={setInput}
+            onSend={send}
+            inputRef={inputRef}
+          />
         </div>
       )}
     </>
