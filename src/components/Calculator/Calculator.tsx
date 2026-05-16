@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import katex from 'katex';
 import type { Formula } from '../../types/domain';
 import { useLocalized } from '../../hooks/useLocalized';
+import Latex from '../Latex/Latex';
 import './Calculator.css';
 
 /** Calculator field values: numeric defaults or raw `<input>` strings. */
@@ -62,18 +62,10 @@ export default function Calculator({ formula }: CalculatorProps) {
     return val;
   };
 
-  const renderedLatex = katex.renderToString(formula.latex, {
-    throwOnError: false,
-    displayMode: true
-  });
-
   return (
     <div className="calculator" id="formula-calculator">
       <h3 className="calculator-title">{t('formula.calculate')}</h3>
-      <div
-        className="calculator-formula"
-        dangerouslySetInnerHTML={{ __html: renderedLatex }}
-      />
+      <Latex tex={formula.latex} display className="calculator-formula" />
 
       <div className="calculator-inputs">
         {inputVars.map(v => (

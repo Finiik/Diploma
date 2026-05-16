@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import katex from 'katex';
+import Latex from '../../components/Latex/Latex';
 import { useBookmarks } from '../../contexts/BookmarkContext';
 import { useAuth } from '../../contexts/AuthContext';
 import Calculator from '../../components/Calculator/Calculator';
@@ -72,10 +72,6 @@ export default function FormulaDetail() {
     );
   }
 
-  const renderedLatex = katex.renderToString(formula.latex, {
-    throwOnError: false,
-    displayMode: true
-  });
 
   const derivedFormulas = findFormulasByIds(formula.derivedFormulas || []);
 
@@ -127,10 +123,7 @@ export default function FormulaDetail() {
             </button>
           </div>
 
-          <div
-            className="formula-detail-latex"
-            dangerouslySetInnerHTML={{ __html: renderedLatex }}
-          />
+          <Latex tex={formula.latex} display className="formula-detail-latex" />
 
           <div className="formula-detail-desc">
             <h2>{t('formula.description')}</h2>
@@ -155,25 +148,19 @@ export default function FormulaDetail() {
             <div className="derived-section">
               <h2>{t('formula.derived')}</h2>
               <div className="derived-grid">
-                {derivedFormulas.map(df => {
-                  const dfLatex = katex.renderToString(df.latex, { throwOnError: false });
-                  return (
-                    <Link
-                      key={df.id}
-                      to={`/formula/${df.id}`}
-                      className="derived-card"
-                      id={`derived-${df.id}`}
-                    >
-                      <span className="derived-name">
-                        {tr(df, 'name')}
-                      </span>
-                      <div
-                        className="derived-latex"
-                        dangerouslySetInnerHTML={{ __html: dfLatex }}
-                      />
-                    </Link>
-                  );
-                })}
+                {derivedFormulas.map(df => (
+                  <Link
+                    key={df.id}
+                    to={`/formula/${df.id}`}
+                    className="derived-card"
+                    id={`derived-${df.id}`}
+                  >
+                    <span className="derived-name">
+                      {tr(df, 'name')}
+                    </span>
+                    <Latex tex={df.latex} className="derived-latex" />
+                  </Link>
+                ))}
               </div>
             </div>
           )}

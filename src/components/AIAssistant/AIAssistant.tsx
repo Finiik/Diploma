@@ -2,8 +2,8 @@ import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { renderLatex } from '../../lib/katex';
 import { processMessage } from '../../services/assistantEngine';
 import type { NavLink, AssistantResponse } from '../../types/domain';
 import './AIAssistant.css';
@@ -12,12 +12,6 @@ import './AIAssistant.css';
 type ChatMessage =
   | { role: 'user'; text: string; timestamp: number }
   | ({ role: 'bot'; timestamp: number } & AssistantResponse);
-
-const HTML_ESCAPE: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;'
-};
 
 export default function AIAssistant() {
   const { t, i18n } = useTranslation();
@@ -134,20 +128,6 @@ export default function AIAssistant() {
     }
   };
 
-  // Render a single LaTeX expression to HTML. Falls back to the escaped
-  // source (not raw, to avoid breaking layout) if KaTeX can't parse it.
-  const renderMath = (tex: string, displayMode: boolean): string => {
-    try {
-      return katex.renderToString(tex.trim(), {
-        throwOnError: false,
-        displayMode,
-      });
-    } catch {
-      const safe = tex.replace(/[&<>]/g, (c) => HTML_ESCAPE[c]);
-      return `<code class="formula-inline">${safe}</code>`;
-    }
-  };
-
   // Turn an assistant message into HTML: real KaTeX for $$...$$ (block) and
   // $...$ (inline), plus **bold** and newlines for the surrounding text.
   // Math is extracted to placeholders first so the markdown pass can't
@@ -162,8 +142,8 @@ export default function AIAssistant() {
     };
 
     let out = text
-      .replace(/\$\$([\s\S]+?)\$\$/g, (_: string, tex: string) => stash(renderMath(tex, true)))
-      .replace(/\$([^$\n]+?)\$/g, (_: string, tex: string) => stash(renderMath(tex, false)));
+      .replace(/\$\$([\s\S]+?)\$\$/g, (_: string, tex: string) => stash(renderLatex(tex, true)))
+      .replace(/\$([^$\n]+?)\$/g, (_: string, tex: string) => stash(renderLatex(tex, false)));
 
     out = out
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')

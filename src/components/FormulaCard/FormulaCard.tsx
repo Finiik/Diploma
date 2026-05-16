@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useBookmarks } from '../../contexts/BookmarkContext';
-import 'katex/dist/katex.min.css';
-import katex from 'katex';
 import type { Formula } from '../../types/domain';
 import { useLocalized } from '../../hooks/useLocalized';
+import Latex from '../Latex/Latex';
 import './FormulaCard.css';
 
 const BOOKMARK_KEY: Record<'true' | 'false', string> = {
@@ -22,11 +21,6 @@ export default function FormulaCard({ formula }: FormulaCardProps) {
   const tr = useLocalized();
   const bookmarked = isBookmarked(formula.id);
 
-  const renderedLatex = katex.renderToString(formula.latex, {
-    throwOnError: false,
-    displayMode: true
-  });
-
   return (
     <div className={`formula-card animate-fade-in subject-${formula.subject || 'default'}`} id={`formula-card-${formula.id}`}>
       <div className="formula-card-header">
@@ -42,10 +36,7 @@ export default function FormulaCard({ formula }: FormulaCardProps) {
         </button>
       </div>
       <Link to={`/formula/${formula.id}`} className="formula-card-body">
-        <div
-          className="formula-latex"
-          dangerouslySetInnerHTML={{ __html: renderedLatex }}
-        />
+        <Latex tex={formula.latex} display className="formula-latex" />
         <p className="formula-desc">
           {tr(formula, 'description')}
         </p>
