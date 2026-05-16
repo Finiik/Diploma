@@ -91,7 +91,7 @@ export default function Header() {
           <button
             className={`hamburger-btn ${mobileMenuOpen ? 'open' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Menu"
+            aria-label={t('a11y.menu')}
             id="hamburger-btn"
           >
             <span className="hamburger-line"></span>

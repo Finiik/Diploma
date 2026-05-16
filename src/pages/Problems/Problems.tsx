@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { problemsData } from '../../data/problems';
+import { useLocalized } from '../../hooks/useLocalized';
 import './Problems.css';
 
 const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
@@ -19,8 +20,8 @@ const SOLUTION_TOGGLE_KEY: Record<'true' | 'false', string> = {
 };
 
 export default function Problems() {
-  const { t, i18n } = useTranslation();
-  const isUk = i18n.language === 'uk';
+  const { t } = useTranslation();
+  const tr = useLocalized();
   const [filter, setFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
   const [openSolutions, setOpenSolutions] = useState<Record<string, boolean>>({});
@@ -75,7 +76,7 @@ export default function Problems() {
             <article key={prob.id} className="problem-card" id={`problem-${prob.id}`}>
               <div className="problem-header">
                 <h2 className="problem-title">
-                  {isUk ? prob.name : prob.nameEn}
+                  {tr(prob, 'name')}
                 </h2>
                 <span className="problem-difficulty" title={t(`problems.diff_${prob.difficulty}`)}>
                   {DIFF_STARS[prob.difficulty]}
@@ -83,7 +84,7 @@ export default function Problems() {
               </div>
 
               <p className="problem-desc">
-                {isUk ? prob.description : prob.descriptionEn}
+                {tr(prob, 'description')}
               </p>
 
               <button
@@ -100,12 +101,12 @@ export default function Problems() {
                   {prob.steps.map((step, i) => (
                     <div key={i} className="solution-step">
                       <span className="step-number">{t('problems.step')} {i + 1}</span>
-                      <p className="step-text">{isUk ? step.text : step.textEn}</p>
+                      <p className="step-text">{tr(step, 'text')}</p>
                     </div>
                   ))}
                   <div className="solution-answer">
                     <strong>{t('formula.result')}:</strong>{' '}
-                    {isUk ? prob.answer : prob.answerEn}
+                    {tr(prob, 'answer')}
                   </div>
                   {prob.relatedFormula && (
                     <Link to={`/formula/${prob.relatedFormula}`} className="problem-formula-link">

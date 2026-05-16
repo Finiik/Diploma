@@ -4,6 +4,11 @@
     "subtitle": "Recommendation system for natural science students",
     "description": "Formulas, theory, problem examples & calculator for biology, physics, and chemistry students"
   },
+  "a11y": {
+    "assistant": "AI assistant",
+    "menu": "Menu",
+    "breadcrumb": "Breadcrumb"
+  },
   "nav": {
     "home": "Home",
     "physics": "Physics",

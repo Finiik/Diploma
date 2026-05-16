@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { search } from '../../services/search';
 import type { SearchHit, ContentType, Subject } from '../../types/domain';
+import { useLocalized } from '../../hooks/useLocalized';
 import './SearchBar.css';
 
 const SEARCH_TYPE_KEY: Record<ContentType, string> = {
@@ -12,7 +13,8 @@ const SEARCH_TYPE_KEY: Record<ContentType, string> = {
 };
 
 export default function SearchBar() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const tr = useLocalized();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchHit[]>([]);
@@ -53,8 +55,6 @@ export default function SearchBar() {
     }
   };
 
-  const isUk = i18n.language === 'uk';
-
   const getSubjectColor = (subject: Subject) => {
     if (subject === 'physics') return 'var(--color-physics)';
     if (subject === 'chemistry') return 'var(--color-chemistry)';
@@ -86,10 +86,10 @@ export default function SearchBar() {
             >
               <div className="search-result-info">
                 <span className="search-result-name">
-                  {isUk ? item.name : (item.nameEn || item.name)}
+                  {tr(item, 'name')}
                 </span>
                 <span className="search-result-desc">
-                  {isUk ? (item.description || '').slice(0, 60) : (item.descriptionEn || item.description || '').slice(0, 60)}...
+                  {tr(item, 'description').slice(0, 60)}...
                 </span>
               </div>
               <span

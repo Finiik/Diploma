@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocalized } from '../../hooks/useLocalized';
 import './Breadcrumb.css';
 
 export interface BreadcrumbItem {
@@ -14,23 +15,23 @@ interface BreadcrumbProps {
 }
 
 export default function Breadcrumb({ items }: BreadcrumbProps) {
-  const { i18n } = useTranslation();
-  const isUk = i18n.language === 'uk';
+  const { t } = useTranslation();
+  const tr = useLocalized();
 
   return (
-    <nav className="breadcrumb" aria-label="Breadcrumb">
+    <nav className="breadcrumb" aria-label={t('a11y.breadcrumb')}>
       {items.map((item, index) => (
         <span key={index} className="breadcrumb-item">
           {index > 0 && <span className="breadcrumb-separator">›</span>}
           {item.to ? (
             <Link to={item.to} className="breadcrumb-link">
               {item.icon && <span className="breadcrumb-icon">{item.icon}</span>}
-              {isUk ? item.label : (item.labelEn || item.label)}
+              {tr(item, 'label')}
             </Link>
           ) : (
             <span className="breadcrumb-current">
               {item.icon && <span className="breadcrumb-icon">{item.icon}</span>}
-              {isUk ? item.label : (item.labelEn || item.label)}
+              {tr(item, 'label')}
             </span>
           )}
         </span>

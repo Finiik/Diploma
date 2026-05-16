@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import katex from 'katex';
 import type { Formula } from '../../types/domain';
+import { useLocalized } from '../../hooks/useLocalized';
 import './Calculator.css';
 
 /** Calculator field values: numeric defaults or raw `<input>` strings. */
@@ -14,8 +15,8 @@ interface CalculatorProps {
 }
 
 export default function Calculator({ formula }: CalculatorProps) {
-  const { t, i18n } = useTranslation();
-  const isUk = i18n.language === 'uk';
+  const { t } = useTranslation();
+  const tr = useLocalized();
   const inputVars = formula.variables.filter(v => v.type === 'input');
   const resultVar = formula.variables.find(v => v.type === 'result');
 
@@ -39,7 +40,7 @@ export default function Calculator({ formula }: CalculatorProps) {
     for (const v of inputVars) {
       const val = parseFloat(String(values[v.symbol]));
       if (isNaN(val)) {
-        setError(t('formula.invalid_value', { name: isUk ? v.name : (v.nameEn || v.name) }));
+        setError(t('formula.invalid_value', { name: tr(v, 'name') }));
         return;
       }
       numValues[v.symbol] = val;
@@ -79,7 +80,7 @@ export default function Calculator({ formula }: CalculatorProps) {
           <div key={v.symbol} className="calc-field">
             <label className="calc-label">
               <span className="calc-symbol">{v.symbol}</span>
-              <span className="calc-name">{isUk ? v.name : (v.nameEn || v.name)}</span>
+              <span className="calc-name">{tr(v, 'name')}</span>
               <span className="calc-unit">{v.unit}</span>
             </label>
             <input

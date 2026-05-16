@@ -12,6 +12,7 @@ import { biologyData } from '../../data/biology';
 import type { Formula, Subject, SubjectData } from '../../types/domain';
 import { isFirebaseConfigured } from '../../lib/env';
 import { findFormulaById, findFormulasByIds } from '../../lib/formulas';
+import { useLocalized } from '../../hooks/useLocalized';
 import './FormulaDetail.css';
 
 type InteractionType = 'view' | 'calculation' | 'bookmark';
@@ -47,11 +48,11 @@ function findFormula(id: string | undefined): Formula | undefined {
 
 export default function FormulaDetail() {
   const { formulaId } = useParams();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const tr = useLocalized();
   const { user } = useAuth();
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const navigate = useNavigate();
-  const isUk = i18n.language === 'uk';
 
   const formula = findFormula(formulaId);
   const bookmarked = formula ? isBookmarked(formula.id) : false;
@@ -103,7 +104,7 @@ export default function FormulaDetail() {
     breadcrumbs.push({ label: formula.topic, labelEn: formula.topic });
   }
   breadcrumbs.push({
-    label: isUk ? formula.name : (formula.nameEn || formula.name)
+    label: tr(formula, 'name')
   });
 
   return (
@@ -114,7 +115,7 @@ export default function FormulaDetail() {
         <div className="formula-detail animate-fade-in">
           <div className="formula-detail-header">
             <h1 className="formula-detail-title">
-              {isUk ? formula.name : (formula.nameEn || formula.name)}
+              {tr(formula, 'name')}
             </h1>
             <button
               className={`bookmark-btn-lg ${bookmarked ? 'bookmarked' : ''}`}
@@ -133,7 +134,7 @@ export default function FormulaDetail() {
 
           <div className="formula-detail-desc">
             <h2>{t('formula.description')}</h2>
-            <p>{isUk ? formula.description : (formula.descriptionEn || formula.description)}</p>
+            <p>{tr(formula, 'description')}</p>
           </div>
 
           <div className="formula-detail-vars">
@@ -142,7 +143,7 @@ export default function FormulaDetail() {
               {formula.variables.map(v => (
                 <div key={v.symbol} className="var-row">
                   <span className="var-symbol">{v.symbol}</span>
-                  <span className="var-name">{isUk ? v.name : (v.nameEn || v.name)}</span>
+                  <span className="var-name">{tr(v, 'name')}</span>
                   <span className="var-unit">{v.unit}</span>
                 </div>
               ))}
@@ -164,7 +165,7 @@ export default function FormulaDetail() {
                       id={`derived-${df.id}`}
                     >
                       <span className="derived-name">
-                        {isUk ? df.name : (df.nameEn || df.name)}
+                        {tr(df, 'name')}
                       </span>
                       <div
                         className="derived-latex"

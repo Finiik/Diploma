@@ -4,6 +4,7 @@ import { useBookmarks } from '../../contexts/BookmarkContext';
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
 import type { Formula } from '../../types/domain';
+import { useLocalized } from '../../hooks/useLocalized';
 import './FormulaCard.css';
 
 const BOOKMARK_KEY: Record<'true' | 'false', string> = {
@@ -16,9 +17,9 @@ interface FormulaCardProps {
 }
 
 export default function FormulaCard({ formula }: FormulaCardProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { isBookmarked, toggleBookmark } = useBookmarks();
-  const isUk = i18n.language === 'uk';
+  const tr = useLocalized();
   const bookmarked = isBookmarked(formula.id);
 
   const renderedLatex = katex.renderToString(formula.latex, {
@@ -30,7 +31,7 @@ export default function FormulaCard({ formula }: FormulaCardProps) {
     <div className={`formula-card animate-fade-in subject-${formula.subject || 'default'}`} id={`formula-card-${formula.id}`}>
       <div className="formula-card-header">
         <Link to={`/formula/${formula.id}`} className="formula-card-title">
-          {isUk ? formula.name : (formula.nameEn || formula.name)}
+          {tr(formula, 'name')}
         </Link>
         <button
           className={`bookmark-btn ${bookmarked ? 'bookmarked' : ''}`}
@@ -46,7 +47,7 @@ export default function FormulaCard({ formula }: FormulaCardProps) {
           dangerouslySetInnerHTML={{ __html: renderedLatex }}
         />
         <p className="formula-desc">
-          {isUk ? formula.description : (formula.descriptionEn || formula.description)}
+          {tr(formula, 'description')}
         </p>
       </Link>
     </div>

@@ -15,11 +15,10 @@ const subjects = [
 ];
 
 export default function Home() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [recommendations, setRecommendations] = useState<Formula[]>([]);
   const [recsLoading, setRecsLoading] = useState(true);
-  const isUk = i18n.language === 'uk';
 
   useEffect(() => {
     async function loadRecs() {

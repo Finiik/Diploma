@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { theoryData } from '../../data/theory';
+import { useLocalized } from '../../hooks/useLocalized';
 import './Theory.css';
 
 const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
@@ -28,8 +29,8 @@ const DIFF_FILTER_KEY: Record<string, string> = {
 };
 
 export default function Theory() {
-  const { t, i18n } = useTranslation();
-  const isUk = i18n.language === 'uk';
+  const { t } = useTranslation();
+  const tr = useLocalized();
   const [filter, setFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
 
@@ -86,10 +87,10 @@ export default function Theory() {
                   <span className="theory-icon">{getSubjectIcon(th.subject)}</span>
                   <div>
                     <h2 className="theory-card-title">
-                      {isUk ? th.name : th.nameEn}
+                      {tr(th, 'name')}
                     </h2>
                     <p className="theory-card-topic">
-                      {isUk ? th.topic : th.topic}
+                      {th.topic}
                     </p>
                   </div>
                   <span className={`difficulty-badge ${badge.cls}`}>
@@ -97,10 +98,10 @@ export default function Theory() {
                   </span>
                 </div>
                 <p className="theory-card-desc">
-                  {isUk ? th.description : th.descriptionEn}
+                  {tr(th, 'description')}
                 </p>
                 <div className="theory-content">
-                  {(isUk ? th.content : th.contentEn).split('\n\n').map((para, i) => (
+                  {tr(th, 'content').split('\n\n').map((para, i) => (
                     <p key={i} dangerouslySetInnerHTML={{
                       __html: para
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')

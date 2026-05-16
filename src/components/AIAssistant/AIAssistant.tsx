@@ -178,7 +178,7 @@ export default function AIAssistant() {
       <button
         className={`ai-fab ${isOpen ? 'ai-fab-active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="AI Assistant"
+        aria-label={t('a11y.assistant')}
         id="ai-assistant-toggle"
       >
         {isOpen ? (
