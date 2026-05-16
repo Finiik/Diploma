@@ -10,19 +10,19 @@ function isFirebaseConfigured() {
   return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
 }
 
-function getLocalBookmarks() {
+function getLocalBookmarks(): string[] {
   try {
-    return JSON.parse(localStorage.getItem(BOOKMARKS_KEY)) || [];
+    return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) ?? 'null') || [];
   } catch {
     return [];
   }
 }
 
-function setLocalBookmarks(bookmarks) {
+function setLocalBookmarks(bookmarks: string[]): void {
   localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
 }
 
-export async function getBookmarks(userId) {
+export async function getBookmarks(userId?: string): Promise<string[]> {
   if (userId && isFirebaseConfigured()) {
     try {
       const { getBookmarksFirebase } = await import('../firebase/firestore');
@@ -36,7 +36,7 @@ export async function getBookmarks(userId) {
   return getLocalBookmarks();
 }
 
-export async function addBookmark(userId, formulaId) {
+export async function addBookmark(userId: string | undefined, formulaId: string): Promise<string[]> {
   const bookmarks = getLocalBookmarks();
   if (!bookmarks.includes(formulaId)) {
     bookmarks.push(formulaId);
@@ -53,7 +53,7 @@ export async function addBookmark(userId, formulaId) {
   return bookmarks;
 }
 
-export async function removeBookmark(userId, formulaId) {
+export async function removeBookmark(userId: string | undefined, formulaId: string): Promise<string[]> {
   let bookmarks = getLocalBookmarks().filter(id => id !== formulaId);
   setLocalBookmarks(bookmarks);
   if (userId && isFirebaseConfigured()) {
@@ -67,6 +67,6 @@ export async function removeBookmark(userId, formulaId) {
   return bookmarks;
 }
 
-export function isBookmarked(formulaId) {
+export function isBookmarked(formulaId: string): boolean {
   return getLocalBookmarks().includes(formulaId);
 }

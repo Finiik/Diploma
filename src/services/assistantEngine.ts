@@ -16,11 +16,15 @@
    ============================================ */
 
 import { RESPONDERS, finalizeResponse } from './assistant/responders';
+import type { AssistantResponse } from '../types/domain';
 
 // ============================================
 // Main entry point — async
 // ============================================
-export async function processMessage(query, isUk = true) {
+export async function processMessage(
+  query: string,
+  isUk = true
+): Promise<AssistantResponse> {
   if (!query || query.trim().length === 0) {
     return finalizeResponse({
       text: isUk ? 'Будь ласка, напишіть ваше питання.' : 'Please type your question.'

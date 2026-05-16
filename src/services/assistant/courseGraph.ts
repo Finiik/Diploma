@@ -15,48 +15,72 @@ import {
   getAllFormulas, getAllChemFormulas, getAllBioFormulas
 } from './subjects';
 import { normalizeConcept, conceptCore, similarity } from './text';
-import type { Concept } from '../../types/domain';
+import type {
+  Concept, CourseGraph, GraphItem, Subject, SubjectData
+} from '../../types/domain';
 
-let _graph = null;
-export function buildCourseGraph() {
+// Concept under construction: itemIds is a Set while we accumulate, then
+// frozen to the array `Concept` declares once the graph is finalized.
+interface ConceptBuilder {
+  label: string;
+  labelEn: string;
+  subject: Subject;
+  keys?: string[];
+  itemIds: Set<string>;
+}
+
+let _graph: CourseGraph | null = null;
+export function buildCourseGraph(): CourseGraph {
   if (_graph) return _graph;
 
-  const subjects = [
-    { key: 'physics', data: physicsData, list: getAllFormulas() },
-    { key: 'chemistry', data: chemistryData, list: getAllChemFormulas() },
-    { key: 'biology', data: biologyData, list: getAllBioFormulas() }
+  const subjects: { key: Subject; data: SubjectData; list: GraphItem[] }[] = [
+    {
+      key: 'physics',
+      data: physicsData,
+      list: getAllFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'physics' as const }))
+    },
+    {
+      key: 'chemistry',
+      data: chemistryData,
+      list: getAllChemFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'chemistry' as const }))
+    },
+    {
+      key: 'biology',
+      data: biologyData,
+      list: getAllBioFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'biology' as const }))
+    }
   ];
 
   // 1. Flat index of every platform item by id.
-  // TODO(Phase 4): tighten to Record<string, GraphItem> once the data layer
-  // is typed (the union's per-variant cross-link fields need the data's
-  // `subject` literals widened to the Subject type first).
-  const byId: Record<string, any> = {};
-  subjects.forEach(({ key, list }) =>
-    list.forEach(f => { byId[f.id] = { ...f, type: 'formula', subject: f.subject || key }; })
+  const byId: Record<string, GraphItem> = {};
+  subjects.forEach(({ list }) =>
+    list.forEach(f => { byId[f.id] = f; })
   );
-  theoryData.forEach(t => { byId[t.id] = { ...t, type: 'theory' }; });
-  problemsData.forEach(p => { byId[p.id] = { ...p, type: 'problem' }; });
+  theoryData.forEach(t => { byId[t.id] = { ...t, type: 'theory' as const }; });
+  problemsData.forEach(p => { byId[p.id] = { ...p, type: 'problem' as const }; });
 
   // 2. Undirected relationship edges from the data's own cross-links.
   const edges: Record<string, Set<string>> = {};
-  const link = (a, b) => {
+  const link = (a: string | undefined, b: string | undefined) => {
     if (!a || !b || a === b || !byId[a] || !byId[b]) return;
     (edges[a] = edges[a] || new Set()).add(b);
     (edges[b] = edges[b] || new Set()).add(a);
   };
   Object.values(byId).forEach(item => {
-    (item.derivedFormulas || []).forEach(id => link(item.id, id));
-    (item.relatedFormulas || []).forEach(id => link(item.id, id));
-    if (item.relatedFormula) link(item.id, item.relatedFormula);
+    const derived = item.type === 'formula' ? item.derivedFormulas : undefined;
+    const related = item.type !== 'problem' ? item.relatedFormulas : undefined;
+    const relatedOne = item.type === 'problem' ? item.relatedFormula : undefined;
+    (derived || []).forEach(id => link(item.id, id));
+    (related || []).forEach(id => link(item.id, id));
+    if (relatedOne) link(item.id, relatedOne);
   });
 
   // 3. Concept index: every topic and subtopic name (uk + en) is a concept
   //    that owns the items living under it. Theory/problems attach to the
   //    concept whose label matches their declared topic.
-  const concepts = [];
-  const addConcept = (label, labelEn, subject) => {
-    const c = { label, labelEn: labelEn || label, subject, itemIds: new Set() };
+  const concepts: ConceptBuilder[] = [];
+  const addConcept = (label: string, labelEn: string | undefined, subject: Subject): ConceptBuilder => {
+    const c: ConceptBuilder = { label, labelEn: labelEn || label, subject, itemIds: new Set() };
     concepts.push(c);
     return c;
   };
@@ -69,16 +93,19 @@ export function buildCourseGraph() {
       });
     });
   });
-  const conceptByLabel = {};
+  const conceptByLabel: Record<string, ConceptBuilder> = {};
   concepts.forEach(c => { conceptByLabel[normalizeConcept(c.label)] = c; });
   [...theoryData, ...problemsData].forEach(item => {
     const c = conceptByLabel[normalizeConcept(item.topic || '')];
     if (c) c.itemIds.add(item.id);
   });
-  concepts.forEach(c => {
-    c.keys = [c.label, c.labelEn].filter(Boolean).map(normalizeConcept);
-    c.itemIds = [...c.itemIds];
-  });
+  const finalConcepts: Concept[] = concepts.map(c => ({
+    label: c.label,
+    labelEn: c.labelEn,
+    subject: c.subject,
+    keys: [c.label, c.labelEn].filter(Boolean).map(normalizeConcept),
+    itemIds: [...c.itemIds]
+  }));
 
   // 4. Per-subject topic → subtopic outline for the model prompt.
   const outline = subjects.map(({ key, data }) => ({
@@ -92,7 +119,7 @@ export function buildCourseGraph() {
     }))
   }));
 
-  _graph = { byId, edges, concepts, outline };
+  _graph = { byId, edges, concepts: finalConcepts, outline };
   return _graph;
 }
 
@@ -101,7 +128,7 @@ export function buildCourseGraph() {
 // match (short queries only) tolerates typos/inflections. Whole-string — not
 // substring — so a specific lookup like "сила тяжіння" isn't swallowed by a
 // broad topic concept.
-export function matchConcept(query) {
+export function matchConcept(query: string): Concept | null {
   const raw = normalizeConcept(query.replace(/[?!.]+$/, ''));
   const core = conceptCore(query);
   const { concepts } = buildCourseGraph();
@@ -116,7 +143,7 @@ export function matchConcept(query) {
   // specific questions.
   if (core.split(' ').filter(Boolean).length > 4) return null;
 
-  let best = null;
+  let best: { c: Concept; s: number } | null = null;
   for (const c of concepts) {
     for (const k of c.keys) {
       const s = Math.max(similarity(core, k), similarity(raw, k));
@@ -130,7 +157,7 @@ export function matchConcept(query) {
 // that live under that topic/subtopic, expanded one hop along the data's own
 // relationship edges. Capped and ordered theory → formula → problem so the
 // AI gets an explainer article first when one exists.
-export function resolveRelated(concept: Concept | null) {
+export function resolveRelated(concept: Concept | null): GraphItem[] {
   if (!concept?.itemIds?.length) return [];
   const { byId, edges } = buildCourseGraph();
   const ids = new Set(concept.itemIds);
@@ -138,10 +165,10 @@ export function resolveRelated(concept: Concept | null) {
     const ns = edges[id];
     if (ns) ns.forEach(n => ids.add(n));
   });
-  const order = { theory: 0, formula: 1, problem: 2 };
+  const order: Record<GraphItem['type'], number> = { theory: 0, formula: 1, problem: 2 };
   return [...ids]
     .map(id => byId[id])
-    .filter(Boolean)
+    .filter((item): item is GraphItem => Boolean(item))
     .sort((a, b) => (order[a.type] ?? 3) - (order[b.type] ?? 3))
     .slice(0, 6);
 }

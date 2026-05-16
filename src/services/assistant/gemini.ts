@@ -16,11 +16,25 @@ const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.1-flash-lite
 const GEMINI_THINKING = import.meta.env.VITE_GEMINI_THINKING || 'low';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
+// Minimal shape of the Gemini generateContent JSON we actually read.
+interface GeminiPart {
+  text?: string;
+  thought?: boolean;
+}
+interface GeminiCandidate {
+  content?: { parts?: GeminiPart[] };
+  finishReason?: string;
+}
+interface GeminiResponse {
+  candidates?: GeminiCandidate[];
+  promptFeedback?: { blockReason?: string };
+}
+
 // Gemini 3 responses can carry multiple parts, including internal "thought"
 // parts (part.thought === true) that are NOT the answer. Concatenate only the
 // visible text parts; if there are none, surface WHY (prompt blocked, or the
 // thinking budget ate the output) instead of a generic empty-response error.
-function extractText(data) {
+function extractText(data: GeminiResponse): string {
   const candidate = data?.candidates?.[0];
   const parts = candidate?.content?.parts;
   if (Array.isArray(parts)) {
@@ -44,12 +58,12 @@ function extractText(data) {
 }
 
 // Whether a usable API key is configured (vs. missing/placeholder).
-export function geminiConfigured() {
+export function geminiConfigured(): boolean {
   return Boolean(GEMINI_API_KEY) && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY';
 }
 
 // Call Gemini API
-export async function callGemini(userMessage, isUk) {
+export async function callGemini(userMessage: string, isUk: boolean): Promise<string> {
   const { formulaList, theoryList, problemList, topicOutline, totalFormulas } = buildPlatformContext(isUk);
   const relevantContent = findRelevantContent(userMessage, isUk);
 
@@ -112,6 +126,6 @@ ${relevantContent}`;
     throw new Error(`Gemini API error: ${response.status}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as GeminiResponse;
   return extractText(data);
 }

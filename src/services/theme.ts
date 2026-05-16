@@ -8,7 +8,7 @@ export function getTheme() {
   return localStorage.getItem(THEME_KEY) || 'light';
 }
 
-export function setTheme(theme) {
+export function setTheme(theme: string) {
   localStorage.setItem(THEME_KEY, theme);
   document.documentElement.setAttribute('data-theme', theme);
 }

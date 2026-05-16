@@ -40,9 +40,9 @@ describe('matchConcept', () => {
   it('resolves an exact topic name to its concept', () => {
     const c = matchConcept('Механіка');
     expect(c).toBeTruthy();
-    expect(c.label).toBe('Механіка');
-    expect(c.subject).toBe('physics');
-    expect(c.itemIds.length).toBeGreaterThan(0);
+    expect(c!.label).toBe('Механіка');
+    expect(c!.subject).toBe('physics');
+    expect(c!.itemIds.length).toBeGreaterThan(0);
   });
 
   it('resolves the English topic label too', () => {

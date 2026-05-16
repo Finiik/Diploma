@@ -1,8 +1,18 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { auth } from '../firebase/config';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
 
-type AuthContextValue = { user: any; loading: boolean };
+/**
+ * Either a real Firebase user or the synthetic offline user the app falls
+ * back to when Firebase is unconfigured / auth fails. Consumers only ever
+ * read `uid`, so that's the only field guaranteed across both shapes.
+ */
+type OfflineUser = { uid: string; isAnonymous: boolean; offline: true };
+type AppUser = User | OfflineUser;
+
+type AuthContextValue = { user: AppUser | null; loading: boolean };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -12,8 +22,8 @@ function isFirebaseConfigured() {
   return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
 }
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

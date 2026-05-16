@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { initTheme, toggleTheme as toggleThemeService, setTheme as setThemeService } from '../services/theme';
 
 type ThemeContextValue = { theme: string; toggleTheme: () => void };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-export function ThemeProvider({ children }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState(() => initTheme());
 
   useEffect(() => {

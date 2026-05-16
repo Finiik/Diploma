@@ -9,13 +9,14 @@
 import { smartSearch } from './text';
 import { matchConcept, resolveRelated, buildCourseGraph } from './courseGraph';
 import { getSubjectEmoji, localizedName } from './subjects';
+import type { ResponderResult } from '../../types/domain';
 
 // Offline concept answer, fully SYNTHESIZED from the course data — no
 // hardcoded prose. A matched concept (topic/subtopic) leads with its
 // connected theory article (already prose in the data); if none, it stitches
 // a summary from the connected formulas. Follow-up chips are sibling topics
 // in the same subject. When Gemini is up this path is unused.
-export function detectConceptualAnswer(query, isUk) {
+export function detectConceptualAnswer(query: string, isUk: boolean): ResponderResult | null {
   const c = matchConcept(query);
   if (!c) return null;
   const related = resolveRelated(c);
@@ -55,7 +56,7 @@ export function detectConceptualAnswer(query, isUk) {
   return { text, suggestions };
 }
 
-export function localFallback(query, isUk) {
+export function localFallback(query: string, isUk: boolean): ResponderResult {
   // Broad conceptual question (e.g. "що таке фізика?") — answer the concept
   // generally instead of forcing the nearest specific formula.
   const concept = detectConceptualAnswer(query, isUk);
@@ -90,6 +91,10 @@ export function localFallback(query, isUk) {
 
   const others = results.slice(1, 4);
   const name = localizedName(top, isUk);
+  // The type guards below exhaust GraphItem's discriminant, so the trailing
+  // "generic result" branch is unreachable; keep an un-narrowed handle to
+  // read the shared description fields there without a `never` access.
+  const topItem = top;
 
   // Formula response — rich with variables
   if (top.type === 'formula') {
@@ -127,7 +132,7 @@ export function localFallback(query, isUk) {
     const desc = isUk ? top.description : top.descriptionEn;
     const content = (isUk ? top.content : top.contentEn) || '';
     const preview = content.split('\n\n').slice(0, 2).join('\n\n');
-    const diffLabels = { 1: '🟢', 2: '🟡', 3: '🔴' };
+    const diffLabels: Record<number, string> = { 1: '🟢', 2: '🟡', 3: '🔴' };
 
     let text = `📖 **${name}** ${diffLabels[top.difficulty] || ''}\n\n${desc}\n\n${preview.slice(0, 300)}${content.length > 300 ? '...' : ''}`;
 
@@ -158,9 +163,10 @@ export function localFallback(query, isUk) {
     return { text, suggestions: [] };
   }
 
-  // Generic result
+  // Generic result (unreachable: the guards above cover every GraphItem
+  // variant; kept as a defensive default identical to the original).
   return {
-    text: `🔍 **${name}**\n\n${isUk ? top.description : (top.descriptionEn || top.description)}`,
+    text: `🔍 **${name}**\n\n${isUk ? topItem.description : (topItem.descriptionEn || topItem.description)}`,
     suggestions: []
   };
 }

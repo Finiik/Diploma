@@ -4,6 +4,7 @@
    ============================================ */
 
 import { search } from '../search';
+import type { SearchHit } from '../../types/domain';
 
 // Intent words to strip before searching
 export const INTENT_WORDS_UK = [
@@ -21,7 +22,7 @@ export const INTENT_WORDS_EN = [
 ];
 
 // Strip intent words to get the core search query
-export function extractSearchQuery(query) {
+export function extractSearchQuery(query: string): string {
   let cleaned = query.toLowerCase().trim();
   // Remove question marks and trailing dots
   cleaned = cleaned.replace(/[?!.]+$/, '').trim();
@@ -45,7 +46,7 @@ export function extractSearchQuery(query) {
 }
 
 // Smart search: try original query, then cleaned query, then individual words
-export function smartSearch(query) {
+export function smartSearch(query: string): SearchHit[] {
   // Try full query first
   let results = search(query);
   if (results.length > 0) return results;
@@ -69,7 +70,7 @@ export function smartSearch(query) {
 
 // Normalize for tolerant concept matching: lowercase, drop punctuation and
 // apostrophes, fold ё→е, collapse whitespace.
-export function normalizeConcept(s) {
+export function normalizeConcept(s: string): string {
   return s
     .toLowerCase()
     .replace(/[?!.,;:()]+/g, ' ')
@@ -81,13 +82,13 @@ export function normalizeConcept(s) {
 
 // Levenshtein distance + a 0..1 similarity ratio, so small typos
 // ("Авагадро" → "Авогадро") and inflections still resolve to the concept.
-export function levenshtein(a, b) {
+export function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length;
   if (m === 0) return n;
   if (n === 0) return m;
   let prev = Array.from({ length: n + 1 }, (_, i) => i);
   for (let i = 1; i <= m; i++) {
-    const cur = [i];
+    const cur: number[] = [i];
     for (let j = 1; j <= n; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
       cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
@@ -97,7 +98,7 @@ export function levenshtein(a, b) {
   return prev[n];
 }
 
-export function similarity(a, b) {
+export function similarity(a: string, b: string): number {
   const max = Math.max(a.length, b.length);
   return max === 0 ? 1 : 1 - levenshtein(a, b) / max;
 }
@@ -113,7 +114,7 @@ export const FILLER_WORDS = [
 // Reduce a query to its bare subject for concept matching: strip a leading
 // run of fillers and intent phrases (looped, anywhere a prefix matches), so
 // the typo-tolerant comparison sees just the topic.
-export function conceptCore(query) {
+export function conceptCore(query: string): string {
   let s = normalizeConcept(query.replace(/[?!.]+$/, ''));
   const intents = [...INTENT_WORDS_UK, ...INTENT_WORDS_EN]
     .map(normalizeConcept)

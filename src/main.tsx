@@ -6,7 +6,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import { BookmarkProvider } from './contexts/BookmarkContext';
 import './i18n/index.js';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element #root not found');
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <ThemeProvider>
       <AuthProvider>

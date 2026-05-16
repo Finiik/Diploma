@@ -14,20 +14,30 @@ import {
   increment
 } from 'firebase/firestore';
 import { db } from './config';
+import type { Interaction, InteractionsByUser } from '../types/domain';
+
+/** Counters stored per-formula. Non-optional here (Firestore writes all 3). */
+type InteractionCounters = Required<Interaction>;
+type InteractionType = 'view' | 'calculation' | 'bookmark';
 
 /* ============================================
    User Interactions — for collaborative filtering
    ============================================ */
 
-export async function logInteraction(userId, formulaId, type = 'view') {
+export async function logInteraction(
+  userId: string | undefined,
+  formulaId: string,
+  type: InteractionType = 'view'
+): Promise<void> {
   if (!userId) return;
   const ref = doc(db, 'userInteractions', userId);
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
     const data = snap.data();
-    const interactions = data.interactions || {};
-    const current = interactions[formulaId] || { views: 0, calculations: 0, bookmarks: 0 };
+    const interactions: Record<string, InteractionCounters> = data.interactions || {};
+    const current: InteractionCounters =
+      interactions[formulaId] || { views: 0, calculations: 0, bookmarks: 0 };
 
     if (type === 'view') current.views += 1;
     if (type === 'calculation') current.calculations += 1;
@@ -36,7 +46,7 @@ export async function logInteraction(userId, formulaId, type = 'view') {
     interactions[formulaId] = current;
     await updateDoc(ref, { interactions, updatedAt: serverTimestamp() });
   } else {
-    const interactions = {};
+    const interactions: Record<string, InteractionCounters> = {};
     interactions[formulaId] = {
       views: type === 'view' ? 1 : 0,
       calculations: type === 'calculation' ? 1 : 0,
@@ -46,16 +56,18 @@ export async function logInteraction(userId, formulaId, type = 'view') {
   }
 }
 
-export async function getUserInteractions(userId) {
+export async function getUserInteractions(
+  userId: string | undefined
+): Promise<Record<string, Interaction>> {
   if (!userId) return {};
   const ref = doc(db, 'userInteractions', userId);
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data().interactions || {} : {};
 }
 
-export async function getAllInteractions() {
+export async function getAllInteractions(): Promise<InteractionsByUser> {
   const snapshot = await getDocs(collection(db, 'userInteractions'));
-  const all = {};
+  const all: InteractionsByUser = {};
   snapshot.forEach((docSnap) => {
     all[docSnap.id] = docSnap.data().interactions || {};
   });
@@ -66,7 +78,10 @@ export async function getAllInteractions() {
    Bookmarks — per-user
    ============================================ */
 
-export async function addBookmarkFirebase(userId, formulaId) {
+export async function addBookmarkFirebase(
+  userId: string | undefined,
+  formulaId: string
+): Promise<void> {
   if (!userId) return;
   const ref = doc(db, 'bookmarks', userId);
   const snap = await getDoc(ref);
@@ -78,13 +93,18 @@ export async function addBookmarkFirebase(userId, formulaId) {
   }
 }
 
-export async function removeBookmarkFirebase(userId, formulaId) {
+export async function removeBookmarkFirebase(
+  userId: string | undefined,
+  formulaId: string
+): Promise<void> {
   if (!userId) return;
   const ref = doc(db, 'bookmarks', userId);
   await updateDoc(ref, { formulaIds: arrayRemove(formulaId), updatedAt: serverTimestamp() });
 }
 
-export async function getBookmarksFirebase(userId) {
+export async function getBookmarksFirebase(
+  userId: string | undefined
+): Promise<string[]> {
   if (!userId) return [];
   const ref = doc(db, 'bookmarks', userId);
   const snap = await getDoc(ref);

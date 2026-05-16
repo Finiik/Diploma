@@ -7,7 +7,9 @@
 import { getAllFormulas } from '../data/physics';
 import { getAllFormulas as getAllChemFormulas } from '../data/chemistry';
 import { getAllFormulas as getAllBioFormulas } from '../data/biology';
-import type { InteractionsByUser } from '../types/domain';
+import type {
+  Formula, Interaction, InteractionsByUser
+} from '../types/domain';
 
 // Check if Firebase is actually configured
 function isFirebaseConfigured() {
@@ -16,7 +18,7 @@ function isFirebaseConfigured() {
 }
 
 // Pre-seeded demo users for initial recommendations
-const DEMO_INTERACTIONS = {
+const DEMO_INTERACTIONS: InteractionsByUser = {
   demo_user_1: {
     'phys_newton2': { views: 5, calculations: 3, bookmarks: 1 },
     'phys_kinetic_energy': { views: 3, calculations: 2, bookmarks: 1 },
@@ -54,18 +56,21 @@ const DEMO_INTERACTIONS = {
   }
 };
 
-function interactionScore(interaction) {
+function interactionScore(interaction: Interaction | undefined): number {
   if (!interaction) return 0;
   return (interaction.views || 0) * 1 +
          (interaction.calculations || 0) * 3 +
          (interaction.bookmarks || 0) * 5;
 }
 
-function buildUserVector(interactions, allFormulaIds) {
+function buildUserVector(
+  interactions: Record<string, Interaction>,
+  allFormulaIds: string[]
+): number[] {
   return allFormulaIds.map(id => interactionScore(interactions[id]));
 }
 
-function cosineSimilarity(a, b) {
+function cosineSimilarity(a: number[], b: number[]): number {
   let dot = 0, magA = 0, magB = 0;
   for (let i = 0; i < a.length; i++) {
     dot += a[i] * b[i];
@@ -78,7 +83,10 @@ function cosineSimilarity(a, b) {
   return dot / (magA * magB);
 }
 
-export async function getRecommendations(userId, topN = 6) {
+export async function getRecommendations(
+  userId: string | null | undefined,
+  topN = 6
+): Promise<Formula[]> {
   const allFormulas = [
     ...getAllFormulas(),
     ...getAllChemFormulas(),
@@ -101,18 +109,23 @@ export async function getRecommendations(userId, topN = 6) {
       const firebaseInteractions = await Promise.race([firebasePromise, timeoutPromise]) as InteractionsByUser;
       allInteractions = { ...allInteractions, ...firebaseInteractions };
     } catch (e) {
-      console.warn('Using demo data for recommendations:', e.message);
+      console.warn(
+        'Using demo data for recommendations:',
+        e instanceof Error ? e.message : e
+      );
     }
   }
 
   // Get current user interactions from local storage as fast fallback
-  let userInteractions = {};
+  let userInteractions: Record<string, Interaction> = {};
   if (userId && allInteractions[userId]) {
     userInteractions = allInteractions[userId];
   } else {
     // Check localStorage for local user interactions
     try {
-      const local = JSON.parse(localStorage.getItem('userInteractions') || '{}');
+      const local = JSON.parse(
+        localStorage.getItem('userInteractions') || '{}'
+      ) as Record<string, Interaction>;
       userInteractions = local;
     } catch {
       userInteractions = {};
@@ -128,7 +141,11 @@ export async function getRecommendations(userId, topN = 6) {
   }
 
   // Compute similarity with all other users
-  const similarities = [];
+  const similarities: {
+    userId: string;
+    similarity: number;
+    interactions: Record<string, Interaction>;
+  }[] = [];
   for (const [otherId, otherInteractions] of Object.entries(allInteractions)) {
     if (otherId === userId) continue;
     const otherVector = buildUserVector(otherInteractions, allFormulaIds);
@@ -159,10 +176,14 @@ export async function getRecommendations(userId, topN = 6) {
 
   return sorted
     .map(id => allFormulas.find(f => f.id === id))
-    .filter(Boolean);
+    .filter((f): f is Formula => f !== undefined);
 }
 
-function getPopularFormulas(allInteractions, allFormulas, topN) {
+function getPopularFormulas(
+  allInteractions: InteractionsByUser,
+  allFormulas: Formula[],
+  topN: number
+): Formula[] {
   const popularity: Record<string, number> = {};
   for (const interactions of Object.values(allInteractions)) {
     for (const [formulaId, interaction] of Object.entries(interactions)) {
@@ -177,5 +198,5 @@ function getPopularFormulas(allInteractions, allFormulas, topN) {
 
   return sorted
     .map(id => allFormulas.find(f => f.id === id))
-    .filter(Boolean);
+    .filter((f): f is Formula => f !== undefined);
 }

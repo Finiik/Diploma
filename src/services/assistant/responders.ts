@@ -27,11 +27,14 @@ import {
   detectHelpIntent, detectListIntent, detectThanksIntent, detectSubjectIntent
 } from './intents';
 import { localFallback } from './fallback';
+import type {
+  AssistantResponse, Responder, ResponderResult
+} from '../../types/domain';
 
 const GREETING_RE = /^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i;
 
 // Normalize any responder's partial result into the full response contract.
-export function finalizeResponse(partial) {
+export function finalizeResponse(partial: ResponderResult): AssistantResponse {
   return {
     text: partial.text,
     links: partial.links ?? [],
@@ -41,7 +44,7 @@ export function finalizeResponse(partial) {
 
 // --- Instant responders (no API call) ---------------------------------------
 
-function greeting(query, isUk) {
+function greeting(query: string, isUk: boolean): ResponderResult | null {
   if (!GREETING_RE.test(query)) return null;
   const allFormulas = getAllFormulasFlat();
   return {
@@ -54,7 +57,7 @@ function greeting(query, isUk) {
   };
 }
 
-function help(query, isUk) {
+function help(query: string, isUk: boolean): ResponderResult | null {
   if (!detectHelpIntent(query)) return null;
   const allFormulas = getAllFormulasFlat();
   return {
@@ -67,7 +70,7 @@ function help(query, isUk) {
   };
 }
 
-function thanks(query, isUk) {
+function thanks(query: string, isUk: boolean): ResponderResult | null {
   if (!detectThanksIntent(query)) return null;
   return {
     text: isUk
@@ -79,7 +82,7 @@ function thanks(query, isUk) {
   };
 }
 
-function list(query, isUk) {
+function list(query: string, isUk: boolean): ResponderResult | null {
   if (!detectListIntent(query)) return null;
 
   const subj = detectSubjectIntent(query);
@@ -102,7 +105,7 @@ function list(query, isUk) {
   };
 }
 
-function pureSubject(query, isUk) {
+function pureSubject(query: string, isUk: boolean): ResponderResult | null {
   const subj = detectSubjectIntent(query);
   if (!subj || query.length >= 15) return null;
 
@@ -120,7 +123,7 @@ function pureSubject(query, isUk) {
 // --- Terminal responder: Gemini, then rich local fallback -------------------
 // Always returns a response, so the chain never falls through.
 
-async function aiOrFallback(query, isUk) {
+async function aiOrFallback(query: string, isUk: boolean): Promise<ResponderResult> {
   // Navigation links: search hits first, then curated concept-graph links so
   // a topic like "стала Авогадро" still surfaces its connected materials
   // (mole, molarity, ideal-gas law) even with no direct search hit.
@@ -135,7 +138,10 @@ async function aiOrFallback(query, isUk) {
       const text = await callGemini(query, isUk);
       return { text, links };
     } catch (err) {
-      console.warn('Gemini API failed, using local fallback:', err.message);
+      console.warn(
+        'Gemini API failed, using local fallback:',
+        err instanceof Error ? err.message : err
+      );
     }
   }
 
@@ -144,7 +150,7 @@ async function aiOrFallback(query, isUk) {
 }
 
 // Ordered chain. First responder to return non-null answers the query.
-export const RESPONDERS = [
+export const RESPONDERS: Responder[] = [
   { id: 'greeting', run: greeting },
   { id: 'help', run: help },
   { id: 'thanks', run: thanks },

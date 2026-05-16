@@ -10,9 +10,10 @@ import { problemsData } from '../../data/problems';
 import { getAllFormulasFlat, localizedName } from './subjects';
 import { buildCourseGraph, matchConcept, resolveRelated } from './courseGraph';
 import { smartSearch } from './text';
+import type { Concept, GraphItem, NavLink } from '../../types/domain';
 
 // Build a compact context summary for Gemini
-export function buildPlatformContext(isUk) {
+export function buildPlatformContext(isUk: boolean) {
   const allFormulas = getAllFormulasFlat();
 
   const formulaList = allFormulas.map(f => {
@@ -51,7 +52,7 @@ export function buildPlatformContext(isUk) {
 }
 
 // Serialize one platform item into the Gemini prompt context.
-export function formatItemContext(item, isUk) {
+export function formatItemContext(item: GraphItem, isUk: boolean): string {
   const name = localizedName(item, isUk);
   if (item.type === 'formula') {
     const desc = isUk ? item.description : item.descriptionEn;
@@ -80,7 +81,7 @@ export function formatItemContext(item, isUk) {
 // expanded along the data's own edges, so the model explains by synthesizing
 // what the course actually teaches instead of answering in isolation.
 // Everything else falls back to fuzzy search, keeping only strong matches.
-export function findRelevantContent(query, isUk) {
+export function findRelevantContent(query: string, isUk: boolean): string {
   const related = resolveRelated(matchConcept(query));
   if (related.length > 0) {
     let context = '\n\n--- CONNECTED PLATFORM MATERIALS (this question is about a concept the platform covers across the items below — build the explanation by SYNTHESIZING these materials and explicitly connecting them; ground every claim in what is shown here and do NOT pad with facts the platform does not cover; tell the student they can open each one) ---\n';
@@ -100,9 +101,13 @@ export function findRelevantContent(query, isUk) {
 
 // Shared mapping from a platform item to a navigation link chip. The Gemini
 // path prefixes the label with a type emoji; the concept-graph path doesn't.
-const LINK_TYPE = { formula: 'formula', theory: 'theory', problem: 'problems' };
-const LINK_EMOJI = { formula: '📐', theory: '📖', problem: '📝' };
-function itemToLink(item, isUk, withEmoji = false) {
+const LINK_TYPE: Record<GraphItem['type'], NavLink['type']> = {
+  formula: 'formula', theory: 'theory', problem: 'problems'
+};
+const LINK_EMOJI: Record<GraphItem['type'], string> = {
+  formula: '📐', theory: '📖', problem: '📝'
+};
+function itemToLink(item: GraphItem, isUk: boolean, withEmoji = false): NavLink | null {
   const type = LINK_TYPE[item.type];
   if (!type) return null;
   const name = localizedName(item, isUk);
@@ -110,23 +115,25 @@ function itemToLink(item, isUk, withEmoji = false) {
 }
 
 // Build navigation links from search results
-export function extractLinks(query, isUk) {
+export function extractLinks(query: string, isUk: boolean): NavLink[] {
   return smartSearch(query)
     .slice(0, 4)
     .map(item => itemToLink(item, isUk, true))
-    .filter(Boolean);
+    .filter((l): l is NavLink => l !== null);
 }
 
 // Concept-graph navigation links (any subject), reused by the fallback and
 // the Gemini path so the topic still surfaces its connected materials.
-export function buildConceptLinks(concept, isUk) {
+export function buildConceptLinks(concept: Concept | null, isUk: boolean): NavLink[] {
   return resolveRelated(concept)
     .slice(0, 4)
     .map(item => itemToLink(item, isUk))
-    .filter(Boolean);
+    .filter((l): l is NavLink => l !== null);
 }
 
-export function mergeLinks(primary, extra, cap = 5) {
+export function mergeLinks<T extends { type: string; id: string }>(
+  primary: T[], extra: T[], cap = 5
+): T[] {
   const seen = new Set(primary.map(l => `${l.type}:${l.id}`));
   const out = [...primary];
   for (const l of extra) {

@@ -8,27 +8,28 @@ import { getAllFormulas as getAllChemFormulas } from '../data/chemistry';
 import { getAllFormulas as getAllBioFormulas } from '../data/biology';
 import { theoryData } from '../data/theory';
 import { problemsData } from '../data/problems';
+import type { GraphItem, SearchHit } from '../types/domain';
 
-let fuseInstance = null;
+let fuseInstance: Fuse<GraphItem> | null = null;
 
-function buildSearchIndex() {
-  const formulas = [
-    ...getAllFormulas().map(f => ({ ...f, type: 'formula', subject: 'physics' })),
-    ...getAllChemFormulas().map(f => ({ ...f, type: 'formula', subject: 'chemistry' })),
-    ...getAllBioFormulas().map(f => ({ ...f, type: 'formula', subject: 'biology' }))
+function buildSearchIndex(): Fuse<GraphItem> {
+  const formulas: GraphItem[] = [
+    ...getAllFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'physics' as const })),
+    ...getAllChemFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'chemistry' as const })),
+    ...getAllBioFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'biology' as const }))
   ];
 
-  const theories = theoryData.map(t => ({
+  const theories: GraphItem[] = theoryData.map(t => ({
     ...t,
-    type: 'theory'
+    type: 'theory' as const
   }));
 
-  const problems = problemsData.map(p => ({
+  const problems: GraphItem[] = problemsData.map(p => ({
     ...p,
-    type: 'problem'
+    type: 'problem' as const
   }));
 
-  const allItems = [...formulas, ...theories, ...problems];
+  const allItems: GraphItem[] = [...formulas, ...theories, ...problems];
 
   fuseInstance = new Fuse(allItems, {
     keys: [
@@ -49,17 +50,17 @@ function buildSearchIndex() {
   return fuseInstance;
 }
 
-export function search(queryStr) {
+export function search(queryStr: string): SearchHit[] {
   if (!queryStr || queryStr.trim().length < 2) return [];
-  if (!fuseInstance) buildSearchIndex();
-  return fuseInstance.search(queryStr).map(result => ({
+  const fuse = fuseInstance ?? buildSearchIndex();
+  return fuse.search(queryStr).map(result => ({
     ...result.item,
     score: result.score,
     matches: result.matches
   }));
 }
 
-export function rebuildIndex() {
+export function rebuildIndex(): void {
   fuseInstance = null;
   buildSearchIndex();
 }
