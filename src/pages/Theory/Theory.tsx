@@ -1,12 +1,11 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { theoryData } from '../../data/theory';
 import { useLocalized } from '../../hooks/useLocalized';
+import { useContentFilters } from '../../hooks/useContentFilters';
+import SubjectFilterBar from '../../components/FilterBar/SubjectFilterBar';
+import DifficultyFilterBar, { type DifficultyOption } from '../../components/FilterBar/DifficultyFilterBar';
 import './Theory.css';
-
-const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
-const DIFF_FILTERS = ['all', '1', '2', '3'];
 
 interface DifficultyBadge {
   key: string;
@@ -20,25 +19,18 @@ const DIFF_BADGE: Record<string, DifficultyBadge> = {
   2: { key: 'difficulty.intermediate', cls: 'diff-intermediate', icon: '🟡' },
   3: { key: 'difficulty.advanced', cls: 'diff-advanced', icon: '🔴' }
 };
-const DIFF_FILTER_ICON: Record<string, string> = { all: '📊', 1: '🟢', 2: '🟡', 3: '🔴' };
-const DIFF_FILTER_KEY: Record<string, string> = {
-  all: 'difficulty.all',
-  1: 'difficulty.beginner',
-  2: 'difficulty.intermediate',
-  3: 'difficulty.advanced'
-};
+const DIFF_OPTIONS: DifficultyOption[] = [
+  { value: 'all', icon: '📊', labelKey: 'difficulty.all' },
+  { value: '1', icon: '🟢', labelKey: 'difficulty.beginner' },
+  { value: '2', icon: '🟡', labelKey: 'difficulty.intermediate' },
+  { value: '3', icon: '🔴', labelKey: 'difficulty.advanced' }
+];
 
 export default function Theory() {
   const { t } = useTranslation();
   const tr = useLocalized();
-  const [filter, setFilter] = useState('all');
-  const [diffFilter, setDiffFilter] = useState('all');
-
-  const filtered = theoryData.filter(th => {
-    const matchSubject = filter === 'all' || th.subject === filter;
-    const matchDiff = diffFilter === 'all' || th.difficulty === Number(diffFilter);
-    return matchSubject && matchDiff;
-  });
+  const { subject, setSubject, difficulty, setDifficulty, filtered } =
+    useContentFilters(theoryData);
 
   const getSubjectIcon = (s: string) => SUBJECT_ICON[s] || '📚';
   const getDifficultyBadge = (level: number): DifficultyBadge =>
@@ -50,29 +42,13 @@ export default function Theory() {
         <h1 className="page-title animate-fade-in">{t('theory.title')}</h1>
 
         <div className="filters-row animate-fade-in">
-          <div className="filter-bar">
-            {SUBJECTS.map(s => (
-              <button
-                key={s}
-                className={`filter-btn ${filter === s ? 'active' : ''}`}
-                onClick={() => setFilter(s)}
-              >
-                {t(`subjects.${s}`)}
-              </button>
-            ))}
-          </div>
-
-          <div className="filter-bar difficulty-filter">
-            {DIFF_FILTERS.map(d => (
-              <button
-                key={d}
-                className={`filter-btn diff-filter-btn ${diffFilter === d ? 'active' : ''}`}
-                onClick={() => setDiffFilter(d)}
-              >
-                <span className="diff-icon">{DIFF_FILTER_ICON[d]}</span> {t(DIFF_FILTER_KEY[d])}
-              </button>
-            ))}
-          </div>
+          <SubjectFilterBar value={subject} onChange={setSubject} />
+          <DifficultyFilterBar
+            value={difficulty}
+            onChange={setDifficulty}
+            options={DIFF_OPTIONS}
+            iconClassName="diff-icon"
+          />
         </div>
 
         <div className="theory-list stagger-children">

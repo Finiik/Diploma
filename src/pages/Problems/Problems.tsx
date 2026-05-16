@@ -1,20 +1,20 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { problemsData } from '../../data/problems';
 import { useLocalized } from '../../hooks/useLocalized';
 import { useExpandedSet } from '../../hooks/useExpandedSet';
+import { useContentFilters } from '../../hooks/useContentFilters';
+import SubjectFilterBar from '../../components/FilterBar/SubjectFilterBar';
+import DifficultyFilterBar, { type DifficultyOption } from '../../components/FilterBar/DifficultyFilterBar';
 import './Problems.css';
 
-const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
-const DIFF_FILTERS = ['all', '1', '2', '3'];
 const DIFF_STARS: Record<string, string> = { all: '', 1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐' };
-const DIFF_KEY: Record<string, string> = {
-  all: 'difficulty.all',
-  1: 'problems.diff_1',
-  2: 'problems.diff_2',
-  3: 'problems.diff_3'
-};
+const DIFF_OPTIONS: DifficultyOption[] = [
+  { value: 'all', labelKey: 'difficulty.all' },
+  { value: '1', icon: '⭐', labelKey: 'problems.diff_1' },
+  { value: '2', icon: '⭐⭐', labelKey: 'problems.diff_2' },
+  { value: '3', icon: '⭐⭐⭐', labelKey: 'problems.diff_3' }
+];
 const SOLUTION_TOGGLE_KEY: Record<'true' | 'false', string> = {
   true: 'problems.hide_solution',
   false: 'problems.show_solution'
@@ -23,15 +23,9 @@ const SOLUTION_TOGGLE_KEY: Record<'true' | 'false', string> = {
 export default function Problems() {
   const { t } = useTranslation();
   const tr = useLocalized();
-  const [filter, setFilter] = useState('all');
-  const [diffFilter, setDiffFilter] = useState('all');
   const { isOpen, toggle } = useExpandedSet();
-
-  const filtered = problemsData.filter(p => {
-    const matchSubject = filter === 'all' || p.subject === filter;
-    const matchDiff = diffFilter === 'all' || p.difficulty === Number(diffFilter);
-    return matchSubject && matchDiff;
-  });
+  const { subject, setSubject, difficulty, setDifficulty, filtered } =
+    useContentFilters(problemsData);
 
   return (
     <div className="problems-page">
@@ -39,30 +33,13 @@ export default function Problems() {
         <h1 className="page-title animate-fade-in">{t('problems.title')}</h1>
 
         <div className="filters-row animate-fade-in">
-          <div className="filter-bar">
-            {SUBJECTS.map(s => (
-              <button
-                key={s}
-                className={`filter-btn ${filter === s ? 'active' : ''}`}
-                onClick={() => setFilter(s)}
-              >
-                {t(`subjects.${s}`)}
-              </button>
-            ))}
-          </div>
-
-          <div className="filter-bar difficulty-filter">
-            {DIFF_FILTERS.map(d => (
-              <button
-                key={d}
-                className={`filter-btn diff-filter-btn ${diffFilter === d ? 'active' : ''}`}
-                onClick={() => setDiffFilter(d)}
-              >
-                {DIFF_STARS[d] && <span className="diff-stars">{DIFF_STARS[d]}</span>}{' '}
-                {t(DIFF_KEY[d])}
-              </button>
-            ))}
-          </div>
+          <SubjectFilterBar value={subject} onChange={setSubject} />
+          <DifficultyFilterBar
+            value={difficulty}
+            onChange={setDifficulty}
+            options={DIFF_OPTIONS}
+            iconClassName="diff-stars"
+          />
         </div>
 
         <div className="problems-list stagger-children">
