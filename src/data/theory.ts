@@ -2,7 +2,9 @@
    Theory Data
    ============================================ */
 
-export const theoryData = [
+import type { TheoryItem } from '../types/domain';
+
+export const theoryData: TheoryItem[] = [
   {
     id: 'theory_newton_laws',
     name: 'Закони Ньютона',
@@ -470,10 +472,10 @@ BMR = 88.362 + 13.397×m + 4.799×h - 5.677×a`,
   }
 ];
 
-export function getTheoryBySubject(subject) {
+export function getTheoryBySubject(subject: string): TheoryItem[] {
   return theoryData.filter(t => t.subject === subject);
 }
 
-export function getTheoryById(id) {
+export function getTheoryById(id: string): TheoryItem | undefined {
   return theoryData.find(t => t.id === id);
 }

@@ -36,9 +36,14 @@ export interface Formula {
   description: string;
   descriptionEn: string;
   variables: FormulaVariable[];
-  /** Pure calculator function: input symbol→value map → result value. */
-  compute: (values: Record<string, number>) => number;
+  /**
+   * Pure calculator function. Most formulas return a single number; a few
+   * (e.g. Hardy-Weinberg, dihybrid cross) return several labelled results.
+   */
+  compute: (values: Record<string, number>) => number | Record<string, number>;
   resultVar: string;
+  /** True when `compute` returns several labelled results instead of one. */
+  multiResult?: boolean;
   topic: string;
   subtopic: string;
   /** Cross-links that become knowledge-graph edges. */

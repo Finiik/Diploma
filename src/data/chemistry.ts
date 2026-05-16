@@ -2,7 +2,9 @@
    Chemistry Formula Data
    ============================================ */
 
-export const chemistryData = {
+import type { SubjectData, Formula } from '../types/domain';
+
+export const chemistryData: SubjectData = {
   id: 'chemistry',
   name: 'Хімія',
   nameEn: 'Chemistry',
@@ -577,8 +579,8 @@ export const chemistryData = {
   ]
 };
 
-export function getAllFormulas() {
-  const formulas = [];
+export function getAllFormulas(): Formula[] {
+  const formulas: Formula[] = [];
   for (const topic of chemistryData.topics) {
     for (const subtopic of topic.subtopics) {
       for (const formula of subtopic.formulas) {
@@ -589,6 +591,6 @@ export function getAllFormulas() {
   return formulas;
 }
 
-export function getFormulaById(id) {
+export function getFormulaById(id: string): Formula | undefined {
   return getAllFormulas().find(f => f.id === id);
 }

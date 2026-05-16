@@ -2,7 +2,9 @@
    Problem Examples Data
    ============================================ */
 
-export const problemsData = [
+import type { ProblemItem } from '../types/domain';
+
+export const problemsData: ProblemItem[] = [
   {
     id: 'prob_newton_car',
     name: 'Прискорення автомобіля',
@@ -471,10 +473,10 @@ export const problemsData = [
   }
 ];
 
-export function getProblemsBySubject(subject) {
+export function getProblemsBySubject(subject: string): ProblemItem[] {
   return problemsData.filter(p => p.subject === subject);
 }
 
-export function getProblemById(id) {
+export function getProblemById(id: string): ProblemItem | undefined {
   return problemsData.find(p => p.id === id);
 }

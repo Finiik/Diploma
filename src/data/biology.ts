@@ -2,7 +2,9 @@
    Biology Formula Data
    ============================================ */
 
-export const biologyData = {
+import type { SubjectData, Formula } from '../types/domain';
+
+export const biologyData: SubjectData = {
   id: 'biology',
   name: 'Біологія',
   nameEn: 'Biology',
@@ -545,8 +547,8 @@ export const biologyData = {
   ]
 };
 
-export function getAllFormulas() {
-  const formulas = [];
+export function getAllFormulas(): Formula[] {
+  const formulas: Formula[] = [];
   for (const topic of biologyData.topics) {
     for (const subtopic of topic.subtopics) {
       for (const formula of subtopic.formulas) {
@@ -557,6 +559,6 @@ export function getAllFormulas() {
   return formulas;
 }
 
-export function getFormulaById(id) {
+export function getFormulaById(id: string): Formula | undefined {
   return getAllFormulas().find(f => f.id === id);
 }

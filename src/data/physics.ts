@@ -3,7 +3,9 @@
    Organized by topic → subtopics → formulas
    ============================================ */
 
-export const physicsData = {
+import type { SubjectData, Formula } from '../types/domain';
+
+export const physicsData: SubjectData = {
   id: 'physics',
   name: 'Фізика',
   nameEn: 'Physics',
@@ -681,8 +683,8 @@ export const physicsData = {
 };
 
 // Helper: get flat array of all formulas
-export function getAllFormulas() {
-  const formulas = [];
+export function getAllFormulas(): Formula[] {
+  const formulas: Formula[] = [];
   for (const topic of physicsData.topics) {
     for (const subtopic of topic.subtopics) {
       for (const formula of subtopic.formulas) {
@@ -694,6 +696,6 @@ export function getAllFormulas() {
 }
 
 // Helper: find formula by ID
-export function getFormulaById(id) {
+export function getFormulaById(id: string): Formula | undefined {
   return getAllFormulas().find(f => f.id === id);
 }
