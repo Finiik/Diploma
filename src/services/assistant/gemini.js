@@ -7,7 +7,41 @@ import { problemsData } from '../../data/problems';
 import { buildPlatformContext, findRelevantContent } from './context';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+// Model is env-overridable (VITE_GEMINI_MODEL) so swapping models is config,
+// not a code change. Default: Gemini 3.1 Flash-Lite — low-latency, low-cost.
+const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || 'gemini-3.1-flash-lite';
+// Gemini 3 thinking allowance: "minimal" | "low" | "medium" | "high".
+// "low" keeps the tutor fast/cheap while leaving enough reasoning for the
+// SYNTHESIZE-the-materials task. Env-overridable like the model.
+const GEMINI_THINKING = import.meta.env.VITE_GEMINI_THINKING || 'low';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
+// Gemini 3 responses can carry multiple parts, including internal "thought"
+// parts (part.thought === true) that are NOT the answer. Concatenate only the
+// visible text parts; if there are none, surface WHY (prompt blocked, or the
+// thinking budget ate the output) instead of a generic empty-response error.
+function extractText(data) {
+  const candidate = data?.candidates?.[0];
+  const parts = candidate?.content?.parts;
+  if (Array.isArray(parts)) {
+    const text = parts
+      .filter(p => p && typeof p.text === 'string' && p.thought !== true)
+      .map(p => p.text)
+      .join('')
+      .trim();
+    if (text) return text;
+  }
+
+  const blocked = data?.promptFeedback?.blockReason;
+  if (blocked) throw new Error(`Gemini blocked the prompt: ${blocked}`);
+
+  const finish = candidate?.finishReason;
+  if (finish && finish !== 'STOP') {
+    // e.g. MAX_TOKENS — thinking consumed the budget before any answer.
+    throw new Error(`Gemini returned no text (finishReason: ${finish})`);
+  }
+  throw new Error('Empty response from Gemini');
+}
 
 // Whether a usable API key is configured (vs. missing/placeholder).
 export function geminiConfigured() {
@@ -58,9 +92,13 @@ ${relevantContent}`;
       }
     ],
     generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 600,
-      topP: 0.9
+      // Gemini 3: Google strongly recommends leaving temperature at its
+      // default (1.0) — lowering it can cause looping / degraded reasoning.
+      // So no temperature/topP overrides here on purpose.
+      // Budget covers thinking + answer (thinking levels are relative
+      // allowances, not strict guarantees), so keep generous headroom.
+      maxOutputTokens: 2048,
+      thinkingConfig: { thinkingLevel: GEMINI_THINKING }
     }
   };
 
@@ -75,8 +113,5 @@ ${relevantContent}`;
   }
 
   const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!text) throw new Error('Empty response from Gemini');
-  return text;
+  return extractText(data);
 }
