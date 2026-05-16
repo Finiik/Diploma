@@ -5,7 +5,7 @@ import 'katex/dist/katex.min.css';
 import katex from 'katex';
 import './FormulaCard.css';
 
-const BOOKMARK_KEY = {
+const BOOKMARK_KEY: Record<'true' | 'false', string> = {
   true: 'formula.bookmark_remove',
   false: 'formula.bookmark_add'
 };
@@ -30,7 +30,7 @@ export default function FormulaCard({ formula }) {
         <button
           className={`bookmark-btn ${bookmarked ? 'bookmarked' : ''}`}
           onClick={(e) => { e.preventDefault(); toggleBookmark(formula.id); }}
-          title={t(BOOKMARK_KEY[bookmarked])}
+          title={t(BOOKMARK_KEY[bookmarked ? 'true' : 'false'])}
         >
           {bookmarked ? '★' : '☆'}
         </button>
