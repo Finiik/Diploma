@@ -15,6 +15,7 @@ import {
   getAllFormulas, getAllChemFormulas, getAllBioFormulas
 } from './subjects';
 import { normalizeConcept, conceptCore, similarity } from './text';
+import type { Concept } from '../../types/domain';
 
 let _graph = null;
 export function buildCourseGraph() {
@@ -27,7 +28,10 @@ export function buildCourseGraph() {
   ];
 
   // 1. Flat index of every platform item by id.
-  const byId = {};
+  // TODO(Phase 4): tighten to Record<string, GraphItem> once the data layer
+  // is typed (the union's per-variant cross-link fields need the data's
+  // `subject` literals widened to the Subject type first).
+  const byId: Record<string, any> = {};
   subjects.forEach(({ key, list }) =>
     list.forEach(f => { byId[f.id] = { ...f, type: 'formula', subject: f.subject || key }; })
   );
@@ -35,7 +39,7 @@ export function buildCourseGraph() {
   problemsData.forEach(p => { byId[p.id] = { ...p, type: 'problem' }; });
 
   // 2. Undirected relationship edges from the data's own cross-links.
-  const edges = {};
+  const edges: Record<string, Set<string>> = {};
   const link = (a, b) => {
     if (!a || !b || a === b || !byId[a] || !byId[b]) return;
     (edges[a] = edges[a] || new Set()).add(b);
@@ -126,7 +130,7 @@ export function matchConcept(query) {
 // that live under that topic/subtopic, expanded one hop along the data's own
 // relationship edges. Capped and ordered theory → formula → problem so the
 // AI gets an explainer article first when one exists.
-export function resolveRelated(concept) {
+export function resolveRelated(concept: Concept | null) {
   if (!concept?.itemIds?.length) return [];
   const { byId, edges } = buildCourseGraph();
   const ids = new Set(concept.itemIds);

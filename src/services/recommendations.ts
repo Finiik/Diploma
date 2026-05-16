@@ -7,6 +7,7 @@
 import { getAllFormulas } from '../data/physics';
 import { getAllFormulas as getAllChemFormulas } from '../data/chemistry';
 import { getAllFormulas as getAllBioFormulas } from '../data/biology';
+import type { InteractionsByUser } from '../types/domain';
 
 // Check if Firebase is actually configured
 function isFirebaseConfigured() {
@@ -86,7 +87,7 @@ export async function getRecommendations(userId, topN = 6) {
   const allFormulaIds = allFormulas.map(f => f.id);
 
   // Start with demo data — always available instantly
-  let allInteractions = { ...DEMO_INTERACTIONS };
+  let allInteractions: InteractionsByUser = { ...DEMO_INTERACTIONS };
 
   // Only try Firebase if configured
   if (isFirebaseConfigured()) {
@@ -97,7 +98,7 @@ export async function getRecommendations(userId, topN = 6) {
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Firebase timeout')), 2000)
       );
-      const firebaseInteractions = await Promise.race([firebasePromise, timeoutPromise]);
+      const firebaseInteractions = await Promise.race([firebasePromise, timeoutPromise]) as InteractionsByUser;
       allInteractions = { ...allInteractions, ...firebaseInteractions };
     } catch (e) {
       console.warn('Using demo data for recommendations:', e.message);
@@ -141,7 +142,7 @@ export async function getRecommendations(userId, topN = 6) {
   const topSimilar = similarities.slice(0, 5);
 
   // Aggregate weighted scores from similar users
-  const formulaScores = {};
+  const formulaScores: Record<string, number> = {};
   for (const { similarity, interactions } of topSimilar) {
     for (const [formulaId, interaction] of Object.entries(interactions)) {
       if (userInteractions[formulaId]) continue; // Skip already interacted
@@ -162,7 +163,7 @@ export async function getRecommendations(userId, topN = 6) {
 }
 
 function getPopularFormulas(allInteractions, allFormulas, topN) {
-  const popularity = {};
+  const popularity: Record<string, number> = {};
   for (const interactions of Object.values(allInteractions)) {
     for (const [formulaId, interaction] of Object.entries(interactions)) {
       popularity[formulaId] = (popularity[formulaId] || 0) + interactionScore(interaction);
