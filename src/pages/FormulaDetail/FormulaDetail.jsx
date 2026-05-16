@@ -17,6 +17,11 @@ const subjectDataMap = {
   biology: biologyData
 };
 
+const BOOKMARK_KEY = {
+  true: 'formula.bookmark_remove',
+  false: 'formula.bookmark_add'
+};
+
 function isFirebaseConfigured() {
   const key = import.meta.env.VITE_FIREBASE_API_KEY;
   return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
@@ -85,7 +90,7 @@ export default function FormulaDetail() {
   // Build breadcrumb
   const subjectData = subjectDataMap[formula.subject];
   const breadcrumbs = [
-    { label: 'Головна', labelEn: 'Home', to: '/', icon: '🏠' },
+    { label: t('nav.home'), to: '/', icon: '🏠' },
     subjectData && {
       label: subjectData.name,
       labelEn: subjectData.nameEn,
@@ -112,7 +117,7 @@ export default function FormulaDetail() {
               id="formula-bookmark-btn"
             >
               {bookmarked ? '★' : '☆'}
-              <span>{bookmarked ? t('formula.bookmark_remove') : t('formula.bookmark_add')}</span>
+              <span>{t(BOOKMARK_KEY[bookmarked])}</span>
             </button>
           </div>
 

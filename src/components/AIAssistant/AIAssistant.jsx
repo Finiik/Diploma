@@ -7,7 +7,7 @@ import { processMessage } from '../../services/assistantEngine';
 import './AIAssistant.css';
 
 export default function AIAssistant() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const isUk = i18n.language === 'uk';
 
@@ -73,7 +73,7 @@ export default function AIAssistant() {
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'bot',
-        text: isUk ? '❌ Виникла помилка. Спробуйте ще раз.' : '❌ An error occurred. Please try again.',
+        text: t('assistant.error'),
         links: [], suggestions: [], timestamp: Date.now()
       }]);
     } finally {
@@ -93,7 +93,7 @@ export default function AIAssistant() {
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'bot',
-        text: isUk ? '❌ Виникла помилка.' : '❌ An error occurred.',
+        text: t('assistant.error_short'),
         links: [], suggestions: [], timestamp: Date.now()
       }]);
     } finally {
@@ -190,7 +190,7 @@ export default function AIAssistant() {
               <div>
                 <h3 className="ai-header-title">SciLearn AI</h3>
                 <span className="ai-header-status">
-                  {isUk ? '✨ Gemini' : '✨ Gemini'}
+                  {t('assistant.powered_by')}
                 </span>
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function AIAssistant() {
               ref={inputRef}
               type="text"
               className="ai-input"
-              placeholder={isUk ? 'Запитайте щось...' : 'Ask something...'}
+              placeholder={t('assistant.placeholder')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}

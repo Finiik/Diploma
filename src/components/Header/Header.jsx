@@ -5,6 +5,11 @@ import { useTheme } from '../../contexts/ThemeContext';
 import SearchBar from '../SearchBar/SearchBar';
 import './Header.css';
 
+const THEME_TITLE_KEY = {
+  light: 'theme.dark',
+  dark: 'theme.light'
+};
+
 export default function Header() {
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -71,7 +76,7 @@ export default function Header() {
           <button
             className="action-btn theme-toggle"
             onClick={toggleTheme}
-            title={theme === 'light' ? t('theme.dark') : t('theme.light')}
+            title={t(THEME_TITLE_KEY[theme])}
             id="theme-toggle"
           >
             {theme === 'light' ? '🌙' : '☀️'}
@@ -81,7 +86,7 @@ export default function Header() {
             onClick={toggleLanguage}
             id="lang-toggle"
           >
-            {i18n.language === 'uk' ? 'EN' : 'UA'}
+            {t('language.toggle')}
           </button>
           <button
             className={`hamburger-btn ${mobileMenuOpen ? 'open' : ''}`}

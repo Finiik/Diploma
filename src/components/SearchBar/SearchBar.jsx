@@ -4,6 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { search } from '../../services/search';
 import './SearchBar.css';
 
+const SEARCH_TYPE_KEY = {
+  formula: 'search.type_formula',
+  theory: 'search.type_theory',
+  problem: 'search.type_problem'
+};
+
 export default function SearchBar() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -48,13 +54,6 @@ export default function SearchBar() {
 
   const isUk = i18n.language === 'uk';
 
-  const getTypeLabel = (type) => {
-    if (type === 'formula') return isUk ? 'Формула' : 'Formula';
-    if (type === 'theory') return isUk ? 'Теорія' : 'Theory';
-    if (type === 'problem') return isUk ? 'Задача' : 'Problem';
-    return type;
-  };
-
   const getSubjectColor = (subject) => {
     if (subject === 'physics') return 'var(--color-physics)';
     if (subject === 'chemistry') return 'var(--color-chemistry)';
@@ -96,7 +95,7 @@ export default function SearchBar() {
                 className="search-result-badge"
                 style={{ background: getSubjectColor(item.subject) }}
               >
-                {getTypeLabel(item.type)}
+                {t(SEARCH_TYPE_KEY[item.type])}
               </span>
             </button>
           ))}

@@ -23,6 +23,7 @@
     "start_learning": "Start Learning"
   },
   "subjects": {
+    "all": "All",
     "physics": "Physics",
     "chemistry": "Chemistry",
     "biology": "Biology",
@@ -41,13 +42,18 @@
     "bookmark_add": "Add to bookmarks",
     "bookmark_remove": "Remove from bookmarks",
     "back_to_list": "Back to list",
-    "no_result": "Enter values and press \"Calculate\""
+    "no_result": "Enter values and press \"Calculate\"",
+    "calc_error": "Calculation error",
+    "invalid_value": "Enter a valid value for {{name}}"
   },
   "search": {
     "placeholder": "Search formulas, theory, problems...",
     "no_results": "Nothing found",
     "results_for": "Results for",
-    "hint": "Start typing to search"
+    "hint": "Start typing to search",
+    "type_formula": "Formula",
+    "type_theory": "Theory",
+    "type_problem": "Problem"
   },
   "bookmarks": {
     "title": "My Bookmarks",
@@ -56,14 +62,19 @@
   },
   "theory": {
     "title": "Theory Materials",
-    "read_more": "Read more"
+    "read_more": "Read more",
+    "related_formulas": "Related formulas:"
   },
   "problems": {
     "title": "Problem Examples",
     "show_solution": "Show solution",
     "hide_solution": "Hide solution",
     "difficulty": "Difficulty",
-    "step": "Step"
+    "step": "Step",
+    "diff_1": "Easy",
+    "diff_2": "Medium",
+    "diff_3": "Hard",
+    "go_to_formula": "Go to formula →"
   },
   "common": {
     "loading": "Loading...",
@@ -72,7 +83,11 @@
     "close": "Close",
     "topic": "Topic",
     "subtopic": "Subtopic",
-    "all": "All"
+    "all": "All",
+    "no_results": "Nothing found",
+    "unknown_error": "Unknown error",
+    "try_again": "Try again",
+    "go_home": "Go home"
   },
   "theme": {
     "light": "Light theme",
@@ -80,7 +95,8 @@
   },
   "language": {
     "uk": "Українська",
-    "en": "English"
+    "en": "English",
+    "toggle": "UA"
   },
   "footer": {
     "copyright": "© 2026 SciLearn. Diploma project.",
@@ -99,6 +115,9 @@
     "online": "Online",
     "placeholder": "Ask something...",
     "greeting": "Hi! I'm your AI assistant. How can I help?",
-    "no_results": "Sorry, I couldn't find an answer. Try rephrasing."
+    "no_results": "Sorry, I couldn't find an answer. Try rephrasing.",
+    "powered_by": "✨ Gemini",
+    "error": "❌ An error occurred. Please try again.",
+    "error_short": "❌ An error occurred."
   }
 }

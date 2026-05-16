@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import './LoadingSkeleton.css';
 
 export function SkeletonCard() {
@@ -35,10 +36,11 @@ export function SkeletonGrid({ count = 6 }) {
 }
 
 export function PageLoader() {
+  const { t } = useTranslation();
   return (
     <div className="page-loader">
       <div className="loader-spinner"></div>
-      <p className="loader-text">Loading...</p>
+      <p className="loader-text">{t('common.loading')}</p>
     </div>
   );
 }

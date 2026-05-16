@@ -29,7 +29,7 @@ export default function Calculator({ formula }) {
     for (const v of inputVars) {
       const val = parseFloat(values[v.symbol]);
       if (isNaN(val)) {
-        setError(isUk ? `Введіть коректне значення для ${v.name}` : `Enter a valid value for ${v.nameEn || v.name}`);
+        setError(t('formula.invalid_value', { name: isUk ? v.name : (v.nameEn || v.name) }));
         return;
       }
       numValues[v.symbol] = val;
@@ -40,7 +40,7 @@ export default function Calculator({ formula }) {
       setResult(computed);
       setError('');
     } catch (e) {
-      setError(isUk ? 'Помилка обчислення' : 'Calculation error');
+      setError(t('formula.calc_error'));
     }
   };
 

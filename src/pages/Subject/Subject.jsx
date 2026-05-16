@@ -29,7 +29,7 @@ export default function Subject() {
   }
 
   const breadcrumbs = [
-    { label: 'Головна', labelEn: 'Home', to: '/', icon: '🏠' },
+    { label: t('nav.home'), to: '/', icon: '🏠' },
     { label: subject.name, labelEn: subject.nameEn, icon: subject.icon }
   ];
 

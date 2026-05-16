@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { Link } from 'react-router-dom';
+import i18n from '../../i18n';
 import './ErrorBoundary.css';
 
 export default class ErrorBoundary extends Component {
@@ -21,19 +22,19 @@ export default class ErrorBoundary extends Component {
       return (
         <div className="error-boundary">
           <div className="error-icon">⚠️</div>
-          <h2 className="error-title">Щось пішло не так</h2>
+          <h2 className="error-title">{i18n.t('common.error')}</h2>
           <p className="error-message">
-            {this.state.error?.message || 'Невідома помилка'}
+            {this.state.error?.message || i18n.t('common.unknown_error')}
           </p>
           <div className="error-actions">
             <button
               className="error-btn"
               onClick={() => this.setState({ hasError: false, error: null })}
             >
-              Спробувати знову
+              {i18n.t('common.try_again')}
             </button>
             <Link to="/" className="error-btn error-btn-secondary">
-              На головну
+              {i18n.t('common.go_home')}
             </Link>
           </div>
         </div>

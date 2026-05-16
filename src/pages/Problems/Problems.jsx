@@ -4,14 +4,26 @@ import { useTranslation } from 'react-i18next';
 import { problemsData } from '../../data/problems';
 import './Problems.css';
 
+const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
+const DIFF_FILTERS = ['all', '1', '2', '3'];
+const DIFF_STARS = { all: '', 1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐' };
+const DIFF_KEY = {
+  all: 'difficulty.all',
+  1: 'problems.diff_1',
+  2: 'problems.diff_2',
+  3: 'problems.diff_3'
+};
+const SOLUTION_TOGGLE_KEY = {
+  true: 'problems.hide_solution',
+  false: 'problems.show_solution'
+};
+
 export default function Problems() {
   const { t, i18n } = useTranslation();
   const isUk = i18n.language === 'uk';
   const [filter, setFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
   const [openSolutions, setOpenSolutions] = useState({});
-
-  const subjects = ['all', 'physics', 'chemistry', 'biology'];
 
   const filtered = problemsData.filter(p => {
     const matchSubject = filter === 'all' || p.subject === filter;
@@ -23,20 +35,6 @@ export default function Problems() {
     setOpenSolutions(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const difficultyLabel = (level) => {
-    const labels = { 1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐' };
-    return labels[level] || '⭐';
-  };
-
-  const getDiffName = (level) => {
-    const names = {
-      1: isUk ? 'Легка' : 'Easy',
-      2: isUk ? 'Середня' : 'Medium',
-      3: isUk ? 'Складна' : 'Hard'
-    };
-    return names[level] || names[1];
-  };
-
   return (
     <div className="problems-page">
       <div className="container">
@@ -44,38 +42,34 @@ export default function Problems() {
 
         <div className="filters-row animate-fade-in">
           <div className="filter-bar">
-            {subjects.map(s => (
+            {SUBJECTS.map(s => (
               <button
                 key={s}
                 className={`filter-btn ${filter === s ? 'active' : ''}`}
                 onClick={() => setFilter(s)}
               >
-                {s === 'all' ? t('common.all') : t(`subjects.${s}`)}
+                {t(`subjects.${s}`)}
               </button>
             ))}
           </div>
 
           <div className="filter-bar difficulty-filter">
-            {['all', '1', '2', '3'].map(d => {
-              const label = d === 'all'
-                ? (isUk ? 'Всі рівні' : 'All levels')
-                : `${difficultyLabel(Number(d))} ${getDiffName(Number(d))}`;
-              return (
-                <button
-                  key={d}
-                  className={`filter-btn diff-filter-btn ${diffFilter === d ? 'active' : ''}`}
-                  onClick={() => setDiffFilter(d)}
-                >
-                  {label}
-                </button>
-              );
-            })}
+            {DIFF_FILTERS.map(d => (
+              <button
+                key={d}
+                className={`filter-btn diff-filter-btn ${diffFilter === d ? 'active' : ''}`}
+                onClick={() => setDiffFilter(d)}
+              >
+                {DIFF_STARS[d] && <span className="diff-stars">{DIFF_STARS[d]}</span>}{' '}
+                {t(DIFF_KEY[d])}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="problems-list stagger-children">
           {filtered.length === 0 && (
-            <p className="no-results">{isUk ? 'Нічого не знайдено' : 'No results found'}</p>
+            <p className="no-results">{t('common.no_results')}</p>
           )}
           {filtered.map(prob => (
             <article key={prob.id} className="problem-card" id={`problem-${prob.id}`}>
@@ -83,8 +77,8 @@ export default function Problems() {
                 <h2 className="problem-title">
                   {isUk ? prob.name : prob.nameEn}
                 </h2>
-                <span className="problem-difficulty" title={getDiffName(prob.difficulty)}>
-                  {difficultyLabel(prob.difficulty)}
+                <span className="problem-difficulty" title={t(`problems.diff_${prob.difficulty}`)}>
+                  {DIFF_STARS[prob.difficulty]}
                 </span>
               </div>
 
@@ -97,7 +91,7 @@ export default function Problems() {
                 onClick={() => toggleSolution(prob.id)}
                 id={`solution-toggle-${prob.id}`}
               >
-                {openSolutions[prob.id] ? t('problems.hide_solution') : t('problems.show_solution')}
+                {t(SOLUTION_TOGGLE_KEY[Boolean(openSolutions[prob.id])])}
                 <span className={`toggle-arrow ${openSolutions[prob.id] ? 'open' : ''}`}>▼</span>
               </button>
 
@@ -115,7 +109,7 @@ export default function Problems() {
                   </div>
                   {prob.relatedFormula && (
                     <Link to={`/formula/${prob.relatedFormula}`} className="problem-formula-link">
-                      {isUk ? 'Перейти до формули →' : 'Go to formula →'}
+                      {t('problems.go_to_formula')}
                     </Link>
                   )}
                 </div>
