@@ -5,9 +5,9 @@
    ============================================ */
 
 import { search } from './search';
-import { getAllFormulas } from '../data/physics';
-import { getAllFormulas as getAllChemFormulas } from '../data/chemistry';
-import { getAllFormulas as getAllBioFormulas } from '../data/biology';
+import { physicsData, getAllFormulas } from '../data/physics';
+import { chemistryData, getAllFormulas as getAllChemFormulas } from '../data/chemistry';
+import { biologyData, getAllFormulas as getAllBioFormulas } from '../data/biology';
 import { theoryData } from '../data/theory';
 import { problemsData } from '../data/problems';
 
@@ -118,13 +118,21 @@ function buildPlatformContext(isUk) {
     return `- ${name} (${p.subject}, difficulty: ${p.difficulty}⭐): ${desc}`;
   }).join('\n');
 
-  return { formulaList, theoryList, problemList, totalFormulas: allFormulas.length };
-}
+  // The course's own topic → subtopic map, auto-derived from the data so the
+  // model understands the scope of what the platform actually teaches and can
+  // explain concepts within that scope instead of inventing its own.
+  const { outline } = buildCourseGraph();
+  const topicOutline = outline.map(s => {
+    const subj = isUk ? s.label : s.labelEn;
+    const topics = s.topics.map(t => {
+      const tn = isUk ? t.name : t.nameEn;
+      const subs = t.subtopics.map(x => (isUk ? x.name : x.nameEn)).filter(Boolean);
+      return subs.length ? `  • ${tn}: ${subs.join(', ')}` : `  • ${tn}`;
+    }).join('\n');
+    return `${subj}:\n${topics}`;
+  }).join('\n');
 
-// Is the question phrased as a definition request ("що таке X", "what is X")?
-function isDefinitionalQuery(query) {
-  return /(?:^|\s)(?:що таке|що це|поясни|розкажи про|what(?:'s| is| are)|define|tell me about)(?:\s|$)/i
-    .test(query.toLowerCase());
+  return { formulaList, theoryList, problemList, topicOutline, totalFormulas: allFormulas.length };
 }
 
 // Normalize for tolerant concept matching: lowercase, drop punctuation and
@@ -194,18 +202,104 @@ function conceptCore(query) {
   return s || normalizeConcept(extractSearchQuery(query));
 }
 
-// Resolve a query to a concept in the field-agnostic knowledge base. Exact
-// key matches win; otherwise a WHOLE-string fuzzy match (short queries only)
-// tolerates typos/inflections. Whole-string — not substring — so specific
-// lookups like "сила тяжіння" aren't swallowed by the broad "сила" concept.
+// ============================================
+// Auto-derived course knowledge graph
+//
+// There is NO hardcoded concept dictionary. The platform's own topics and
+// subtopics ARE the concepts; the data's own cross-links
+// (derivedFormulas / relatedFormulas / relatedFormula) ARE the edges. The AI
+// then explains a concept by synthesizing the materials these edges connect.
+// Adding/curating a concept = editing the course data, nothing here.
+// ============================================
+let _graph = null;
+function buildCourseGraph() {
+  if (_graph) return _graph;
+
+  const subjects = [
+    { key: 'physics', data: physicsData, list: getAllFormulas() },
+    { key: 'chemistry', data: chemistryData, list: getAllChemFormulas() },
+    { key: 'biology', data: biologyData, list: getAllBioFormulas() }
+  ];
+
+  // 1. Flat index of every platform item by id.
+  const byId = {};
+  subjects.forEach(({ key, list }) =>
+    list.forEach(f => { byId[f.id] = { ...f, type: 'formula', subject: f.subject || key }; })
+  );
+  theoryData.forEach(t => { byId[t.id] = { ...t, type: 'theory' }; });
+  problemsData.forEach(p => { byId[p.id] = { ...p, type: 'problem' }; });
+
+  // 2. Undirected relationship edges from the data's own cross-links.
+  const edges = {};
+  const link = (a, b) => {
+    if (!a || !b || a === b || !byId[a] || !byId[b]) return;
+    (edges[a] = edges[a] || new Set()).add(b);
+    (edges[b] = edges[b] || new Set()).add(a);
+  };
+  Object.values(byId).forEach(item => {
+    (item.derivedFormulas || []).forEach(id => link(item.id, id));
+    (item.relatedFormulas || []).forEach(id => link(item.id, id));
+    if (item.relatedFormula) link(item.id, item.relatedFormula);
+  });
+
+  // 3. Concept index: every topic and subtopic name (uk + en) is a concept
+  //    that owns the items living under it. Theory/problems attach to the
+  //    concept whose label matches their declared topic.
+  const concepts = [];
+  const addConcept = (label, labelEn, subject) => {
+    const c = { label, labelEn: labelEn || label, subject, itemIds: new Set() };
+    concepts.push(c);
+    return c;
+  };
+  subjects.forEach(({ key, data }) => {
+    (data.topics || []).forEach(topic => {
+      const tc = addConcept(topic.name, topic.nameEn, key);
+      (topic.subtopics || []).forEach(sub => {
+        const sc = addConcept(sub.name, sub.nameEn, key);
+        (sub.formulas || []).forEach(f => { tc.itemIds.add(f.id); sc.itemIds.add(f.id); });
+      });
+    });
+  });
+  const conceptByLabel = {};
+  concepts.forEach(c => { conceptByLabel[normalizeConcept(c.label)] = c; });
+  [...theoryData, ...problemsData].forEach(item => {
+    const c = conceptByLabel[normalizeConcept(item.topic || '')];
+    if (c) c.itemIds.add(item.id);
+  });
+  concepts.forEach(c => {
+    c.keys = [c.label, c.labelEn].filter(Boolean).map(normalizeConcept);
+    c.itemIds = [...c.itemIds];
+  });
+
+  // 4. Per-subject topic → subtopic outline for the model prompt.
+  const outline = subjects.map(({ key, data }) => ({
+    subject: key,
+    label: data.name,
+    labelEn: data.nameEn,
+    topics: (data.topics || []).map(t => ({
+      name: t.name,
+      nameEn: t.nameEn,
+      subtopics: (t.subtopics || []).map(s => ({ name: s.name, nameEn: s.nameEn }))
+    }))
+  }));
+
+  _graph = { byId, edges, concepts, outline };
+  return _graph;
+}
+
+// Resolve a query to a course concept (a topic/subtopic auto-extracted from
+// the data). Exact normalized-key match wins; otherwise a WHOLE-string fuzzy
+// match (short queries only) tolerates typos/inflections. Whole-string — not
+// substring — so a specific lookup like "сила тяжіння" isn't swallowed by a
+// broad topic concept.
 function matchConcept(query) {
   const raw = normalizeConcept(query.replace(/[?!.]+$/, ''));
   const core = conceptCore(query);
+  const { concepts } = buildCourseGraph();
 
-  for (const c of CONCEPTS) {
+  for (const c of concepts) {
     for (const k of c.keys) {
-      const nk = normalizeConcept(k);
-      if (core === nk || raw === nk) return c;
+      if (core === k || raw === k) return c;
     }
   }
 
@@ -214,46 +308,33 @@ function matchConcept(query) {
   if (core.split(' ').filter(Boolean).length > 4) return null;
 
   let best = null;
-  for (const c of CONCEPTS) {
+  for (const c of concepts) {
     for (const k of c.keys) {
-      const nk = normalizeConcept(k);
-      const s = Math.max(similarity(core, nk), similarity(raw, nk));
+      const s = Math.max(similarity(core, k), similarity(raw, k));
       if (s >= 0.84 && (!best || s > best.s)) best = { c, s };
     }
   }
   return best ? best.c : null;
 }
 
-// Broad conceptual = a definition request whose subject is a recognized
-// concept that has no curated links (a whole field like "фізика"). Those
-// inject nothing so weak fuzzy hits can't bias the model.
-function isBroadConceptualQuery(query) {
-  return isDefinitionalQuery(query) && matchConcept(query) !== null;
-}
-
-// Index every platform item by id so a concept's "related" list resolves to
-// real names + navigation targets. Field-agnostic: covers all subjects.
-let _itemsById = null;
-function itemsById() {
-  if (_itemsById) return _itemsById;
-  const idx = {};
-  [
-    [getAllFormulas(), 'physics'],
-    [getAllChemFormulas(), 'chemistry'],
-    [getAllBioFormulas(), 'biology']
-  ].forEach(([list, subject]) =>
-    list.forEach(f => { idx[f.id] = { ...f, type: 'formula', subject: f.subject || subject }; })
-  );
-  theoryData.forEach(t => { idx[t.id] = { ...t, type: 'theory' }; });
-  problemsData.forEach(p => { idx[p.id] = { ...p, type: 'problem' }; });
-  _itemsById = idx;
-  return idx;
-}
-
+// Resolve a matched concept to its connected platform materials: the items
+// that live under that topic/subtopic, expanded one hop along the data's own
+// relationship edges. Capped and ordered theory → formula → problem so the
+// AI gets an explainer article first when one exists.
 function resolveRelated(concept) {
-  if (!concept?.related) return [];
-  const idx = itemsById();
-  return concept.related.map(id => idx[id]).filter(Boolean);
+  if (!concept?.itemIds?.length) return [];
+  const { byId, edges } = buildCourseGraph();
+  const ids = new Set(concept.itemIds);
+  concept.itemIds.forEach(id => {
+    const ns = edges[id];
+    if (ns) ns.forEach(n => ids.add(n));
+  });
+  const order = { theory: 0, formula: 1, problem: 2 };
+  return [...ids]
+    .map(id => byId[id])
+    .filter(Boolean)
+    .sort((a, b) => (order[a.type] ?? 3) - (order[b.type] ?? 3))
+    .slice(0, 6);
 }
 
 // Serialize one platform item into the Gemini prompt context.
@@ -281,20 +362,18 @@ function formatItemContext(item, isUk) {
   return '';
 }
 
-// Build platform context for the Gemini prompt. A recognized concept pulls in
-// its curated cross-topic materials (e.g. Avogadro → mole, molarity, ideal
-// gas) so the model connects topics instead of answering in isolation. Broad
-// fields with no curated links inject nothing; everything else falls back to
-// fuzzy search, keeping only strong matches.
+// Build the retrieval context for the Gemini prompt (graph/keyword RAG). A
+// matched concept pulls in the platform materials its topic/subtopic owns,
+// expanded along the data's own edges, so the model explains by synthesizing
+// what the course actually teaches instead of answering in isolation.
+// Everything else falls back to fuzzy search, keeping only strong matches.
 function findRelevantContent(query, isUk) {
   const related = resolveRelated(matchConcept(query));
   if (related.length > 0) {
-    let context = '\n\n--- RELATED PLATFORM MATERIALS (the question connects to these; weave them together and tell the student they can open them) ---\n';
+    let context = '\n\n--- CONNECTED PLATFORM MATERIALS (this question is about a concept the platform covers across the items below — build the explanation by SYNTHESIZING these materials and explicitly connecting them; ground every claim in what is shown here and do NOT pad with facts the platform does not cover; tell the student they can open each one) ---\n';
     related.forEach(item => { context += formatItemContext(item, isUk); });
     return context;
   }
-
-  if (isBroadConceptualQuery(query)) return '';
 
   const results = smartSearch(query)
     .filter(r => r.score == null || r.score <= 0.4)
@@ -324,7 +403,7 @@ function extractLinks(query, isUk) {
 
 // Call Gemini API
 async function callGemini(userMessage, isUk) {
-  const { formulaList, theoryList, problemList, totalFormulas } = buildPlatformContext(isUk);
+  const { formulaList, theoryList, problemList, topicOutline, totalFormulas } = buildPlatformContext(isUk);
   const relevantContent = findRelevantContent(userMessage, isUk);
 
   const lang = isUk ? 'Ukrainian' : 'English';
@@ -334,14 +413,17 @@ async function callGemini(userMessage, isUk) {
 HOW TO ANSWER:
 1. ALWAYS respond in ${lang}.
 2. Answer the student's ACTUAL question first, directly and clearly, using your own knowledge.
-3. For broad or conceptual questions (e.g. "what is physics?", "why does X happen?", "what is energy?"), give a clear GENERAL explanation of the field or idea in plain language. Do NOT jump to a single specific formula unless the student explicitly asked for one.
-4. Bring up a specific platform formula/topic/problem ONLY when it genuinely helps answer THIS question. When you do, name it and say the student can open it on the platform. Never force an unrelated formula into the answer. If a "RELATED PLATFORM MATERIALS" block is provided below, the question links several platform topics — connect them: explain how they relate and point the student to each listed material so they see the bigger picture.
+3. For broad or conceptual questions (e.g. "what is physics?", "why does X happen?", "what is energy?"), give a clear GENERAL explanation in plain language, framed by the scope the platform actually teaches (see COURSE TOPIC MAP). Do NOT jump to a single specific formula unless the student explicitly asked for one.
+4. Bring up a specific platform formula/topic/problem ONLY when it genuinely helps answer THIS question. When you do, name it and say the student can open it on the platform. Never force an unrelated formula into the answer. If a "CONNECTED PLATFORM MATERIALS" block is provided below, the question is about a concept the course covers across those materials — build the explanation by SYNTHESIZING them: explain how they relate, ground every claim in what those materials show (don't pad with facts the platform doesn't cover), and point the student to each one so they see the bigger picture.
 5. Keep it concise: 3-6 sentences for simple questions, a little more for explanations. Move from the general idea to specifics, not the other way around.
 6. Write formulas in LaTeX wrapped in $$...$$. Show calculation steps clearly when solving a problem.
 7. Be encouraging and educational. Use at most 1-2 emoji. Use **bold** for emphasis; do NOT use markdown headers (#).
 8. If something isn't on the platform, still answer from your knowledge.
 
-The catalog below is the platform's library — use it ONLY to point students to relevant materials, NOT as the source of your answer and NOT something to recite.
+The COURSE TOPIC MAP below is the exact scope this platform teaches — treat it as the boundary of "what the course covers". The catalog after it is the platform's library — use it ONLY to point students to relevant materials, NOT as the source of your answer and NOT something to recite.
+
+COURSE TOPIC MAP (subjects → topics → subtopics the platform actually teaches):
+${topicOutline}
 
 PLATFORM CATALOG (${totalFormulas} formulas, ${theoryData.length} theory articles, ${problemsData.length} problems):
 
@@ -409,118 +491,6 @@ function detectSubjectIntent(query) {
   return null;
 }
 
-// General-concept knowledge base for broad/definitional questions, so the
-// offline fallback answers "what is physics?" with an explanation of the
-// field instead of forcing the nearest specific formula. Extend as needed.
-// Field-agnostic concept knowledge base. Each entry can carry:
-//   related  — platform item ids (any subject) to surface as links/context
-//   seeAlso  — keys of sibling concepts, offered as follow-up suggestions
-// The matching/linking engine is generic; adding a concept for any field is
-// purely a data change here.
-const CONCEPTS = [
-  {
-    keys: ['фізика', 'фізику', 'фізики', 'physics'],
-    emoji: '⚛️',
-    uk: { title: 'Фізика', body: 'Фізика — це природнича наука, яка вивчає матерію, енергію та фундаментальні взаємодії, а також закони, за якими рухається і змінюється світ. Основні розділи: механіка, термодинаміка, електрика й магнетизм, оптика, коливання та хвилі, атомна і ядерна фізика.' },
-    en: { title: 'Physics', body: 'Physics is a natural science that studies matter, energy and the fundamental interactions, and the laws that govern how the world moves and changes. Main branches: mechanics, thermodynamics, electricity & magnetism, optics, oscillations & waves, and atomic & nuclear physics.' },
-    seeAlso: ['енергія', 'сила', 'атом']
-  },
-  {
-    keys: ['хімія', 'хімію', 'хімії', 'chemistry'],
-    emoji: '🧪',
-    uk: { title: 'Хімія', body: 'Хімія — це наука про речовини, їхній склад, будову, властивості та перетворення під час хімічних реакцій. Вона вивчає атоми й молекули, зв’язки між ними, розчини, кислоти та основи, а також енергію хімічних процесів.' },
-    en: { title: 'Chemistry', body: 'Chemistry is the science of substances — their composition, structure, properties and the transformations they undergo in chemical reactions. It studies atoms and molecules, bonds, solutions, acids and bases, and the energy of chemical processes.' },
-    seeAlso: ['моль', 'молярна концентрація', 'атом']
-  },
-  {
-    keys: ['біологія', 'біологію', 'біології', 'biology'],
-    emoji: '🧬',
-    uk: { title: 'Біологія', body: 'Біологія — це наука про живі організми: їхню будову, функціонування, розвиток, спадковість та взаємодію із середовищем. Основні напрями: клітинна біологія, генетика, екологія, фізіологія та еволюція.' },
-    en: { title: 'Biology', body: 'Biology is the science of living organisms — their structure, function, growth, heredity and interaction with the environment. Main areas: cell biology, genetics, ecology, physiology and evolution.' },
-    seeAlso: ['клітина', 'днк']
-  },
-  {
-    keys: ['енергія', 'енергію', 'енергії', 'energy'],
-    emoji: '⚡',
-    uk: { title: 'Енергія', body: 'Енергія — це фізична величина, що характеризує здатність системи виконувати роботу. Вона буває кінетичною, потенціальною, тепловою, електричною, хімічною тощо; за законом збереження енергія не зникає, а лише переходить з однієї форми в іншу.' },
-    en: { title: 'Energy', body: 'Energy is a physical quantity describing a system’s ability to do work. It comes in kinetic, potential, thermal, electrical, chemical and other forms; by the conservation law it is never destroyed, only converted between forms.' },
-    related: ['phys_kinetic_energy', 'phys_work', 'phys_mass_energy', 'theory_thermodynamics'],
-    seeAlso: ['сила', 'атом']
-  },
-  {
-    keys: ['сила', 'силу', 'сили', 'force'],
-    emoji: '🧲',
-    uk: { title: 'Сила', body: 'Сила — це міра взаємодії тіл, що змінює їхній стан руху або форму. Вона векторна (має величину й напрям), вимірюється в ньютонах (Н), а її дію описують закони Ньютона.' },
-    en: { title: 'Force', body: 'Force is a measure of interaction between bodies that changes their state of motion or shape. It is a vector (has magnitude and direction), measured in newtons (N), and its effects are described by Newton’s laws.' },
-    related: ['phys_newton2', 'phys_weight', 'phys_gravity_law', 'theory_newton_laws'],
-    seeAlso: ['енергія']
-  },
-  {
-    keys: ['атом', 'атома', 'атоми', 'atom'],
-    emoji: '⚛️',
-    uk: { title: 'Атом', body: 'Атом — найменша частинка хімічного елемента, що зберігає його властивості. Складається з ядра (протони й нейтрони) та електронів навколо нього; саме будова атома визначає хімічну поведінку речовини.' },
-    en: { title: 'Atom', body: 'An atom is the smallest particle of a chemical element that retains its properties. It consists of a nucleus (protons and neutrons) and surrounding electrons; the atomic structure determines a substance’s chemical behaviour.' },
-    related: ['phys_mass_energy', 'phys_photon_energy', 'phys_radioactive_decay'],
-    seeAlso: ['стала авогадро', 'моль']
-  },
-  {
-    keys: ['клітина', 'клітину', 'клітини', 'cell'],
-    emoji: '🦠',
-    uk: { title: 'Клітина', body: 'Клітина — це структурна й функціональна одиниця всіх живих організмів. Вона має мембрану, цитоплазму та органели (а в еукаріотів — ядро) і здатна до обміну речовин, росту та поділу.' },
-    en: { title: 'Cell', body: 'The cell is the structural and functional unit of all living organisms. It has a membrane, cytoplasm and organelles (and a nucleus in eukaryotes), and is capable of metabolism, growth and division.' },
-    related: ['bio_osmotic_pressure', 'theory_cell_biology'],
-    seeAlso: ['днк', 'біологія']
-  },
-  {
-    keys: ['днк', 'дезоксирибонуклеїнова кислота', 'dna', 'deoxyribonucleic acid'],
-    emoji: '🧬',
-    uk: { title: 'ДНК', body: 'ДНК (дезоксирибонуклеїнова кислота) — біополімер, що зберігає спадкову інформацію у послідовності нуклеотидів (A, T, G, C). Вона організована у подвійну спіраль, копіюється під час поділу клітини й через триплети-кодони задає синтез білків.' },
-    en: { title: 'DNA', body: 'DNA (deoxyribonucleic acid) is a biopolymer that stores hereditary information in a sequence of nucleotides (A, T, G, C). It is organised as a double helix, copied during cell division, and via three-letter codons directs protein synthesis.' },
-    related: ['bio_dna_length', 'bio_codon_count', 'bio_protein_mw', 'theory_cell_biology'],
-    seeAlso: ['клітина', 'біологія']
-  },
-  {
-    keys: ['стала авогадро', 'число авогадро', 'постійна авогадро', 'константа авогадро', 'авогадро',
-      "avogadro's number", 'avogadro number', 'avogadro constant', 'avogadro'],
-    emoji: '🧪',
-    uk: { title: 'Стала Авогадро', body: 'Стала (число) Авогадро Nₐ ≈ 6.022·10²³ моль⁻¹ — це кількість структурних частинок (атомів, молекул, йонів) в одному молі речовини. Саме вона пов’язує мікросвіт окремих частинок із макроскопічними величинами: переводить кількість речовини (моль) у число частинок, а молярну масу — у масу однієї молекули. Тому стала Авогадро лежить в основі розрахунків кількості речовини, молярної концентрації розчинів та рівняння стану ідеального газу.' },
-    en: { title: "Avogadro's Constant", body: "Avogadro's constant (number) Nₐ ≈ 6.022·10²³ mol⁻¹ is the number of structural particles (atoms, molecules, ions) in one mole of a substance. It bridges the microscopic world of single particles with macroscopic quantities: it converts amount of substance (moles) into a particle count and molar mass into the mass of one molecule. It therefore underpins calculations of amount of substance, solution molarity and the ideal-gas law." },
-    related: ['chem_molar_mass', 'chem_molarity', 'chem_ideal_gas', 'theory_solutions'],
-    seeAlso: ['моль', 'молярна концентрація', 'атом']
-  },
-  {
-    keys: ['моль', 'молі', 'моля', 'кількість речовини', 'mole', 'amount of substance'],
-    emoji: '🧪',
-    uk: { title: 'Моль і кількість речовини', body: 'Моль — одиниця кількості речовини, що містить рівно стільки частинок, скільки задає стала Авогадро (≈ 6.022·10²³). Кількість речовини обчислюють як n = m/M (маса поділена на молярну масу), і вона є вхідною величиною для молярної концентрації розчинів та рівняння стану ідеального газу.' },
-    en: { title: 'Mole and Amount of Substance', body: "The mole is the unit of amount of substance containing exactly as many particles as Avogadro's constant defines (≈ 6.022·10²³). Amount of substance is computed as n = m/M (mass over molar mass) and feeds into solution molarity and the ideal-gas law." },
-    related: ['chem_molar_mass', 'chem_molarity', 'chem_ideal_gas'],
-    seeAlso: ['стала авогадро', 'молярна концентрація']
-  },
-  {
-    keys: ['молярна концентрація', 'молярність', 'концентрація розчину', 'концентрація',
-      'molarity', 'molar concentration', 'concentration'],
-    emoji: '🧪',
-    uk: { title: 'Молярна концентрація', body: 'Молярна концентрація (молярність) — кількість молів розчиненої речовини в одному літрі розчину: C = n/V. Вона спирається на поняття молю (а отже й сталу Авогадро) і є базовою величиною для розрахунків розчинів, розбавлення та pH.' },
-    en: { title: 'Molarity', body: "Molarity is the number of moles of solute per litre of solution: C = n/V. It builds on the mole (and hence Avogadro's constant) and is the core quantity for solution, dilution and pH calculations." },
-    related: ['chem_molarity', 'chem_dilution', 'chem_mass_fraction', 'theory_solutions'],
-    seeAlso: ['моль', 'стала авогадро']
-  }
-];
-
-// Return a general explanation when the question is a broad definitional one
-// whose subject is a known concept. Specific lookups (e.g. "що таке закон
-// Ома") have a multi-word core and fall through to formula/theory search.
-// Display title of the concept owning a given key (for seeAlso suggestions).
-function conceptTitle(key, isUk) {
-  const nk = normalizeConcept(key);
-  for (const c of CONCEPTS) {
-    if (c.keys.some(k => normalizeConcept(k) === nk)) {
-      return isUk ? c.uk.title : c.en.title;
-    }
-  }
-  return key;
-}
-
 // Concept-graph navigation links (any subject), reused by the fallback and
 // the Gemini path so the topic still surfaces its connected materials.
 function buildConceptLinks(concept, isUk) {
@@ -546,20 +516,48 @@ function mergeLinks(primary, extra, cap = 5) {
   return out.slice(0, cap);
 }
 
+// Offline concept answer, fully SYNTHESIZED from the course data — no
+// hardcoded prose. A matched concept (topic/subtopic) leads with its
+// connected theory article (already prose in the data); if none, it stitches
+// a summary from the connected formulas. Follow-up chips are sibling topics
+// in the same subject. When Gemini is up this path is unused.
 function detectConceptualAnswer(query, isUk) {
   const c = matchConcept(query);
   if (!c) return null;
-  const t = isUk ? c.uk : c.en;
-  let text = `${c.emoji} **${t.title}**\n\n${t.body}`;
-
-  // Show how this concept connects to other platform topics.
   const related = resolveRelated(c);
-  if (related.length > 0) {
-    const names = related.map(r => (isUk ? r.name : (r.nameEn || r.name)));
-    text += `\n\n${isUk ? '🔗 На платформі це пов’язано з' : '🔗 On the platform this connects to'}: ${names.join(', ')}.`;
-  }
+  if (related.length === 0) return null;
 
-  const suggestions = (c.seeAlso || []).map(k => conceptTitle(k, isUk)).slice(0, 3);
+  const title = isUk ? c.label : c.labelEn;
+  const emoji = getSubjectEmoji(c.subject);
+
+  const theory = related.find(r => r.type === 'theory');
+  let body;
+  if (theory) {
+    const content = (isUk ? theory.content : theory.contentEn) || '';
+    body = content.length > 700 ? `${content.slice(0, 700).trimEnd()}…` : content;
+  } else {
+    body = related
+      .filter(r => r.type === 'formula')
+      .slice(0, 4)
+      .map(f => {
+        const n = isUk ? f.name : (f.nameEn || f.name);
+        const d = isUk ? f.description : (f.descriptionEn || f.description);
+        return `• **${n}** — $${f.latex}$${d ? ` — ${d}` : ''}`;
+      })
+      .join('\n');
+  }
+  if (!body) return null;
+
+  let text = `${emoji} **${title}**\n\n${body}`;
+  const names = related.map(r => (isUk ? r.name : (r.nameEn || r.name)));
+  text += `\n\n${isUk ? '🔗 На платформі це пов’язано з' : '🔗 On the platform this connects to'}: ${names.join(', ')}.`;
+
+  const { concepts } = buildCourseGraph();
+  const suggestions = concepts
+    .filter(o => o.subject === c.subject && o.label !== c.label && o.itemIds.length)
+    .slice(0, 3)
+    .map(o => (isUk ? o.label : o.labelEn));
+
   return { text, suggestions };
 }
 
