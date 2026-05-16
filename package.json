@@ -12,7 +12,9 @@
     "deploy:rules": "npx firebase-tools deploy --only firestore:rules",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "format": "biome format --write ./src",
+    "format:check": "biome format ./src"
   },
   "dependencies": {
     "firebase": "^11.4.0",
@@ -26,6 +28,7 @@
     "react-router-dom": "^7.4.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.15",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
