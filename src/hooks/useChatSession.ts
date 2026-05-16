@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { processMessage } from '@/services/assistantEngine';
 import type { ChatMessage } from '@/components/AIAssistant/types';
@@ -43,11 +43,37 @@ export function useChatSession() {
 
   const sendSuggestion = useCallback((text: string) => run(text, 'assistant.error_short'), [run]);
 
-  /** Bot greeting shown the first time the panel is opened. */
+  // Guards a second concurrent seed if the panel is reopened while the first
+  // welcome request is still in flight.
+  const seedingRef = useRef(false);
+
+  /**
+   * Bot greeting shown the first time the panel is opened. Always resolves
+   * the transcript to a message — the welcome on success, an error bubble on
+   * failure — so the panel can never be left silently blank.
+   */
   const seedWelcome = useCallback(async () => {
-    const welcome = await processMessage('привіт', isUk);
-    setMessages([{ role: 'bot', ...welcome, timestamp: Date.now() }]);
-  }, [isUk]);
+    if (seedingRef.current) return;
+    seedingRef.current = true;
+    setIsTyping(true);
+    try {
+      const welcome = await processMessage('привіт', isUk);
+      setMessages([{ role: 'bot', ...welcome, timestamp: Date.now() }]);
+    } catch {
+      setMessages([
+        {
+          role: 'bot',
+          text: t('assistant.error'),
+          links: [],
+          suggestions: [],
+          timestamp: Date.now()
+        }
+      ]);
+    } finally {
+      setIsTyping(false);
+      seedingRef.current = false;
+    }
+  }, [isUk, t]);
 
   return { messages, input, setInput, isTyping, send, sendSuggestion, seedWelcome };
 }

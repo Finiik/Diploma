@@ -14,6 +14,8 @@ export function useAsyncResource<T>(
   const [data, setData] = useState<T>(initial);
   const [loading, setLoading] = useState(true);
 
+  // `deps` is the caller's trigger list, forwarded verbatim — the standard
+  // generic-hook pattern; there is no static dependency to resolve here.
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -30,7 +32,7 @@ export function useAsyncResource<T>(
     return () => {
       active = false;
     };
-  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
+  }, deps);
 
   return { data, loading };
 }

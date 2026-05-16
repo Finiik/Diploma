@@ -29,11 +29,13 @@ export default function AIAssistant() {
   const { messagesEndRef, lastUserMsgRef } = useChatScroll(isOpen, [messages, isTyping]);
   useAutoFocus(inputRef, isOpen, 300);
 
-  // Greet the user the first time the panel opens.
+  // Greet on first open. Deps are complete and honest: seedWelcome is stable
+  // and self-guards (it always resolves the transcript to a welcome- or
+  // error-message and ignores concurrent calls), so this neither loops nor
+  // leaves the panel blank.
   useEffect(() => {
     if (isOpen && messages.length === 0) seedWelcome();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, messages.length, seedWelcome]);
 
   const handleLinkClick = (link: NavLink) => {
     const path = resolveNavPath(link);

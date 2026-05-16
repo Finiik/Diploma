@@ -8,9 +8,12 @@ export function useChatScroll(isOpen: boolean, contentDeps: DependencyList) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastUserMsgRef = useRef<HTMLDivElement>(null);
 
+  // `contentDeps` is the caller's trigger list, forwarded verbatim — the
+  // standard generic-hook pattern. There is no static dependency to resolve
+  // here; the caller owns correctness of what it passes.
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, contentDeps); // eslint-disable-line react-hooks/exhaustive-deps
+  }, contentDeps);
 
   useEffect(() => {
     if (!isOpen) return;
