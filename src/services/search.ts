@@ -3,9 +3,7 @@
    ============================================ */
 
 import Fuse from 'fuse.js';
-import { getAllFormulas } from '../data/physics';
-import { getAllFormulas as getAllChemFormulas } from '../data/chemistry';
-import { getAllFormulas as getAllBioFormulas } from '../data/biology';
+import { getAllFormulas } from '../lib/formulas';
 import { theoryData } from '../data/theory';
 import { problemsData } from '../data/problems';
 import type { GraphItem, SearchHit } from '../types/domain';
@@ -13,11 +11,10 @@ import type { GraphItem, SearchHit } from '../types/domain';
 let fuseInstance: Fuse<GraphItem> | null = null;
 
 function buildSearchIndex(): Fuse<GraphItem> {
-  const formulas: GraphItem[] = [
-    ...getAllFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'physics' as const })),
-    ...getAllChemFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'chemistry' as const })),
-    ...getAllBioFormulas().map(f => ({ ...f, type: 'formula' as const, subject: 'biology' as const }))
-  ];
+  const formulas: GraphItem[] = getAllFormulas().map(f => ({
+    ...f,
+    type: 'formula' as const
+  }));
 
   const theories: GraphItem[] = theoryData.map(t => ({
     ...t,

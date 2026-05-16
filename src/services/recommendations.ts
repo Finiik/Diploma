@@ -4,9 +4,7 @@
    Falls back instantly to demo data when Firebase is not configured
    ============================================ */
 
-import { getAllFormulas } from '../data/physics';
-import { getAllFormulas as getAllChemFormulas } from '../data/chemistry';
-import { getAllFormulas as getAllBioFormulas } from '../data/biology';
+import { getAllFormulas, findFormulasByIds } from '../lib/formulas';
 import type {
   Formula, Interaction, InteractionsByUser
 } from '../types/domain';
@@ -82,11 +80,7 @@ export async function getRecommendations(
   userId: string | null | undefined,
   topN = 6
 ): Promise<Formula[]> {
-  const allFormulas = [
-    ...getAllFormulas(),
-    ...getAllChemFormulas(),
-    ...getAllBioFormulas()
-  ];
+  const allFormulas = getAllFormulas();
   const allFormulaIds = allFormulas.map(f => f.id);
 
   // Start with demo data — always available instantly
@@ -132,7 +126,7 @@ export async function getRecommendations(
   const hasInteractions = userVector.some(v => v > 0);
 
   if (!hasInteractions) {
-    return getPopularFormulas(allInteractions, allFormulas, topN);
+    return getPopularFormulas(allInteractions, topN);
   }
 
   // Compute similarity with all other users
@@ -169,14 +163,11 @@ export async function getRecommendations(
     .slice(0, topN)
     .map(([id]) => id);
 
-  return sorted
-    .map(id => allFormulas.find(f => f.id === id))
-    .filter((f): f is Formula => f !== undefined);
+  return findFormulasByIds(sorted);
 }
 
 function getPopularFormulas(
   allInteractions: InteractionsByUser,
-  allFormulas: Formula[],
   topN: number
 ): Formula[] {
   const popularity: Record<string, number> = {};
@@ -191,7 +182,5 @@ function getPopularFormulas(
     .slice(0, topN)
     .map(([id]) => id);
 
-  return sorted
-    .map(id => allFormulas.find(f => f.id === id))
-    .filter((f): f is Formula => f !== undefined);
+  return findFormulasByIds(sorted);
 }

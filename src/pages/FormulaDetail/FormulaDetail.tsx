@@ -6,11 +6,12 @@ import { useBookmarks } from '../../contexts/BookmarkContext';
 import { useAuth } from '../../contexts/AuthContext';
 import Calculator from '../../components/Calculator/Calculator';
 import Breadcrumb, { type BreadcrumbItem } from '../../components/Breadcrumb/Breadcrumb';
-import { physicsData, getFormulaById as getPhysFormula, getAllFormulas as getPhysAll } from '../../data/physics';
-import { chemistryData, getFormulaById as getChemFormula, getAllFormulas as getChemAll } from '../../data/chemistry';
-import { biologyData, getFormulaById as getBioFormula, getAllFormulas as getBioAll } from '../../data/biology';
+import { physicsData } from '../../data/physics';
+import { chemistryData } from '../../data/chemistry';
+import { biologyData } from '../../data/biology';
 import type { Formula, Subject, SubjectData } from '../../types/domain';
 import { isFirebaseConfigured } from '../../lib/env';
+import { findFormulaById, findFormulasByIds } from '../../lib/formulas';
 import './FormulaDetail.css';
 
 type InteractionType = 'view' | 'calculation' | 'bookmark';
@@ -41,12 +42,7 @@ async function safeLogInteraction(
 }
 
 function findFormula(id: string | undefined): Formula | undefined {
-  if (!id) return undefined;
-  return getPhysFormula(id) || getChemFormula(id) || getBioFormula(id);
-}
-
-function findAllFormulas() {
-  return [...getPhysAll(), ...getChemAll(), ...getBioAll()];
+  return id ? findFormulaById(id) : undefined;
 }
 
 export default function FormulaDetail() {
@@ -80,10 +76,7 @@ export default function FormulaDetail() {
     displayMode: true
   });
 
-  const allFormulas = findAllFormulas();
-  const derivedFormulas = (formula.derivedFormulas || [])
-    .map(id => allFormulas.find(f => f.id === id))
-    .filter((f): f is Formula => f !== undefined);
+  const derivedFormulas = findFormulasByIds(formula.derivedFormulas || []);
 
   const handleCalculate = () => {
     if (user?.uid) {

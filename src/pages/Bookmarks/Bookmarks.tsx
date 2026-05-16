@@ -1,20 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { useBookmarks } from '../../contexts/BookmarkContext';
 import FormulaCard from '../../components/FormulaCard/FormulaCard';
-import { getAllFormulas as getPhysAll } from '../../data/physics';
-import { getAllFormulas as getChemAll } from '../../data/chemistry';
-import { getAllFormulas as getBioAll } from '../../data/biology';
-import type { Formula } from '../../types/domain';
+import { findFormulasByIds } from '../../lib/formulas';
 import './Bookmarks.css';
 
 export default function Bookmarks() {
   const { t } = useTranslation();
   const { bookmarks } = useBookmarks();
 
-  const allFormulas = [...getPhysAll(), ...getChemAll(), ...getBioAll()];
-  const bookmarkedFormulas = bookmarks
-    .map(id => allFormulas.find(f => f.id === id))
-    .filter((f): f is Formula => f !== undefined);
+  const bookmarkedFormulas = findFormulasByIds(bookmarks);
 
   return (
     <div className="bookmarks-page">
