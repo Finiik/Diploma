@@ -2,7 +2,14 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { getBookmarks, addBookmark, removeBookmark, isBookmarked as checkBookmarked } from '../services/bookmarks';
 import { useAuth } from './AuthContext';
 
-const BookmarkContext = createContext();
+type BookmarkContextValue = {
+  bookmarks: string[];
+  toggleBookmark: (formulaId: string) => Promise<void>;
+  isBookmarked: (formulaId: string) => boolean;
+  loadBookmarks: () => Promise<void>;
+};
+
+const BookmarkContext = createContext<BookmarkContextValue | undefined>(undefined);
 
 export function BookmarkProvider({ children }) {
   const [bookmarks, setBookmarks] = useState([]);

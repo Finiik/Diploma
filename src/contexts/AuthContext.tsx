@@ -2,7 +2,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
-const AuthContext = createContext();
+type AuthContextValue = { user: any; loading: boolean };
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 // Check if Firebase is actually configured (not placeholder values)
 function isFirebaseConfigured() {
