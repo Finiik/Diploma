@@ -1,4 +1,5 @@
-/* Characterization tests — cross-subject formula access. */
+/* Characterization tests — cross-subject formula access.
+   The one place that merges physics + chemistry + biology catalogs. */
 import { describe, it, expect } from 'vitest';
 import {
   getAllFormulas,
@@ -7,21 +8,41 @@ import {
 } from '@/lib/formulas';
 
 describe('getAllFormulas', () => {
-  const all = getAllFormulas();
-
   it('returns a non-empty catalog', () => {
-    expect(all.length).toBeGreaterThan(0);
+    expect(getAllFormulas().length).toBeGreaterThan(0);
   });
 
   it('tags every formula with a non-empty subject', () => {
-    expect(
-      all.every((f) => typeof f.subject === 'string' && f.subject.length > 0)
-    ).toBe(true);
+    for (const f of getAllFormulas()) {
+      expect(typeof f.subject).toBe('string');
+      expect((f.subject as string).length).toBeGreaterThan(0);
+    }
   });
 
-  it('has unique ids', () => {
-    const ids = all.map((f) => f.id);
+  it('spans more than one subject', () => {
+    const subjects = new Set(getAllFormulas().map((f) => f.subject));
+    expect(subjects.size).toBeGreaterThan(1);
+  });
+
+  it('every entry has an id, latex and a compute function', () => {
+    for (const f of getAllFormulas()) {
+      expect(typeof f.id).toBe('string');
+      expect(f.id.length).toBeGreaterThan(0);
+      expect(typeof f.latex).toBe('string');
+      expect(typeof f.compute).toBe('function');
+    }
+  });
+
+  it('has globally unique ids across subjects', () => {
+    const ids = getAllFormulas().map((f) => f.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('returns a fresh array each call (no shared mutable state)', () => {
+    const a = getAllFormulas();
+    const b = getAllFormulas();
+    expect(a).not.toBe(b);
+    expect(a.length).toBe(b.length);
   });
 });
 
@@ -34,18 +55,32 @@ describe('findFormulaById', () => {
   it('returns undefined for an unknown id', () => {
     expect(findFormulaById('__does_not_exist__')).toBeUndefined();
   });
+
+  it('returns undefined for an empty id', () => {
+    expect(findFormulaById('')).toBeUndefined();
+  });
 });
 
 describe('findFormulasByIds', () => {
   it('resolves ids in order and drops misses', () => {
     const all = getAllFormulas();
-    const a = all[0].id;
-    const b = all[1].id;
-    const out = findFormulasByIds([b, '__nope__', a]);
-    expect(out.map((f) => f.id)).toEqual([b, a]);
+    const [a, b] = [all[0].id, all[1].id];
+    expect(findFormulasByIds([b, '__nope__', a]).map((f) => f.id)).toEqual([
+      b,
+      a
+    ]);
   });
 
-  it('returns an empty array for an empty list', () => {
+  it('keeps duplicates', () => {
+    const id = getAllFormulas()[0].id;
+    expect(findFormulasByIds([id, id]).map((f) => f.id)).toEqual([id, id]);
+  });
+
+  it('returns [] for an empty list', () => {
     expect(findFormulasByIds([])).toEqual([]);
+  });
+
+  it('returns [] when nothing resolves', () => {
+    expect(findFormulasByIds(['__a__', '__b__'])).toEqual([]);
   });
 });
