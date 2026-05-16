@@ -1,18 +1,18 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import Latex from '../../components/Latex/Latex';
-import { useBookmarks } from '../../contexts/BookmarkContext';
-import { useAuth } from '../../contexts/AuthContext';
-import Calculator from '../../components/Calculator/Calculator';
-import Breadcrumb, { type BreadcrumbItem } from '../../components/Breadcrumb/Breadcrumb';
-import { physicsData } from '../../data/physics';
-import { chemistryData } from '../../data/chemistry';
-import { biologyData } from '../../data/biology';
-import type { Formula, Subject, SubjectData } from '../../types/domain';
-import { isFirebaseConfigured } from '../../lib/env';
-import { findFormulaById, findFormulasByIds } from '../../lib/formulas';
-import { useLocalized } from '../../hooks/useLocalized';
+import Latex from '@/components/Latex/Latex';
+import { useBookmarks } from '@/contexts/BookmarkContext';
+import { useAuth } from '@/contexts/AuthContext';
+import Calculator from '@/components/Calculator/Calculator';
+import Breadcrumb, { type BreadcrumbItem } from '@/components/Breadcrumb/Breadcrumb';
+import { physicsData } from '@/data/physics';
+import { chemistryData } from '@/data/chemistry';
+import { biologyData } from '@/data/biology';
+import type { Formula, Subject, SubjectData } from '@/types/domain';
+import { isFirebaseConfigured } from '@/lib/env';
+import { findFormulaById, findFormulasByIds } from '@/lib/formulas';
+import { useLocalized } from '@/hooks/useLocalized';
 import './FormulaDetail.css';
 
 type InteractionType = 'view' | 'calculation' | 'bookmark';
@@ -35,7 +35,7 @@ async function safeLogInteraction(
 ) {
   if (!isFirebaseConfigured() || !userId) return;
   try {
-    const { logInteraction } = await import('../../firebase/firestore');
+    const { logInteraction } = await import('@/firebase/firestore');
     await logInteraction(userId, formulaId, type);
   } catch (e) {
     console.warn('Failed to log interaction:', e);

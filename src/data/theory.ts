@@ -2,7 +2,7 @@
    Theory Data
    ============================================ */
 
-import type { TheoryItem } from '../types/domain';
+import type { TheoryItem } from '@/types/domain';
 
 export const theoryData: TheoryItem[] = [
   {

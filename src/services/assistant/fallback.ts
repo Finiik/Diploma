@@ -9,7 +9,7 @@
 import { smartSearch } from './text';
 import { matchConcept, resolveRelated, buildCourseGraph } from './courseGraph';
 import { getSubjectEmoji, localizedName } from './subjects';
-import type { ResponderResult } from '../../types/domain';
+import type { ResponderResult } from '@/types/domain';
 
 // Offline concept answer, fully SYNTHESIZED from the course data — no
 // hardcoded prose. A matched concept (topic/subtopic) leads with its

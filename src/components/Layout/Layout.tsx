@@ -1,7 +1,7 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import Header from '../Header/Header';
-import AIAssistant from '../AIAssistant/AIAssistant';
+import Header from '@/components/Header/Header';
+import AIAssistant from '@/components/AIAssistant/AIAssistant';
 import './Layout.css';
 import { useTranslation } from 'react-i18next';
 

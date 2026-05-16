@@ -1,12 +1,12 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { physicsData } from '../../data/physics';
-import { chemistryData } from '../../data/chemistry';
-import { biologyData } from '../../data/biology';
-import FormulaCard from '../../components/FormulaCard/FormulaCard';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
-import type { SubjectData } from '../../types/domain';
-import { useLocalized } from '../../hooks/useLocalized';
+import { physicsData } from '@/data/physics';
+import { chemistryData } from '@/data/chemistry';
+import { biologyData } from '@/data/biology';
+import FormulaCard from '@/components/FormulaCard/FormulaCard';
+import Breadcrumb from '@/components/Breadcrumb/Breadcrumb';
+import type { SubjectData } from '@/types/domain';
+import { useLocalized } from '@/hooks/useLocalized';
 import './Subject.css';
 
 const subjectMap: Record<string, SubjectData | undefined> = {

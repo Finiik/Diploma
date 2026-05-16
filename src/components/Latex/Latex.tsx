@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import 'katex/dist/katex.min.css';
-import { renderLatex } from '../../lib/katex';
+import { renderLatex } from '@/lib/katex';
 
 interface LatexProps {
   /** Raw LaTeX source. */

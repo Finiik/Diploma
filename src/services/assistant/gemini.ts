@@ -2,8 +2,8 @@
    Gemini client — calls the API with platform content as context
    ============================================ */
 
-import { theoryData } from '../../data/theory';
-import { problemsData } from '../../data/problems';
+import { theoryData } from '@/data/theory';
+import { problemsData } from '@/data/problems';
 import { buildPlatformContext, findRelevantContent } from './context';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Formula } from '../../types/domain';
-import { useLocalized } from '../../hooks/useLocalized';
-import Latex from '../Latex/Latex';
+import type { Formula } from '@/types/domain';
+import { useLocalized } from '@/hooks/useLocalized';
+import Latex from '@/components/Latex/Latex';
 import './Calculator.css';
 
 /** Calculator field values: numeric defaults or raw `<input>` strings. */

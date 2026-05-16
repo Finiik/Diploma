@@ -1,4 +1,4 @@
-import type { AssistantResponse } from '../../types/domain';
+import type { AssistantResponse } from '@/types/domain';
 
 /** A message in the chat transcript: a user query or a bot answer. */
 export type ChatMessage =

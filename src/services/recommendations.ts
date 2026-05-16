@@ -4,11 +4,11 @@
    Falls back instantly to demo data when Firebase is not configured
    ============================================ */
 
-import { getAllFormulas, findFormulasByIds } from '../lib/formulas';
+import { getAllFormulas, findFormulasByIds } from '@/lib/formulas';
 import type {
   Formula, Interaction, InteractionsByUser
-} from '../types/domain';
-import { isFirebaseConfigured } from '../lib/env';
+} from '@/types/domain';
+import { isFirebaseConfigured } from '@/lib/env';
 
 // Pre-seeded demo users for initial recommendations
 const DEMO_INTERACTIONS: InteractionsByUser = {
@@ -89,7 +89,7 @@ export async function getRecommendations(
   // Only try Firebase if configured
   if (isFirebaseConfigured()) {
     try {
-      const { getAllInteractions } = await import('../firebase/firestore');
+      const { getAllInteractions } = await import('@/firebase/firestore');
       // Add a timeout so we don't block the UI
       const firebasePromise = getAllInteractions();
       const timeoutPromise = new Promise((_, reject) =>

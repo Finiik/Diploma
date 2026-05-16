@@ -2,7 +2,7 @@
    Firebase is forced unconfigured so the deterministic demo-data path is
    exercised (no network, no flakiness). */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getRecommendations } from '../services/recommendations';
+import { getRecommendations } from '@/services/recommendations';
 
 beforeEach(() => {
   // Read at call time inside isFirebaseConfigured() — safe to stub here.

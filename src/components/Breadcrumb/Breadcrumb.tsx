@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useLocalized } from '../../hooks/useLocalized';
+import { useLocalized } from '@/hooks/useLocalized';
 import './Breadcrumb.css';
 
 export interface BreadcrumbItem {

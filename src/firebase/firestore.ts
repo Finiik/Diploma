@@ -14,7 +14,7 @@ import {
   increment
 } from 'firebase/firestore';
 import { db } from './config';
-import type { Interaction, InteractionsByUser } from '../types/domain';
+import type { Interaction, InteractionsByUser } from '@/types/domain';
 
 /** Counters stored per-formula. Non-optional here (Firestore writes all 3). */
 type InteractionCounters = Required<Interaction>;

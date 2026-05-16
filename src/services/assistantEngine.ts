@@ -15,8 +15,8 @@
      responders  — the ordered chain wired from all of the above
    ============================================ */
 
-import { RESPONDERS, finalizeResponse } from './assistant/responders';
-import type { AssistantResponse } from '../types/domain';
+import { RESPONDERS, finalizeResponse } from '@/services/assistant/responders';
+import type { AssistantResponse } from '@/types/domain';
 
 // ============================================
 // Main entry point — async

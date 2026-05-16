@@ -1,6 +1,6 @@
 /* Characterization tests — Fuse.js search service. */
 import { describe, it, expect } from 'vitest';
-import { search, rebuildIndex } from '../services/search';
+import { search, rebuildIndex } from '@/services/search';
 
 describe('search', () => {
   it('returns [] for empty or too-short queries', () => {

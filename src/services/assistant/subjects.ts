@@ -2,10 +2,10 @@
    Subject helpers — formula catalogs, labels, localization
    ============================================ */
 
-import { physicsData, getAllFormulas } from '../../data/physics';
-import { chemistryData, getAllFormulas as getAllChemFormulas } from '../../data/chemistry';
-import { biologyData, getAllFormulas as getAllBioFormulas } from '../../data/biology';
-import type { Formula, Subject } from '../../types/domain';
+import { physicsData, getAllFormulas } from '@/data/physics';
+import { chemistryData, getAllFormulas as getAllChemFormulas } from '@/data/chemistry';
+import { biologyData, getAllFormulas as getAllBioFormulas } from '@/data/biology';
+import type { Formula, Subject } from '@/types/domain';
 
 export {
   physicsData, chemistryData, biologyData,

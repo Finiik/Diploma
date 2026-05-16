@@ -2,7 +2,7 @@
    Biology Formula Data
    ============================================ */
 
-import type { SubjectData, Formula } from '../types/domain';
+import type { SubjectData, Formula } from '@/types/domain';
 
 export const biologyData: SubjectData = {
   id: 'biology',

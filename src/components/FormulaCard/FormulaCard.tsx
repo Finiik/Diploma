@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useBookmarks } from '../../contexts/BookmarkContext';
-import type { Formula } from '../../types/domain';
-import { useLocalized } from '../../hooks/useLocalized';
-import Latex from '../Latex/Latex';
+import { useBookmarks } from '@/contexts/BookmarkContext';
+import type { Formula } from '@/types/domain';
+import { useLocalized } from '@/hooks/useLocalized';
+import Latex from '@/components/Latex/Latex';
 import './FormulaCard.css';
 
 const BOOKMARK_KEY: Record<'true' | 'false', string> = {

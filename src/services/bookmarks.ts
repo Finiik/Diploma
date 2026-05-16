@@ -3,7 +3,7 @@
    Only syncs to Firebase when it's configured
    ============================================ */
 
-import { isFirebaseConfigured } from '../lib/env';
+import { isFirebaseConfigured } from '@/lib/env';
 
 const BOOKMARKS_KEY = 'bookmarks';
 
@@ -22,7 +22,7 @@ function setLocalBookmarks(bookmarks: string[]): void {
 export async function getBookmarks(userId?: string): Promise<string[]> {
   if (userId && isFirebaseConfigured()) {
     try {
-      const { getBookmarksFirebase } = await import('../firebase/firestore');
+      const { getBookmarksFirebase } = await import('@/firebase/firestore');
       const firebaseBookmarks = await getBookmarksFirebase(userId);
       setLocalBookmarks(firebaseBookmarks);
       return firebaseBookmarks;
@@ -41,7 +41,7 @@ export async function addBookmark(userId: string | undefined, formulaId: string)
   }
   if (userId && isFirebaseConfigured()) {
     try {
-      const { addBookmarkFirebase } = await import('../firebase/firestore');
+      const { addBookmarkFirebase } = await import('@/firebase/firestore');
       await addBookmarkFirebase(userId, formulaId);
     } catch (e) {
       console.warn('Failed to sync bookmark to Firebase:', e);
@@ -55,7 +55,7 @@ export async function removeBookmark(userId: string | undefined, formulaId: stri
   setLocalBookmarks(bookmarks);
   if (userId && isFirebaseConfigured()) {
     try {
-      const { removeBookmarkFirebase } = await import('../firebase/firestore');
+      const { removeBookmarkFirebase } = await import('@/firebase/firestore');
       await removeBookmarkFirebase(userId, formulaId);
     } catch (e) {
       console.warn('Failed to sync bookmark removal to Firebase:', e);

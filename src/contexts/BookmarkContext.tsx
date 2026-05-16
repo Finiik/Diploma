@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { getBookmarks, addBookmark, removeBookmark, isBookmarked as checkBookmarked } from '../services/bookmarks';
+import { getBookmarks, addBookmark, removeBookmark, isBookmarked as checkBookmarked } from '@/services/bookmarks';
 import { useAuth } from './AuthContext';
 
 type BookmarkContextValue = {

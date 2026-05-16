@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../contexts/AuthContext';
-import { getRecommendations } from '../../services/recommendations';
-import FormulaCard from '../../components/FormulaCard/FormulaCard';
-import { SkeletonGrid } from '../../components/LoadingSkeleton/LoadingSkeleton';
-import { useAsyncResource } from '../../hooks/useAsyncResource';
-import type { Formula } from '../../types/domain';
+import { useAuth } from '@/contexts/AuthContext';
+import { getRecommendations } from '@/services/recommendations';
+import FormulaCard from '@/components/FormulaCard/FormulaCard';
+import { SkeletonGrid } from '@/components/LoadingSkeleton/LoadingSkeleton';
+import { useAsyncResource } from '@/hooks/useAsyncResource';
+import type { Formula } from '@/types/domain';
 import './Home.css';
 
 const subjects = [

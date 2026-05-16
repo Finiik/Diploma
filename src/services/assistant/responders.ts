@@ -13,8 +13,8 @@
    an intent = write a function and slot it into RESPONDERS.
    ============================================ */
 
-import { theoryData } from '../../data/theory';
-import { problemsData } from '../../data/problems';
+import { theoryData } from '@/data/theory';
+import { problemsData } from '@/data/problems';
 import {
   getAllFormulasFlat, formulasBySubject,
   getAllFormulas, getAllChemFormulas, getAllBioFormulas,
@@ -29,7 +29,7 @@ import {
 import { localFallback } from './fallback';
 import type {
   AssistantResponse, Responder, ResponderResult
-} from '../../types/domain';
+} from '@/types/domain';
 
 const GREETING_RE = /^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i;
 

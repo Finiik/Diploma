@@ -5,7 +5,7 @@ import {
   detectListIntent,
   detectThanksIntent,
   detectSubjectIntent
-} from '../services/assistant/intents';
+} from '@/services/assistant/intents';
 
 describe('detectHelpIntent', () => {
   it('matches help phrasings, both languages', () => {

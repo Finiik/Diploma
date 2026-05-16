@@ -8,8 +8,8 @@
    Adding/curating a concept = editing the course data, nothing here.
    ============================================ */
 
-import { theoryData } from '../../data/theory';
-import { problemsData } from '../../data/problems';
+import { theoryData } from '@/data/theory';
+import { problemsData } from '@/data/problems';
 import {
   physicsData, chemistryData, biologyData,
   getAllFormulas, getAllChemFormulas, getAllBioFormulas
@@ -17,7 +17,7 @@ import {
 import { normalizeConcept, conceptCore, similarity } from './text';
 import type {
   Concept, CourseGraph, GraphItem, Subject, SubjectData
-} from '../../types/domain';
+} from '@/types/domain';
 
 // Concept under construction: itemIds is a Set while we accumulate, then
 // frozen to the array `Concept` declares once the graph is finalized.
