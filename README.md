@@ -137,7 +137,8 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 │  ├── recommendations.js (Collaborative filtering)         │
 │  ├── search.js (Fuse.js index builder)                    │
 │  ├── bookmarks.js (localStorage + Firestore sync)         │
-│  └── assistantEngine.js (Gemini AI + local fallback)      │
+│  ├── assistantEngine.js (entry → responder chain)         │
+│  └── assistant/* (responders, RAG graph, Gemini 3)        │
 ├──────────────────────────────────────────────────────────┤
 │  Data Layer (Static JS modules)                           │
 │  ├── physics.js    — 30 formulas, 10 topics               │
@@ -203,7 +204,16 @@ SciLearn/
     │   └── problems.js              # Problem examples with steps
     │
     ├── services/                    # Business logic
-    │   ├── assistantEngine.js       # Gemini AI + smart local fallback
+    │   ├── assistantEngine.js       # AI entry — runs the responder chain
+    │   ├── assistant/               # AI assistant modules:
+    │   │   ├── responders.js        #   ordered responder chain (strategy)
+    │   │   ├── intents.js           #   instant-intent detectors
+    │   │   ├── text.js              #   intent stripping + fuzzy matching
+    │   │   ├── courseGraph.js       #   auto-derived concept graph (RAG)
+    │   │   ├── context.js           #   RAG context block + nav links
+    │   │   ├── gemini.js            #   Gemini 3 REST client
+    │   │   ├── fallback.js          #   offline graph-synthesis answers
+    │   │   └── subjects.js          #   formula catalogs + localization
     │   ├── recommendations.js       # Collaborative filtering engine
     │   ├── search.js                # Fuse.js search index
     │   └── bookmarks.js             # Bookmark CRUD operations
@@ -275,6 +285,9 @@ VITE_FIREBASE_APP_ID=1:000:web:000000
 
 # Gemini AI (optional — local fallback works without it)
 VITE_GEMINI_API_KEY=your_gemini_api_key
+# Optional model overrides (no code change needed):
+VITE_GEMINI_MODEL=gemini-3.1-flash-lite
+VITE_GEMINI_THINKING=low          # minimal | low | medium | high
 ```
 
 > **Note:** The app works fully without any API keys. Firebase enables cloud bookmarks and multi-device recommendations. Gemini enables AI-powered chatbot responses (falls back to smart local search otherwise).
@@ -346,6 +359,40 @@ The system now holds **zero hardcoded concept definitions**. Instead:
 - **The course data *is* the knowledge base.** Every topic and subtopic the platform teaches is treated as a concept; the data's own cross-links (`derivedFormulas`, `relatedFormulas`, `relatedFormula`) are the relationship edges. Curating a concept means editing course content — never the engine.
 - **The AI does the explaining.** Given the relevant slice of course materials as grounded context, Gemini synthesizes the explanation and connects the topics, instead of reciting a stored paragraph.
 
+### Request Pipeline (Responder Chain)
+
+`processMessage(query, isUk)` — the single entry point used by `AIAssistant.jsx` — is a **chain of responders**, not an `if`/`return` ladder. Each responder is `(query, isUk) => response | null`: return `null` to pass, return an object to answer and stop. First non-null wins; the terminal AI responder never returns `null`.
+
+```
+processMessage(query, isUk)
+   │  empty query ──────────────► validation reply
+   ▼
+RESPONDERS  (assistant/responders.js — ordered, first match wins)
+   1. greeting      "привіт" / "hi"             → templated reply + chips
+   2. help          capabilities intent         → what-I-can-do reply
+   3. thanks        "дякую" / "thanks"          → acknowledgement
+   4. list          "які формули" / "list"      → catalog (subject or all)
+   5. pure-subject  bare "фізика" (<15 chars)   → subject overview + link
+   6. ai            everything else (TERMINAL)  → graph/keyword RAG + Gemini,
+                                                   else offline synthesis
+   ▼
+finalizeResponse()  ──────────► always { text, links[], suggestions[] }
+```
+
+Instant intents (1–5) stay zero-latency — no API call. `finalizeResponse()` centralizes the response contract so handlers declare only non-default fields. **Adding an intent = write a function and slot it into `RESPONDERS`**; the orchestrator never changes. The engine is split into one focused module each:
+
+| Module (`src/services/assistant/`) | Responsibility |
+|---|---|
+| `../assistantEngine.js` | thin entry: validate input → run the chain |
+| `responders.js` | the ordered responder chain (strategy) |
+| `intents.js` | instant-intent detectors (regex) |
+| `text.js` | intent stripping, fuzzy/concept primitives (Levenshtein) |
+| `courseGraph.js` | auto-derived concept knowledge graph (built once) |
+| `context.js` | RAG context block + navigation link chips |
+| `gemini.js` | Gemini 3 REST client |
+| `fallback.js` | offline graph-synthesis answers |
+| `subjects.js` | formula catalogs, labels, localization |
+
 ### How It Works (Graph / Keyword RAG)
 
 ```
@@ -385,6 +432,22 @@ Offline synthesis fallback
 ├── Append "🔗 connects to …" + sibling-topic follow-up chips
 └── No hand-written prose anywhere — everything is synthesized from the data
 ```
+
+### Gemini Client Configuration & Gemini 3 Gotchas
+
+The chatbot calls the Gemini REST API directly via `fetch` — **no SDK**: it makes exactly one `generateContent` call, the app has no backend, and a native call keeps the client bundle lean (the SDK gives no security benefit since the key is client-side either way). Model: **`gemini-3.1-flash-lite`**. Moving to a Gemini 3 model is *not* just a string swap — these are the hard-won specifics, all in `src/services/assistant/gemini.js`:
+
+| Setting | Value | Why it matters on Gemini 3 |
+|---|---|---|
+| `generationConfig.thinkingConfig.thinkingLevel` | `low` | Gemini 3 **reasons before answering**. `low` keeps the tutor fast/cheap while leaving enough budget for the synthesis task. Allowed: `minimal \| low \| medium \| high` |
+| `temperature` / `topP` | **unset (default 1.0)** | Google *strongly* recommends **not** lowering temperature on Gemini 3 — it causes looping / degraded reasoning. The previous `0.7` was actively harmful here |
+| `maxOutputTokens` | `2048` | Budget covers **thinking + answer**. The previous `600` could be spent entirely on thinking, returning an empty answer |
+| Response parsing | filter `part.thought === true`, join remaining text parts | Gemini 3 returns **multi-part** responses; `parts[0].text` is no longer reliably the answer |
+| Errors | diagnostic (`finishReason`, `blockReason`, HTTP status) | A quota `429` or token-starved `MAX_TOKENS` is now distinguishable in the console, not a silent generic "empty response" |
+
+Both the model and thinking level are env-overridable with no code change: `VITE_GEMINI_MODEL`, `VITE_GEMINI_THINKING`.
+
+> **Quota gotcha (read before blaming the code):** a `429` with `"limit: 0"` on `generate_content_free_tier_requests` is **not** rate-limiting — it means the API key's Google Cloud **project has no free-tier allowance** for that model (region- or billing-tier-related). Minting a new key on the *same project* changes nothing; enable billing on the project, or use a free-tier-eligible one. Whenever Gemini is unreachable for any reason, the assistant transparently serves the offline graph-synthesis fallback, so the UX never hard-fails.
 
 ### Why graph/keyword RAG (and not LangChain + a vector store)
 

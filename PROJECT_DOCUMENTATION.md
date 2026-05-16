@@ -61,7 +61,7 @@
 │  ├── recommendations.js (Collaborative filtering)    │
 │  ├── search.js (Fuse.js index)                       │
 │  ├── bookmarks.js (localStorage + Firestore sync)    │
-│  └── assistantEngine.js (AI chatbot logic)           │
+│  └── assistant/* (responder chain + Gemini 3 RAG)    │
 ├─────────────────────────────────────────────────────┤
 │  Data Layer (Static JS modules)                      │
 │  ├── physics.js (30 formulas, 10 topics)             │
@@ -128,7 +128,9 @@ Diploma/
     │   ├── recommendations.js      # Collaborative filtering engine
     │   ├── search.js               # Fuse.js search index builder
     │   ├── bookmarks.js            # Bookmark CRUD (local + cloud)
-    │   └── assistantEngine.js      # AI assistant response engine
+    │   ├── assistantEngine.js      # AI entry — runs the responder chain
+    │   └── assistant/              # AI modules: responders, RAG graph,
+    │                               #   Gemini 3 client, offline fallback
     │
     ├── contexts/
     │   ├── ThemeContext.jsx         # Dark/light mode state
