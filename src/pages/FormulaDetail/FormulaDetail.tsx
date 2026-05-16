@@ -17,7 +17,7 @@ const subjectDataMap = {
   biology: biologyData
 };
 
-const BOOKMARK_KEY = {
+const BOOKMARK_KEY: Record<'true' | 'false', string> = {
   true: 'formula.bookmark_remove',
   false: 'formula.bookmark_add'
 };
@@ -117,7 +117,7 @@ export default function FormulaDetail() {
               id="formula-bookmark-btn"
             >
               {bookmarked ? '★' : '☆'}
-              <span>{t(BOOKMARK_KEY[bookmarked])}</span>
+              <span>{t(BOOKMARK_KEY[bookmarked ? 'true' : 'false'])}</span>
             </button>
           </div>
 

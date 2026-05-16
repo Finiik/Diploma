@@ -13,7 +13,7 @@ const DIFF_KEY = {
   2: 'problems.diff_2',
   3: 'problems.diff_3'
 };
-const SOLUTION_TOGGLE_KEY = {
+const SOLUTION_TOGGLE_KEY: Record<'true' | 'false', string> = {
   true: 'problems.hide_solution',
   false: 'problems.show_solution'
 };
@@ -91,7 +91,7 @@ export default function Problems() {
                 onClick={() => toggleSolution(prob.id)}
                 id={`solution-toggle-${prob.id}`}
               >
-                {t(SOLUTION_TOGGLE_KEY[Boolean(openSolutions[prob.id])])}
+                {t(SOLUTION_TOGGLE_KEY[openSolutions[prob.id] ? 'true' : 'false'])}
                 <span className={`toggle-arrow ${openSolutions[prob.id] ? 'open' : ''}`}>▼</span>
               </button>
 
