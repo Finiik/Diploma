@@ -17,14 +17,14 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const userId = user?.uid;
 
-  useEffect(() => {
-    loadBookmarks();
-  }, [userId]);
-
-  const loadBookmarks = async () => {
+  const loadBookmarks = useCallback(async () => {
     const bm = await getBookmarks(userId);
     setBookmarks(bm);
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    loadBookmarks();
+  }, [loadBookmarks]);
 
   const toggleBookmark = useCallback(async (formulaId: string) => {
     if (bookmarks.includes(formulaId)) {

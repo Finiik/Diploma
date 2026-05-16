@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { problemsData } from '../../data/problems';
 import { useLocalized } from '../../hooks/useLocalized';
+import { useExpandedSet } from '../../hooks/useExpandedSet';
 import './Problems.css';
 
 const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
@@ -24,17 +25,13 @@ export default function Problems() {
   const tr = useLocalized();
   const [filter, setFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
-  const [openSolutions, setOpenSolutions] = useState<Record<string, boolean>>({});
+  const { isOpen, toggle } = useExpandedSet();
 
   const filtered = problemsData.filter(p => {
     const matchSubject = filter === 'all' || p.subject === filter;
     const matchDiff = diffFilter === 'all' || p.difficulty === Number(diffFilter);
     return matchSubject && matchDiff;
   });
-
-  const toggleSolution = (id: string) => {
-    setOpenSolutions(prev => ({ ...prev, [id]: !prev[id] }));
-  };
 
   return (
     <div className="problems-page">
@@ -89,14 +86,14 @@ export default function Problems() {
 
               <button
                 className="solution-toggle"
-                onClick={() => toggleSolution(prob.id)}
+                onClick={() => toggle(prob.id)}
                 id={`solution-toggle-${prob.id}`}
               >
-                {t(SOLUTION_TOGGLE_KEY[openSolutions[prob.id] ? 'true' : 'false'])}
-                <span className={`toggle-arrow ${openSolutions[prob.id] ? 'open' : ''}`}>▼</span>
+                {t(SOLUTION_TOGGLE_KEY[isOpen(prob.id) ? 'true' : 'false'])}
+                <span className={`toggle-arrow ${isOpen(prob.id) ? 'open' : ''}`}>▼</span>
               </button>
 
-              {openSolutions[prob.id] && (
+              {isOpen(prob.id) && (
                 <div className="solution animate-slide-up">
                   {prob.steps.map((step, i) => (
                     <div key={i} className="solution-step">

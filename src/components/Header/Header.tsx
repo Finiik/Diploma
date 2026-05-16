@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 import SearchBar from '../SearchBar/SearchBar';
 import './Header.css';
 
@@ -22,10 +23,7 @@ export default function Header() {
   }, [location.pathname]);
 
   // Prevent body scroll when menu is open
-  useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileMenuOpen]);
+  useBodyScrollLock(mobileMenuOpen);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'uk' ? 'en' : 'uk';

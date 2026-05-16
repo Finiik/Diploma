@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getRecommendations } from '../../services/recommendations';
 import FormulaCard from '../../components/FormulaCard/FormulaCard';
 import { SkeletonGrid } from '../../components/LoadingSkeleton/LoadingSkeleton';
+import { useAsyncResource } from '../../hooks/useAsyncResource';
 import type { Formula } from '../../types/domain';
 import './Home.css';
 
@@ -17,23 +17,11 @@ const subjects = [
 export default function Home() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [recommendations, setRecommendations] = useState<Formula[]>([]);
-  const [recsLoading, setRecsLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadRecs() {
-      setRecsLoading(true);
-      try {
-        const recs = await getRecommendations(user?.uid, 6);
-        setRecommendations(recs);
-      } catch (e) {
-        console.warn('Failed to load recommendations:', e);
-      } finally {
-        setRecsLoading(false);
-      }
-    }
-    loadRecs();
-  }, [user]);
+  const { data: recommendations, loading: recsLoading } = useAsyncResource<Formula[]>(
+    () => getRecommendations(user?.uid, 6),
+    [user],
+    []
+  );
 
   return (
     <div className="home-page">

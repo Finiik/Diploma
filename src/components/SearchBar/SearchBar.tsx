@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { search } from '../../services/search';
 import type { SearchHit, ContentType, Subject } from '../../types/domain';
 import { useLocalized } from '../../hooks/useLocalized';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import { resolveNavPath } from '../../lib/navigation';
 import './SearchBar.css';
 
@@ -22,15 +23,7 @@ export default function SearchBar() {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(ref, () => setIsOpen(false));
 
   const handleSearch = (value: string) => {
     setQuery(value);
