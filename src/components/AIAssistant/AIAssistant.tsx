@@ -1,10 +1,23 @@
+import type React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { processMessage } from '../../services/assistantEngine';
+import type { NavLink, AssistantResponse } from '../../types/domain';
 import './AIAssistant.css';
+
+/** A message in the chat transcript: a user query or a bot answer. */
+type ChatMessage =
+  | { role: 'user'; text: string; timestamp: number }
+  | ({ role: 'bot'; timestamp: number } & AssistantResponse);
+
+const HTML_ESCAPE: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;'
+};
 
 export default function AIAssistant() {
   const { t, i18n } = useTranslation();
@@ -12,12 +25,12 @@ export default function AIAssistant() {
   const isUk = i18n.language === 'uk';
 
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
-  const lastUserMsgRef = useRef(null);
-  const inputRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastUserMsgRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Index of the most recent user message, so we can greet at it on open
   const lastUserIndex = messages.map((m) => m.role).lastIndexOf('user');
@@ -62,7 +75,7 @@ export default function AIAssistant() {
     if (!input.trim()) return;
 
     const userQuery = input.trim();
-    const userMsg = { role: 'user', text: userQuery, timestamp: Date.now() };
+    const userMsg: ChatMessage = { role: 'user', text: userQuery, timestamp: Date.now() };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
@@ -81,9 +94,9 @@ export default function AIAssistant() {
     }
   };
 
-  const handleSuggestion = async (text) => {
+  const handleSuggestion = async (text: string) => {
     setInput('');
-    const userMsg = { role: 'user', text, timestamp: Date.now() };
+    const userMsg: ChatMessage = { role: 'user', text, timestamp: Date.now() };
     setMessages(prev => [...prev, userMsg]);
     setIsTyping(true);
 
@@ -101,7 +114,7 @@ export default function AIAssistant() {
     }
   };
 
-  const handleLinkClick = (link) => {
+  const handleLinkClick = (link: NavLink) => {
     if (link.type === 'formula') {
       navigate(`/formula/${link.id}`);
     } else if (link.type === 'theory') {
@@ -114,7 +127,7 @@ export default function AIAssistant() {
     setIsOpen(false);
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -123,16 +136,14 @@ export default function AIAssistant() {
 
   // Render a single LaTeX expression to HTML. Falls back to the escaped
   // source (not raw, to avoid breaking layout) if KaTeX can't parse it.
-  const renderMath = (tex, displayMode) => {
+  const renderMath = (tex: string, displayMode: boolean): string => {
     try {
       return katex.renderToString(tex.trim(), {
         throwOnError: false,
         displayMode,
       });
     } catch {
-      const safe = tex.replace(/[&<>]/g, (c) => (
-        { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]
-      ));
+      const safe = tex.replace(/[&<>]/g, (c) => HTML_ESCAPE[c]);
       return `<code class="formula-inline">${safe}</code>`;
     }
   };
@@ -141,24 +152,24 @@ export default function AIAssistant() {
   // $...$ (inline), plus **bold** and newlines for the surrounding text.
   // Math is extracted to placeholders first so the markdown pass can't
   // mangle the generated KaTeX markup.
-  const formatText = (text) => {
+  const formatText = (text: string): string => {
     if (!text) return '';
 
-    const mathBlocks = [];
-    const stash = (html) => {
+    const mathBlocks: string[] = [];
+    const stash = (html: string): string => {
       mathBlocks.push(html);
       return `${mathBlocks.length - 1}`;
     };
 
     let out = text
-      .replace(/\$\$([\s\S]+?)\$\$/g, (_, tex) => stash(renderMath(tex, true)))
-      .replace(/\$([^$\n]+?)\$/g, (_, tex) => stash(renderMath(tex, false)));
+      .replace(/\$\$([\s\S]+?)\$\$/g, (_: string, tex: string) => stash(renderMath(tex, true)))
+      .replace(/\$([^$\n]+?)\$/g, (_: string, tex: string) => stash(renderMath(tex, false)));
 
     out = out
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n/g, '<br/>');
 
-    return out.replace(/(\d+)/g, (_, i) => mathBlocks[Number(i)]);
+    return out.replace(/(\d+)/g, (_: string, i: string) => mathBlocks[Number(i)]);
   };
 
   return (
@@ -212,7 +223,7 @@ export default function AIAssistant() {
                     dangerouslySetInnerHTML={{ __html: formatText(msg.text) }}
                   />
                   {/* Links */}
-                  {msg.links && msg.links.length > 0 && (
+                  {msg.role === 'bot' && msg.links && msg.links.length > 0 && (
                     <div className="ai-msg-links">
                       {msg.links.map((link, j) => (
                         <button
@@ -227,7 +238,7 @@ export default function AIAssistant() {
                     </div>
                   )}
                   {/* Suggestions */}
-                  {msg.suggestions && msg.suggestions.length > 0 && (
+                  {msg.role === 'bot' && msg.suggestions && msg.suggestions.length > 0 && (
                     <div className="ai-msg-suggestions">
                       {msg.suggestions.map((sug, j) => (
                         <button

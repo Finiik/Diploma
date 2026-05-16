@@ -5,7 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import SearchBar from '../SearchBar/SearchBar';
 import './Header.css';
 
-const THEME_TITLE_KEY = {
+const THEME_TITLE_KEY: Record<string, string> = {
   light: 'theme.dark',
   dark: 'theme.light'
 };

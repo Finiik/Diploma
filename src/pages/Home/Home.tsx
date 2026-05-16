@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getRecommendations } from '../../services/recommendations';
 import FormulaCard from '../../components/FormulaCard/FormulaCard';
 import { SkeletonGrid } from '../../components/LoadingSkeleton/LoadingSkeleton';
+import type { Formula } from '../../types/domain';
 import './Home.css';
 
 const subjects = [
@@ -16,7 +17,7 @@ const subjects = [
 export default function Home() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const [recommendations, setRecommendations] = useState([]);
+  const [recommendations, setRecommendations] = useState<Formula[]>([]);
   const [recsLoading, setRecsLoading] = useState(true);
   const isUk = i18n.language === 'uk';
 

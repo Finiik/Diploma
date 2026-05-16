@@ -4,6 +4,7 @@ import FormulaCard from '../../components/FormulaCard/FormulaCard';
 import { getAllFormulas as getPhysAll } from '../../data/physics';
 import { getAllFormulas as getChemAll } from '../../data/chemistry';
 import { getAllFormulas as getBioAll } from '../../data/biology';
+import type { Formula } from '../../types/domain';
 import './Bookmarks.css';
 
 export default function Bookmarks() {
@@ -13,7 +14,7 @@ export default function Bookmarks() {
   const allFormulas = [...getPhysAll(), ...getChemAll(), ...getBioAll()];
   const bookmarkedFormulas = bookmarks
     .map(id => allFormulas.find(f => f.id === id))
-    .filter(Boolean);
+    .filter((f): f is Formula => f !== undefined);
 
   return (
     <div className="bookmarks-page">

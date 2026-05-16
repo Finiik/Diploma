@@ -6,8 +6,8 @@ import './Problems.css';
 
 const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
 const DIFF_FILTERS = ['all', '1', '2', '3'];
-const DIFF_STARS = { all: '', 1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐' };
-const DIFF_KEY = {
+const DIFF_STARS: Record<string, string> = { all: '', 1: '⭐', 2: '⭐⭐', 3: '⭐⭐⭐' };
+const DIFF_KEY: Record<string, string> = {
   all: 'difficulty.all',
   1: 'problems.diff_1',
   2: 'problems.diff_2',
@@ -23,7 +23,7 @@ export default function Problems() {
   const isUk = i18n.language === 'uk';
   const [filter, setFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
-  const [openSolutions, setOpenSolutions] = useState({});
+  const [openSolutions, setOpenSolutions] = useState<Record<string, boolean>>({});
 
   const filtered = problemsData.filter(p => {
     const matchSubject = filter === 'all' || p.subject === filter;
@@ -31,7 +31,7 @@ export default function Problems() {
     return matchSubject && matchDiff;
   });
 
-  const toggleSolution = (id) => {
+  const toggleSolution = (id: string) => {
     setOpenSolutions(prev => ({ ...prev, [id]: !prev[id] }));
   };
 

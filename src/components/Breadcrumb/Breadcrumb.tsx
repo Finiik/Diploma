@@ -2,7 +2,18 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './Breadcrumb.css';
 
-export default function Breadcrumb({ items }) {
+export interface BreadcrumbItem {
+  label: string;
+  labelEn?: string;
+  to?: string;
+  icon?: string;
+}
+
+interface BreadcrumbProps {
+  items: BreadcrumbItem[];
+}
+
+export default function Breadcrumb({ items }: BreadcrumbProps) {
   const { i18n } = useTranslation();
   const isUk = i18n.language === 'uk';
 

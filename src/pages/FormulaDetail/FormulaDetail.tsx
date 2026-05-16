@@ -5,13 +5,16 @@ import katex from 'katex';
 import { useBookmarks } from '../../contexts/BookmarkContext';
 import { useAuth } from '../../contexts/AuthContext';
 import Calculator from '../../components/Calculator/Calculator';
-import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import Breadcrumb, { type BreadcrumbItem } from '../../components/Breadcrumb/Breadcrumb';
 import { physicsData, getFormulaById as getPhysFormula, getAllFormulas as getPhysAll } from '../../data/physics';
 import { chemistryData, getFormulaById as getChemFormula, getAllFormulas as getChemAll } from '../../data/chemistry';
 import { biologyData, getFormulaById as getBioFormula, getAllFormulas as getBioAll } from '../../data/biology';
+import type { Formula, Subject, SubjectData } from '../../types/domain';
 import './FormulaDetail.css';
 
-const subjectDataMap = {
+type InteractionType = 'view' | 'calculation' | 'bookmark';
+
+const subjectDataMap: Record<Subject, SubjectData> = {
   physics: physicsData,
   chemistry: chemistryData,
   biology: biologyData
@@ -27,7 +30,11 @@ function isFirebaseConfigured() {
   return key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_');
 }
 
-async function safeLogInteraction(userId, formulaId, type) {
+async function safeLogInteraction(
+  userId: string | undefined,
+  formulaId: string,
+  type: InteractionType
+) {
   if (!isFirebaseConfigured() || !userId) return;
   try {
     const { logInteraction } = await import('../../firebase/firestore');
@@ -37,7 +44,8 @@ async function safeLogInteraction(userId, formulaId, type) {
   }
 }
 
-function findFormula(id) {
+function findFormula(id: string | undefined): Formula | undefined {
+  if (!id) return undefined;
   return getPhysFormula(id) || getChemFormula(id) || getBioFormula(id);
 }
 
@@ -79,7 +87,7 @@ export default function FormulaDetail() {
   const allFormulas = findAllFormulas();
   const derivedFormulas = (formula.derivedFormulas || [])
     .map(id => allFormulas.find(f => f.id === id))
-    .filter(Boolean);
+    .filter((f): f is Formula => f !== undefined);
 
   const handleCalculate = () => {
     if (user?.uid) {
@@ -88,18 +96,26 @@ export default function FormulaDetail() {
   };
 
   // Build breadcrumb
-  const subjectData = subjectDataMap[formula.subject];
-  const breadcrumbs = [
-    { label: t('nav.home'), to: '/', icon: '🏠' },
-    subjectData && {
+  const subjectData = formula.subject
+    ? subjectDataMap[formula.subject]
+    : undefined;
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: t('nav.home'), to: '/', icon: '🏠' }
+  ];
+  if (subjectData) {
+    breadcrumbs.push({
       label: subjectData.name,
       labelEn: subjectData.nameEn,
       to: `/subject/${formula.subject}`,
       icon: subjectData.icon
-    },
-    formula.topic && { label: formula.topic, labelEn: formula.topic },
-    { label: isUk ? formula.name : (formula.nameEn || formula.name) }
-  ].filter(Boolean);
+    });
+  }
+  if (formula.topic) {
+    breadcrumbs.push({ label: formula.topic, labelEn: formula.topic });
+  }
+  breadcrumbs.push({
+    label: isUk ? formula.name : (formula.nameEn || formula.name)
+  });
 
   return (
     <div className="formula-detail-page">

@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { search } from '../../services/search';
+import type { SearchHit, ContentType, Subject } from '../../types/domain';
 import './SearchBar.css';
 
-const SEARCH_TYPE_KEY = {
+const SEARCH_TYPE_KEY: Record<ContentType, string> = {
   formula: 'search.type_formula',
   theory: 'search.type_theory',
   problem: 'search.type_problem'
@@ -14,13 +15,13 @@ export default function SearchBar() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<SearchHit[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (ref.current && !ref.current.contains(e.target)) {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     }
@@ -28,7 +29,7 @@ export default function SearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearch = (value) => {
+  const handleSearch = (value: string) => {
     setQuery(value);
     if (value.trim().length >= 2) {
       const searchResults = search(value);
@@ -40,7 +41,7 @@ export default function SearchBar() {
     }
   };
 
-  const handleSelect = (item) => {
+  const handleSelect = (item: SearchHit) => {
     setIsOpen(false);
     setQuery('');
     if (item.type === 'formula') {
@@ -54,7 +55,7 @@ export default function SearchBar() {
 
   const isUk = i18n.language === 'uk';
 
-  const getSubjectColor = (subject) => {
+  const getSubjectColor = (subject: Subject) => {
     if (subject === 'physics') return 'var(--color-physics)';
     if (subject === 'chemistry') return 'var(--color-chemistry)';
     if (subject === 'biology') return 'var(--color-biology)';

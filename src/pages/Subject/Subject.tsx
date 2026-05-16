@@ -5,19 +5,20 @@ import { chemistryData } from '../../data/chemistry';
 import { biologyData } from '../../data/biology';
 import FormulaCard from '../../components/FormulaCard/FormulaCard';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
+import type { SubjectData } from '../../types/domain';
 import './Subject.css';
 
-const subjectMap = {
+const subjectMap: Record<string, SubjectData | undefined> = {
   physics: physicsData,
   chemistry: chemistryData,
   biology: biologyData
 };
 
 export default function Subject() {
-  const { subjectId } = useParams();
+  const { subjectId } = useParams<{ subjectId: string }>();
   const { t, i18n } = useTranslation();
   const isUk = i18n.language === 'uk';
-  const subject = subjectMap[subjectId];
+  const subject = subjectId ? subjectMap[subjectId] : undefined;
 
   if (!subject) {
     return (
@@ -57,7 +58,7 @@ export default function Subject() {
                     {subtopic.formulas.map((formula) => (
                       <FormulaCard
                         key={formula.id}
-                        formula={{ ...formula, subject: subjectId }}
+                        formula={{ ...formula, subject: subject.id }}
                       />
                     ))}
                   </div>

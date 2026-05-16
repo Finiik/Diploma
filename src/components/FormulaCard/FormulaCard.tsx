@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useBookmarks } from '../../contexts/BookmarkContext';
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
+import type { Formula } from '../../types/domain';
 import './FormulaCard.css';
 
 const BOOKMARK_KEY: Record<'true' | 'false', string> = {
@@ -10,7 +11,11 @@ const BOOKMARK_KEY: Record<'true' | 'false', string> = {
   false: 'formula.bookmark_add'
 };
 
-export default function FormulaCard({ formula }) {
+interface FormulaCardProps {
+  formula: Formula;
+}
+
+export default function FormulaCard({ formula }: FormulaCardProps) {
   const { t, i18n } = useTranslation();
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const isUk = i18n.language === 'uk';

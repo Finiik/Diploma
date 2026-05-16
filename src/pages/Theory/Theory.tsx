@@ -6,14 +6,21 @@ import './Theory.css';
 
 const SUBJECTS = ['all', 'physics', 'chemistry', 'biology'];
 const DIFF_FILTERS = ['all', '1', '2', '3'];
-const SUBJECT_ICON = { physics: '⚛️', chemistry: '🧪', biology: '🧬' };
-const DIFF_BADGE = {
+
+interface DifficultyBadge {
+  key: string;
+  cls: string;
+  icon: string;
+}
+
+const SUBJECT_ICON: Record<string, string> = { physics: '⚛️', chemistry: '🧪', biology: '🧬' };
+const DIFF_BADGE: Record<string, DifficultyBadge> = {
   1: { key: 'difficulty.beginner', cls: 'diff-beginner', icon: '🟢' },
   2: { key: 'difficulty.intermediate', cls: 'diff-intermediate', icon: '🟡' },
   3: { key: 'difficulty.advanced', cls: 'diff-advanced', icon: '🔴' }
 };
-const DIFF_FILTER_ICON = { all: '📊', 1: '🟢', 2: '🟡', 3: '🔴' };
-const DIFF_FILTER_KEY = {
+const DIFF_FILTER_ICON: Record<string, string> = { all: '📊', 1: '🟢', 2: '🟡', 3: '🔴' };
+const DIFF_FILTER_KEY: Record<string, string> = {
   all: 'difficulty.all',
   1: 'difficulty.beginner',
   2: 'difficulty.intermediate',
@@ -32,8 +39,9 @@ export default function Theory() {
     return matchSubject && matchDiff;
   });
 
-  const getSubjectIcon = (s) => SUBJECT_ICON[s] || '📚';
-  const getDifficultyBadge = (level) => DIFF_BADGE[level] || DIFF_BADGE[1];
+  const getSubjectIcon = (s: string) => SUBJECT_ICON[s] || '📚';
+  const getDifficultyBadge = (level: number): DifficultyBadge =>
+    DIFF_BADGE[level] || DIFF_BADGE[1];
 
   return (
     <div className="theory-page">

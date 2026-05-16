@@ -1,33 +1,43 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import katex from 'katex';
+import type { Formula } from '../../types/domain';
 import './Calculator.css';
 
-export default function Calculator({ formula }) {
+/** Calculator field values: numeric defaults or raw `<input>` strings. */
+type CalcValues = Record<string, string | number>;
+/** `compute` returns either one number or several labelled results. */
+type CalcResult = number | Record<string, number>;
+
+interface CalculatorProps {
+  formula: Formula;
+}
+
+export default function Calculator({ formula }: CalculatorProps) {
   const { t, i18n } = useTranslation();
   const isUk = i18n.language === 'uk';
   const inputVars = formula.variables.filter(v => v.type === 'input');
   const resultVar = formula.variables.find(v => v.type === 'result');
 
-  const [values, setValues] = useState(() => {
-    const init = {};
+  const [values, setValues] = useState<CalcValues>(() => {
+    const init: CalcValues = {};
     inputVars.forEach(v => {
       init[v.symbol] = v.defaultValue !== undefined ? v.defaultValue : '';
     });
     return init;
   });
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<CalcResult | null>(null);
   const [error, setError] = useState('');
 
-  const handleChange = (symbol, value) => {
+  const handleChange = (symbol: string, value: string) => {
     setValues(prev => ({ ...prev, [symbol]: value }));
     setError('');
   };
 
   const handleCalculate = () => {
-    const numValues = {};
+    const numValues: Record<string, number> = {};
     for (const v of inputVars) {
-      const val = parseFloat(values[v.symbol]);
+      const val = parseFloat(String(values[v.symbol]));
       if (isNaN(val)) {
         setError(t('formula.invalid_value', { name: isUk ? v.name : (v.nameEn || v.name) }));
         return;
@@ -44,7 +54,7 @@ export default function Calculator({ formula }) {
     }
   };
 
-  const formatResult = (val) => {
+  const formatResult = (val: number): string => {
     if (typeof val === 'number') {
       return Number.isInteger(val) ? val.toString() : val.toFixed(4).replace(/\.?0+$/, '');
     }
@@ -107,7 +117,8 @@ export default function Calculator({ formula }) {
             <div className="calc-result-row">
               <span className="calc-result-key">{resultVar?.symbol}</span>
               <span className="calc-result-value">
-                {formatResult(result)} {resultVar?.unit}
+                {formatResult(typeof result === 'number' ? result : Number(result))}{' '}
+                {resultVar?.unit}
               </span>
             </div>
           )}
