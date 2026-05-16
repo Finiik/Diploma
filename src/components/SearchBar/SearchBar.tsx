@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { search } from '../../services/search';
 import type { SearchHit, ContentType, Subject } from '../../types/domain';
 import { useLocalized } from '../../hooks/useLocalized';
+import { resolveNavPath } from '../../lib/navigation';
 import './SearchBar.css';
 
 const SEARCH_TYPE_KEY: Record<ContentType, string> = {
@@ -46,13 +47,8 @@ export default function SearchBar() {
   const handleSelect = (item: SearchHit) => {
     setIsOpen(false);
     setQuery('');
-    if (item.type === 'formula') {
-      navigate(`/formula/${item.id}`);
-    } else if (item.type === 'theory') {
-      navigate(`/theory`);
-    } else if (item.type === 'problem') {
-      navigate(`/problems`);
-    }
+    const path = resolveNavPath(item);
+    if (path) navigate(path);
   };
 
   const getSubjectColor = (subject: Subject) => {

@@ -6,6 +6,7 @@ import 'katex/dist/katex.min.css';
 import { renderLatex } from '../../lib/katex';
 import { processMessage } from '../../services/assistantEngine';
 import type { NavLink, AssistantResponse } from '../../types/domain';
+import { resolveNavPath } from '../../lib/navigation';
 import './AIAssistant.css';
 
 /** A message in the chat transcript: a user query or a bot answer. */
@@ -109,15 +110,8 @@ export default function AIAssistant() {
   };
 
   const handleLinkClick = (link: NavLink) => {
-    if (link.type === 'formula') {
-      navigate(`/formula/${link.id}`);
-    } else if (link.type === 'theory') {
-      navigate('/theory');
-    } else if (link.type === 'problems') {
-      navigate('/problems');
-    } else if (link.type === 'subject') {
-      navigate(`/subject/${link.id}`);
-    }
+    const path = resolveNavPath(link);
+    if (path) navigate(path);
     setIsOpen(false);
   };
 
