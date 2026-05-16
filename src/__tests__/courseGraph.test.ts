@@ -70,6 +70,8 @@ describe('resolveRelated', () => {
 
   it('returns [] for a null/empty concept', () => {
     expect(resolveRelated(null)).toEqual([]);
-    expect(resolveRelated({ itemIds: [] })).toEqual([]);
+    expect(
+      resolveRelated({ label: '', labelEn: '', subject: 'physics', keys: [], itemIds: [] })
+    ).toEqual([]);
   });
 });
