@@ -214,6 +214,21 @@
   color: white;
 }
 
+/* Inline content references ([[formula:id|label]]) — a real link the
+   reader can click to open the page, mirroring the chips below. */
+.ai-msg-text .ai-inline-link {
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.ai-msg-text .ai-inline-link:hover {
+  color: var(--color-primary-hover);
+}
+
 .formula-inline {
   font-family: 'KaTeX_Math', serif;
   font-style: italic;
