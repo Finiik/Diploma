@@ -2,13 +2,13 @@
 import { describe, it, expect } from 'vitest';
 import {
   extractLinks,
-  buildConceptLinks,
-  mergeLinks,
-  findRelevantContent
-} from '@/features/assistant/services/assistant/context';
+  buildConceptLinks
+} from '@/features/assistant/services/assistant/navLinks';
+import { findRelevantContent } from '@/features/assistant/services/assistant/promptContext';
+import { mergeById } from '@/shared/lib/mergeById';
 import { matchConcept } from '@/features/assistant/services/assistant/courseGraph';
 
-describe('mergeLinks', () => {
+describe('mergeById', () => {
   it('dedupes by type:id and caps the result', () => {
     const a = [
       { type: 'formula', id: 'x' },
@@ -18,7 +18,7 @@ describe('mergeLinks', () => {
       { type: 'formula', id: 'x' },
       { type: 'problems', id: 'z' }
     ];
-    const merged = mergeLinks(a, b, 5);
+    const merged = mergeById(a, b, 5);
     expect(merged).toHaveLength(3);
     expect(merged.map((l) => `${l.type}:${l.id}`)).toEqual([
       'formula:x',
@@ -36,7 +36,7 @@ describe('mergeLinks', () => {
       { type: 'formula', id: '3' },
       { type: 'formula', id: '4' }
     ];
-    expect(mergeLinks(a, b, 3)).toHaveLength(3);
+    expect(mergeById(a, b, 3)).toHaveLength(3);
   });
 });
 

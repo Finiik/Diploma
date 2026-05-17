@@ -25,10 +25,12 @@ import {
   getSubjectLabel
 } from './subjects';
 import { matchConcept } from './courseGraph';
-import { extractLinks, buildConceptLinks, mergeLinks } from './context';
+import { extractLinks, buildConceptLinks } from './navLinks';
+import { mergeById } from '@/shared/lib/mergeById';
 import {
   SUBJECT_FORMULA_LIST_LIMIT,
-  MAX_PURE_SUBJECT_QUERY_LENGTH
+  MAX_PURE_SUBJECT_QUERY_LENGTH,
+  MERGED_LINKS_CAP
 } from './constants';
 import { callGemini, geminiConfigured } from './gemini';
 import {
@@ -162,7 +164,11 @@ async function aiOrFallback(
   const conceptMatch = matchConcept(query);
   let links = extractLinks(query, isUk);
   if (conceptMatch) {
-    links = mergeLinks(links, buildConceptLinks(conceptMatch, isUk));
+    links = mergeById(
+      links,
+      buildConceptLinks(conceptMatch, isUk),
+      MERGED_LINKS_CAP
+    );
   }
 
   if (geminiConfigured()) {

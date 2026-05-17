@@ -1,8 +1,5 @@
 /* ============================================
-   Retrieval context + navigation links
-
-   Builds the platform context/RAG block fed to Gemini, and the navigation
-   link chips shared by the Gemini path and the local fallback.
+   Retrieval context — the platform context/RAG block fed to Gemini.
    ============================================ */
 
 import { theoryData } from '@/features/theory';
@@ -14,11 +11,9 @@ import {
   CONTEXT_DESCRIPTION_CHARS,
   CONTEXT_THEORY_CHARS,
   STRONG_MATCH_MAX_SCORE,
-  RAG_RESULTS_LIMIT,
-  NAV_LINKS_LIMIT,
-  MERGED_LINKS_CAP
+  RAG_RESULTS_LIMIT
 } from './constants';
-import type { Concept, GraphItem, NavLink } from '@/shared/types/domain';
+import type { GraphItem } from '@/shared/types/domain';
 
 // Build a compact context summary for Gemini
 export function buildPlatformContext(isUk: boolean) {
@@ -83,10 +78,17 @@ export function buildPlatformContext(isUk: boolean) {
   };
 }
 
-// Serialize one platform item into the Gemini prompt context.
-export function formatItemContext(item: GraphItem, isUk: boolean): string {
-  const name = localizedName(item, isUk);
-  if (item.type === 'formula') {
+// Per-type serialization of one platform item into the Gemini prompt
+// context. An exhaustive map over GraphItem's discriminant: adding a new
+// item variant is a compile error here instead of a silent empty string.
+type ItemFormatter<T extends GraphItem['type']> = (
+  item: Extract<GraphItem, { type: T }>,
+  isUk: boolean
+) => string;
+
+const ITEM_FORMATTERS: { [T in GraphItem['type']]: ItemFormatter<T> } = {
+  formula: (item, isUk) => {
+    const name = localizedName(item, isUk);
     const desc = isUk ? item.description : item.descriptionEn;
     const vars = item.variables
       ? item.variables
@@ -94,12 +96,14 @@ export function formatItemContext(item: GraphItem, isUk: boolean): string {
           .join(', ')
       : '';
     return `\nFORMULA: ${name}\nLaTeX: ${item.latex}\nDescription: ${desc}\nVariables: ${vars}\nID: ${item.id}\nSubject: ${item.subject}\n`;
-  }
-  if (item.type === 'theory') {
+  },
+  theory: (item, isUk) => {
+    const name = localizedName(item, isUk);
     const content = isUk ? item.content : item.contentEn;
     return `\nTHEORY: ${name}\nContent: ${content}\nRelated formulas: ${(item.relatedFormulas || []).join(', ')}\n`;
-  }
-  if (item.type === 'problem') {
+  },
+  problem: (item, isUk) => {
+    const name = localizedName(item, isUk);
     const desc = isUk ? item.description : item.descriptionEn;
     const steps = item.steps
       ? item.steps
@@ -109,7 +113,16 @@ export function formatItemContext(item: GraphItem, isUk: boolean): string {
     const answer = isUk ? item.answer : item.answerEn;
     return `\nPROBLEM: ${name}\nDescription: ${desc}\n${steps}\nAnswer: ${answer}\nRelated formula: ${item.relatedFormula || 'none'}\n`;
   }
-  return '';
+};
+
+export function formatItemContext(item: GraphItem, isUk: boolean): string {
+  // Single typed dispatch boundary; exhaustiveness is enforced by the
+  // mapped-type declaration of ITEM_FORMATTERS above.
+  const format = ITEM_FORMATTERS[item.type] as (
+    i: GraphItem,
+    uk: boolean
+  ) => string;
+  return format(item, isUk);
 }
 
 // Build the retrieval context for the Gemini prompt (graph/keyword RAG). A
@@ -139,68 +152,4 @@ export function findRelevantContent(query: string, isUk: boolean): string {
     context += formatItemContext(item, isUk);
   });
   return context;
-}
-
-// Shared mapping from a platform item to a navigation link chip. The Gemini
-// path prefixes the label with a type emoji; the concept-graph path doesn't.
-const LINK_TYPE: Record<GraphItem['type'], NavLink['type']> = {
-  formula: 'formula',
-  theory: 'theory',
-  problem: 'problems'
-};
-const LINK_EMOJI: Record<GraphItem['type'], string> = {
-  formula: '📐',
-  theory: '📖',
-  problem: '📝'
-};
-function itemToLink(
-  item: GraphItem,
-  isUk: boolean,
-  withEmoji = false
-): NavLink | null {
-  const type = LINK_TYPE[item.type];
-  if (!type) return null;
-  const name = localizedName(item, isUk);
-  return {
-    type,
-    id: item.id,
-    label: withEmoji ? `${LINK_EMOJI[item.type]} ${name}` : name
-  };
-}
-
-// Build navigation links from search results
-export function extractLinks(query: string, isUk: boolean): NavLink[] {
-  return smartSearch(query)
-    .slice(0, NAV_LINKS_LIMIT)
-    .map((item) => itemToLink(item, isUk, true))
-    .filter((l): l is NavLink => l !== null);
-}
-
-// Concept-graph navigation links (any subject), reused by the fallback and
-// the Gemini path so the topic still surfaces its connected materials.
-export function buildConceptLinks(
-  concept: Concept | null,
-  isUk: boolean
-): NavLink[] {
-  return resolveRelated(concept)
-    .slice(0, NAV_LINKS_LIMIT)
-    .map((item) => itemToLink(item, isUk))
-    .filter((l): l is NavLink => l !== null);
-}
-
-export function mergeLinks<T extends { type: string; id: string }>(
-  primary: T[],
-  extra: T[],
-  cap = MERGED_LINKS_CAP
-): T[] {
-  const seen = new Set(primary.map((l) => `${l.type}:${l.id}`));
-  const out = [...primary];
-  for (const l of extra) {
-    const key = `${l.type}:${l.id}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(l);
-    if (out.length >= cap) break;
-  }
-  return out.slice(0, cap);
 }

@@ -5,7 +5,7 @@
 
 import { theoryData } from '@/features/theory';
 import { problemsData } from '@/features/problems';
-import { buildPlatformContext, findRelevantContent } from './context';
+import { buildPlatformContext, findRelevantContent } from './promptContext';
 
 /**
  * Assembles the full SciLearn-AI system prompt: the static answering rules
