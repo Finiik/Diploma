@@ -14,6 +14,7 @@ import {
   increment
 } from 'firebase/firestore';
 import { db } from './config';
+import { FIRESTORE_COLLECTIONS } from './collections';
 import type { Interaction, InteractionsByUser } from '@/shared/types/domain';
 
 /** Counters stored per-formula. Non-optional here (Firestore writes all 3). */
@@ -30,7 +31,7 @@ export async function logInteraction(
   type: InteractionType = 'view'
 ): Promise<void> {
   if (!userId) return;
-  const ref = doc(db, 'userInteractions', userId);
+  const ref = doc(db, FIRESTORE_COLLECTIONS.userInteractions, userId);
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
@@ -69,13 +70,15 @@ export async function getUserInteractions(
   userId: string | undefined
 ): Promise<Record<string, Interaction>> {
   if (!userId) return {};
-  const ref = doc(db, 'userInteractions', userId);
+  const ref = doc(db, FIRESTORE_COLLECTIONS.userInteractions, userId);
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data().interactions || {} : {};
 }
 
 export async function getAllInteractions(): Promise<InteractionsByUser> {
-  const snapshot = await getDocs(collection(db, 'userInteractions'));
+  const snapshot = await getDocs(
+    collection(db, FIRESTORE_COLLECTIONS.userInteractions)
+  );
   const all: InteractionsByUser = {};
   snapshot.forEach((docSnap) => {
     all[docSnap.id] = docSnap.data().interactions || {};
@@ -92,7 +95,7 @@ export async function addBookmarkFirebase(
   formulaId: string
 ): Promise<void> {
   if (!userId) return;
-  const ref = doc(db, 'bookmarks', userId);
+  const ref = doc(db, FIRESTORE_COLLECTIONS.bookmarks, userId);
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
@@ -115,7 +118,7 @@ export async function removeBookmarkFirebase(
   formulaId: string
 ): Promise<void> {
   if (!userId) return;
-  const ref = doc(db, 'bookmarks', userId);
+  const ref = doc(db, FIRESTORE_COLLECTIONS.bookmarks, userId);
   await updateDoc(ref, {
     formulaIds: arrayRemove(formulaId),
     updatedAt: serverTimestamp()
@@ -126,7 +129,7 @@ export async function getBookmarksFirebase(
   userId: string | undefined
 ): Promise<string[]> {
   if (!userId) return [];
-  const ref = doc(db, 'bookmarks', userId);
+  const ref = doc(db, FIRESTORE_COLLECTIONS.bookmarks, userId);
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data().formulaIds || [] : [];
 }
