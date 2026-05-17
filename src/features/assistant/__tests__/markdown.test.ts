@@ -2,7 +2,7 @@
    Pins the bold/newline transforms, math stash → KaTeX reinjection, and the
    regression where literal numbers in prose were corrupted to "undefined". */
 import { describe, it, expect } from 'vitest';
-import { formatMessage } from '@/lib/markdown';
+import { formatMessage } from '@/features/assistant/lib/markdown';
 
 const NUL = String.fromCharCode(0);
 

@@ -6,7 +6,7 @@ import {
   buildCourseGraph,
   matchConcept,
   resolveRelated
-} from '@/services/assistant/courseGraph';
+} from '@/features/assistant/services/assistant/courseGraph';
 
 describe('buildCourseGraph', () => {
   const g = buildCourseGraph();

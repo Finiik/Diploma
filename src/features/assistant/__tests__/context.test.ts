@@ -5,8 +5,8 @@ import {
   buildConceptLinks,
   mergeLinks,
   findRelevantContent
-} from '@/services/assistant/context';
-import { matchConcept } from '@/services/assistant/courseGraph';
+} from '@/features/assistant/services/assistant/context';
+import { matchConcept } from '@/features/assistant/services/assistant/courseGraph';
 
 describe('mergeLinks', () => {
   it('dedupes by type:id and caps the result', () => {

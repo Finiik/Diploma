@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { formatMessage } from '@/lib/markdown';
+import { formatMessage } from '@/features/assistant/lib/markdown';
 import type { NavLink } from '@/shared/types/domain';
 import type { ChatMessage as ChatMsg } from './types';
 

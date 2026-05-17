@@ -11,7 +11,7 @@ import {
   INTENT_WORDS_UK,
   INTENT_WORDS_EN,
   FILLER_WORDS
-} from '@/services/assistant/text';
+} from '@/features/assistant/services/assistant/text';
 
 describe('levenshtein', () => {
   it('classic kitten→sitting distance is 3', () => {

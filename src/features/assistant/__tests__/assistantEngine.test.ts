@@ -2,7 +2,7 @@
    fetch is mocked to reject so the Gemini path always falls through to the
    deterministic offline responders/fallback, regardless of local env. */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { processMessage } from '@/services/assistantEngine';
+import { processMessage } from '@/features/assistant/services/assistantEngine';
 
 beforeEach(() => {
   vi.stubGlobal(

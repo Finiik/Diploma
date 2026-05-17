@@ -15,7 +15,10 @@
      responders  — the ordered chain wired from all of the above
    ============================================ */
 
-import { RESPONDERS, finalizeResponse } from '@/services/assistant/responders';
+import {
+  RESPONDERS,
+  finalizeResponse
+} from '@/features/assistant/services/assistant/responders';
 import type { AssistantResponse } from '@/shared/types/domain';
 
 // ============================================

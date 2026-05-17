@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { processMessage } from '@/services/assistantEngine';
-import type { ChatMessage } from '@/components/AIAssistant/types';
+import { processMessage } from '@/features/assistant/services/assistantEngine';
+import type { ChatMessage } from '@/features/assistant/components/AIAssistant/types';
 
 /**
  * Owns the chat transcript, the input box and the typing flag. `send` and
