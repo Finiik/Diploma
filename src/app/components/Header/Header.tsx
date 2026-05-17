@@ -1,42 +1,19 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/features/theme';
-import { useBodyScrollLock } from '@/shared/hooks/useBodyScrollLock';
+import { ThemeToggleButton } from '@/features/theme';
 import { SearchBar } from '@/features/search';
-import {
-  LANGUAGE_STORAGE_KEY,
-  SUPPORTED_LANGUAGES
-} from '@/shared/i18n/constants';
+import { useMobileMenu } from '@/shared/hooks/useMobileMenu';
+import { useLanguageToggle } from '@/shared/i18n/useLanguageToggle';
 import './Header.css';
 
-const THEME_TITLE_KEY: Record<string, string> = {
-  light: 'theme.dark',
-  dark: 'theme.light'
-};
-
 export default function Header() {
-  const { t, i18n } = useTranslation();
-  const { theme, toggleTheme } = useTheme();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  // Prevent body scroll when menu is open
-  useBodyScrollLock(mobileMenuOpen);
-
-  const toggleLanguage = () => {
-    const newLang =
-      i18n.language === SUPPORTED_LANGUAGES.uk
-        ? SUPPORTED_LANGUAGES.en
-        : SUPPORTED_LANGUAGES.uk;
-    i18n.changeLanguage(newLang);
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
-  };
+  const { t } = useTranslation();
+  const { toggleLanguage } = useLanguageToggle();
+  const {
+    open: mobileMenuOpen,
+    toggle: toggleMobileMenu,
+    close: closeMobileMenu
+  } = useMobileMenu();
 
   return (
     <header className="header">
@@ -79,22 +56,12 @@ export default function Header() {
 
         {/* Backdrop overlay for mobile menu */}
         {mobileMenuOpen && (
-          <div
-            className="mobile-backdrop"
-            onClick={() => setMobileMenuOpen(false)}
-          />
+          <div className="mobile-backdrop" onClick={closeMobileMenu} />
         )}
 
         <div className="header-actions">
           <SearchBar />
-          <button
-            className="action-btn theme-toggle"
-            onClick={toggleTheme}
-            title={t(THEME_TITLE_KEY[theme])}
-            id="theme-toggle"
-          >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+          <ThemeToggleButton />
           <button
             className="action-btn lang-toggle"
             onClick={toggleLanguage}
@@ -104,7 +71,7 @@ export default function Header() {
           </button>
           <button
             className={`hamburger-btn ${mobileMenuOpen ? 'open' : ''}`}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={toggleMobileMenu}
             aria-label={t('a11y.menu')}
             id="hamburger-btn"
           >
