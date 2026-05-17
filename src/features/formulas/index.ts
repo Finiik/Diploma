@@ -11,7 +11,9 @@ export {
   findFormulaById,
   findFormulasByIds,
   getSubjectData,
-  type SubjectFormula
+  getSubjectTopics,
+  type SubjectFormula,
+  type SubjectTopic
 } from './lib/formulas';
 
 // Raw per-subject datasets (consumed by search & the assistant).

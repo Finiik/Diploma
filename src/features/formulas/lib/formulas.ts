@@ -15,7 +15,13 @@ import {
   biologyData,
   getAllFormulas as getBioFormulas
 } from '@/features/formulas/data/biology';
-import type { Formula, Subject, SubjectData } from '@/shared/types/domain';
+import type {
+  Formula,
+  Subject,
+  SubjectData,
+  Subtopic,
+  Topic
+} from '@/shared/types/domain';
 
 /**
  * A formula guaranteed to carry its `subject`. The per-subject data modules
@@ -50,6 +56,37 @@ export function getSubjectData(
 ): SubjectData | undefined {
   if (!subject) return undefined;
   return SUBJECT_DATA[subject as Subject];
+}
+
+/** A subtopic whose formulas are guaranteed subject-tagged. */
+export interface SubjectSubtopic extends Omit<Subtopic, 'formulas'> {
+  formulas: SubjectFormula[];
+}
+/** A topic whose formulas are guaranteed subject-tagged. */
+export interface SubjectTopic extends Omit<Topic, 'subtopics'> {
+  subtopics: SubjectSubtopic[];
+}
+
+/**
+ * A subject's topic tree with every formula already tagged with its
+ * `subject`. This is the one place that owns subject-tagging, so pages
+ * (e.g. Subject) no longer spread `{ ...formula, subject }` themselves.
+ */
+export function getSubjectTopics(
+  subject: string | undefined
+): SubjectTopic[] | undefined {
+  const data = getSubjectData(subject);
+  if (!data) return undefined;
+  return data.topics.map((topic) => ({
+    ...topic,
+    subtopics: topic.subtopics.map((subtopic) => ({
+      ...subtopic,
+      formulas: subtopic.formulas.map((formula) => ({
+        ...formula,
+        subject: data.id
+      }))
+    }))
+  }));
 }
 
 /** First formula matching `id` across all subjects, or undefined. */

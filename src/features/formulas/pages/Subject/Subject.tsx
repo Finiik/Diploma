@@ -2,7 +2,10 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FormulaCard from '@/features/formulas/components/FormulaCard/FormulaCard';
 import Breadcrumb from '@/shared/ui/Breadcrumb/Breadcrumb';
-import { getSubjectData } from '@/features/formulas/lib/formulas';
+import {
+  getSubjectData,
+  getSubjectTopics
+} from '@/features/formulas/lib/formulas';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import './Subject.css';
 
@@ -11,6 +14,7 @@ export default function Subject() {
   const { t } = useTranslation();
   const tr = useLocalized();
   const subject = getSubjectData(subjectId);
+  const topics = getSubjectTopics(subjectId) ?? [];
 
   if (!subject) {
     return (
@@ -39,7 +43,7 @@ export default function Subject() {
         </div>
 
         <div className="topics-list stagger-children">
-          {subject.topics.map((topic) => (
+          {topics.map((topic) => (
             <div
               key={topic.id}
               className="topic-section"
@@ -56,10 +60,7 @@ export default function Subject() {
                   <h3 className="subtopic-title">{tr(subtopic, 'name')}</h3>
                   <div className="formulas-grid">
                     {subtopic.formulas.map((formula) => (
-                      <FormulaCard
-                        key={formula.id}
-                        formula={{ ...formula, subject: subject.id }}
-                      />
+                      <FormulaCard key={formula.id} formula={formula} />
                     ))}
                   </div>
                 </div>
