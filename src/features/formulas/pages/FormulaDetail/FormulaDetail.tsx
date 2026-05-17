@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Latex from '@/shared/ui/Latex/Latex';
 import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
 import { useAuth } from '@/contexts/AuthContext';
-import Calculator from '@/components/Calculator/Calculator';
+import { Calculator } from '@/features/calculator';
 import Breadcrumb, {
   type BreadcrumbItem
 } from '@/shared/ui/Breadcrumb/Breadcrumb';

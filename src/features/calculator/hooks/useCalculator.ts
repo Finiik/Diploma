@@ -6,7 +6,7 @@ import {
   runCalculation,
   type CalcValues,
   type CalcResult
-} from '@/lib/calculator';
+} from '@/features/calculator/lib/calculator';
 
 /**
  * Owns the calculator's field/result/error state and bridges the pure

@@ -2,7 +2,10 @@
    Pins runCalculation's discriminated outcome and formatResult's numeric
    formatting (including its rounding/trim quirks). */
 import { describe, it, expect } from 'vitest';
-import { runCalculation, formatResult } from '@/lib/calculator';
+import {
+  runCalculation,
+  formatResult
+} from '@/features/calculator/lib/calculator';
 import type { Formula, FormulaVariable } from '@/shared/types/domain';
 
 const v = (symbol: string, type: 'input' | 'result'): FormulaVariable => ({

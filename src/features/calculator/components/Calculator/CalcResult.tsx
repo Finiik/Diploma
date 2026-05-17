@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import {
   formatResult,
   type CalcResult as CalcResultValue
-} from '@/lib/calculator';
+} from '@/features/calculator/lib/calculator';
 
 interface CalcResultProps {
   result: CalcResultValue;
