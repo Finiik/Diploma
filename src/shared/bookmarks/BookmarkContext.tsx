@@ -3,7 +3,8 @@ import {
   useContext,
   useState,
   useEffect,
-  useCallback
+  useCallback,
+  useMemo
 } from 'react';
 import type { ReactNode } from 'react';
 import {
@@ -58,10 +59,13 @@ export function BookmarkProvider({ children }: { children: ReactNode }) {
     [bookmarks]
   );
 
+  const value = useMemo<BookmarkContextValue>(
+    () => ({ bookmarks, toggleBookmark, isBookmarked, loadBookmarks }),
+    [bookmarks, toggleBookmark, isBookmarked, loadBookmarks]
+  );
+
   return (
-    <BookmarkContext.Provider
-      value={{ bookmarks, toggleBookmark, isBookmarked, loadBookmarks }}
-    >
+    <BookmarkContext.Provider value={value}>
       {children}
     </BookmarkContext.Provider>
   );
