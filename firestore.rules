@@ -3,31 +3,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // User interactions — each user can only read/write their own data
-    match /interactions/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Individual formula interactions for a user
-    match /interactions/{userId}/formulas/{formulaId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Bookmarks — each user can only manage their own bookmarks
-    match /bookmarks/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Aggregated interactions for recommendations (read-only for authenticated users)
-    match /aggregated_interactions/{docId} {
+    // Per-user formula interaction counters — the collaborative-filtering
+    // source (FIRESTORE_COLLECTIONS.userInteractions; one document per uid).
+    //
+    // Asymmetric on purpose: collaborative filtering must read *other*
+    // users' interaction vectors — getAllInteractions() lists the whole
+    // collection to build the neighbourhood — so any authenticated user
+    // may read. The data is non-PII (an opaque Firebase uid mapped to
+    // per-formula view/calculation/bookmark counts). Writes are
+    // owner-locked: a user may only mutate the document at their own uid.
+    match /userInteractions/{userId} {
       allow read: if request.auth != null;
-      allow write: if false; // Only cloud functions should write
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Deny all other access
+    // Per-user saved formula ids (FIRESTORE_COLLECTIONS.bookmarks).
+    // Fully private: nothing reads across users, so the owner is the only
+    // principal allowed to read or write their own document.
+    match /bookmarks/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Deny everything else (no other collection is used by the client).
     match /{document=**} {
       allow read, write: if false;
     }
