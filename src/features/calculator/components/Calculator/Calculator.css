@@ -42,8 +42,8 @@
 
 .calc-symbol {
   color: var(--color-primary);
-  font-size: var(--font-base);
-  min-width: 30px;
+  font-size: var(--font-xl);
+  min-width: 36px;
 }
 
 .calc-name {
@@ -140,7 +140,7 @@
 
 .calc-result-key {
   color: var(--color-text);
-  font-size: var(--font-lg);
+  font-size: var(--font-xl);
 }
 
 .calc-result-value {
