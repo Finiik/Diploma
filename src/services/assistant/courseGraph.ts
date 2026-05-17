@@ -9,7 +9,7 @@
    ============================================ */
 
 import { theoryData } from '@/features/theory';
-import { problemsData } from '@/data/problems';
+import { problemsData } from '@/features/problems';
 import {
   physicsData,
   chemistryData,

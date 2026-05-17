@@ -4,7 +4,7 @@ import ErrorBoundary from '@/shared/ui/ErrorBoundary/ErrorBoundary';
 import { Home } from '@/features/recommendations';
 import { Subject, FormulaDetail } from '@/features/formulas';
 import { Theory } from '@/features/theory';
-import Problems from '@/pages/Problems/Problems';
+import { Problems } from '@/features/problems';
 import Bookmarks from '@/pages/Bookmarks/Bookmarks';
 import './styles/global.css';
 

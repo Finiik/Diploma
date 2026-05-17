@@ -3,7 +3,7 @@
    ============================================ */
 
 import { theoryData } from '@/features/theory';
-import { problemsData } from '@/data/problems';
+import { problemsData } from '@/features/problems';
 import { buildPlatformContext, findRelevantContent } from './context';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;

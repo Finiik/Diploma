@@ -5,7 +5,7 @@
 import Fuse from 'fuse.js';
 import { getAllFormulas } from '@/features/formulas';
 import { theoryData } from '@/features/theory';
-import { problemsData } from '@/data/problems';
+import { problemsData } from '@/features/problems';
 import type { GraphItem, SearchHit } from '@/shared/types/domain';
 
 let fuseInstance: Fuse<GraphItem> | null = null;
