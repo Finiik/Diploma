@@ -1,55 +1,41 @@
 /* ============================================
-   Bookmarks Service — localStorage + Firebase sync
-   Only syncs to Firebase when it's configured
+   Bookmarks Service — offline-first, syncs to Firebase
+   when a user is signed in and Firebase is configured.
+   This module owns only the offline-first-then-sync
+   policy; storage adapters live in localBookmarkStore /
+   remoteBookmarkStore.
    ============================================ */
 
-import { isFirebaseConfigured } from '@/shared/lib/env';
-
-const BOOKMARKS_KEY = 'bookmarks';
-
-function getLocalBookmarks(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) ?? 'null') || [];
-  } catch {
-    return [];
-  }
-}
-
-function setLocalBookmarks(bookmarks: string[]): void {
-  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
-}
+import { localBookmarkStore } from './localBookmarkStore';
+import { resolveRemoteBookmarkStore } from './remoteBookmarkStore';
 
 export async function getBookmarks(userId?: string): Promise<string[]> {
-  if (userId && isFirebaseConfigured()) {
+  const remote = await resolveRemoteBookmarkStore(userId);
+  if (remote) {
     try {
-      const { getBookmarksFirebase } = await import(
-        '@/shared/firebase/firestore'
-      );
-      const firebaseBookmarks = await getBookmarksFirebase(userId);
-      setLocalBookmarks(firebaseBookmarks);
-      return firebaseBookmarks;
+      const ids = await remote.store.get(remote.userId);
+      localBookmarkStore.set(ids);
+      return ids;
     } catch {
-      return getLocalBookmarks();
+      return localBookmarkStore.get();
     }
   }
-  return getLocalBookmarks();
+  return localBookmarkStore.get();
 }
 
 export async function addBookmark(
   userId: string | undefined,
   formulaId: string
 ): Promise<string[]> {
-  const bookmarks = getLocalBookmarks();
+  const bookmarks = localBookmarkStore.get();
   if (!bookmarks.includes(formulaId)) {
     bookmarks.push(formulaId);
-    setLocalBookmarks(bookmarks);
+    localBookmarkStore.set(bookmarks);
   }
-  if (userId && isFirebaseConfigured()) {
+  const remote = await resolveRemoteBookmarkStore(userId);
+  if (remote) {
     try {
-      const { addBookmarkFirebase } = await import(
-        '@/shared/firebase/firestore'
-      );
-      await addBookmarkFirebase(userId, formulaId);
+      await remote.store.add(remote.userId, formulaId);
     } catch (e) {
       console.warn('Failed to sync bookmark to Firebase:', e);
     }
@@ -61,21 +47,15 @@ export async function removeBookmark(
   userId: string | undefined,
   formulaId: string
 ): Promise<string[]> {
-  let bookmarks = getLocalBookmarks().filter((id) => id !== formulaId);
-  setLocalBookmarks(bookmarks);
-  if (userId && isFirebaseConfigured()) {
+  const bookmarks = localBookmarkStore.get().filter((id) => id !== formulaId);
+  localBookmarkStore.set(bookmarks);
+  const remote = await resolveRemoteBookmarkStore(userId);
+  if (remote) {
     try {
-      const { removeBookmarkFirebase } = await import(
-        '@/shared/firebase/firestore'
-      );
-      await removeBookmarkFirebase(userId, formulaId);
+      await remote.store.remove(remote.userId, formulaId);
     } catch (e) {
       console.warn('Failed to sync bookmark removal to Firebase:', e);
     }
   }
   return bookmarks;
-}
-
-export function isBookmarked(formulaId: string): boolean {
-  return getLocalBookmarks().includes(formulaId);
 }

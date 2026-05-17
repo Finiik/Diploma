@@ -9,8 +9,7 @@ import type { ReactNode } from 'react';
 import {
   getBookmarks,
   addBookmark,
-  removeBookmark,
-  isBookmarked as checkBookmarked
+  removeBookmark
 } from '@/shared/bookmarks/bookmarks';
 import { useAuth } from '@/shared/auth/AuthContext';
 
