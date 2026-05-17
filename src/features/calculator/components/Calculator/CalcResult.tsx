@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next';
+import Latex from '@/shared/ui/Latex/Latex';
+import { symbolToTex } from '@/shared/lib/symbol-tex';
 import {
   formatResult,
   type CalcResult as CalcResultValue
@@ -27,14 +29,19 @@ export default function CalcResult({
         <div className="calc-multi-result">
           {Object.entries(result).map(([key, val]) => (
             <div key={key} className="calc-result-row">
-              <span className="calc-result-key">{key}</span>
+              <Latex tex={symbolToTex(key)} className="calc-result-key" />
               <span className="calc-result-value">{formatResult(val)}</span>
             </div>
           ))}
         </div>
       ) : (
         <div className="calc-result-row">
-          <span className="calc-result-key">{resultSymbol}</span>
+          {resultSymbol && (
+            <Latex
+              tex={symbolToTex(resultSymbol)}
+              className="calc-result-key"
+            />
+          )}
           <span className="calc-result-value">
             {formatResult(typeof result === 'number' ? result : Number(result))}{' '}
             {resultUnit}

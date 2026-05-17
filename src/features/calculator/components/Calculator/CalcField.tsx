@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { FormulaVariable } from '@/shared/types/domain';
+import Latex from '@/shared/ui/Latex/Latex';
+import { symbolToTex } from '@/shared/lib/symbol-tex';
 
 interface CalcFieldProps {
   variable: FormulaVariable;
@@ -22,7 +24,7 @@ export default function CalcField({
   return (
     <div className="calc-field">
       <label className="calc-label" htmlFor={inputId}>
-        <span className="calc-symbol">{variable.symbol}</span>
+        <Latex tex={symbolToTex(variable.symbol)} className="calc-symbol" />
         <span className="calc-name">{name}</span>
         <span className="calc-unit">{variable.unit}</span>
       </label>

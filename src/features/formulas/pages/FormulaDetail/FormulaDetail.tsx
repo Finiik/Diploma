@@ -2,6 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Latex from '@/shared/ui/Latex/Latex';
+import { symbolToTex } from '@/shared/lib/symbol-tex';
 import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
 import { useAuth } from '@/shared/auth/AuthContext';
 import { Calculator } from '@/features/calculator';
@@ -137,7 +138,7 @@ export default function FormulaDetail() {
             <div className="vars-table">
               {formula.variables.map((v) => (
                 <div key={v.symbol} className="var-row">
-                  <span className="var-symbol">{v.symbol}</span>
+                  <Latex tex={symbolToTex(v.symbol)} className="var-symbol" />
                   <span className="var-name">{tr(v, 'name')}</span>
                   <span className="var-unit">{v.unit}</span>
                 </div>

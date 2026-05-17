@@ -41,10 +41,7 @@
 }
 
 .calc-symbol {
-  font-weight: var(--font-weight-bold);
   color: var(--color-primary);
-  font-family: 'Times New Roman', serif;
-  font-style: italic;
   font-size: var(--font-base);
   min-width: 30px;
 }
@@ -142,9 +139,6 @@
 }
 
 .calc-result-key {
-  font-family: 'Times New Roman', serif;
-  font-style: italic;
-  font-weight: var(--font-weight-bold);
   color: var(--color-text);
   font-size: var(--font-lg);
 }
