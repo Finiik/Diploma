@@ -8,7 +8,7 @@
    Adding/curating a concept = editing the course data, nothing here.
    ============================================ */
 
-import { theoryData } from '@/data/theory';
+import { theoryData } from '@/features/theory';
 import { problemsData } from '@/data/problems';
 import {
   physicsData,

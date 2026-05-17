@@ -2,7 +2,7 @@
    Gemini client — calls the API with platform content as context
    ============================================ */
 
-import { theoryData } from '@/data/theory';
+import { theoryData } from '@/features/theory';
 import { problemsData } from '@/data/problems';
 import { buildPlatformContext, findRelevantContent } from './context';
 

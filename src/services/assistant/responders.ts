@@ -13,7 +13,7 @@
    an intent = write a function and slot it into RESPONDERS.
    ============================================ */
 
-import { theoryData } from '@/data/theory';
+import { theoryData } from '@/features/theory';
 import { problemsData } from '@/data/problems';
 import {
   getAllFormulasFlat,

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { theoryData } from '@/data/theory';
+import { theoryData } from '@/features/theory/data/theory';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useContentFilters } from '@/shared/hooks/useContentFilters';
 import SubjectFilterBar from '@/shared/ui/FilterBar/SubjectFilterBar';

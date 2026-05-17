@@ -3,7 +3,7 @@ import Layout from '@/components/Layout/Layout';
 import ErrorBoundary from '@/shared/ui/ErrorBoundary/ErrorBoundary';
 import { Home } from '@/features/recommendations';
 import { Subject, FormulaDetail } from '@/features/formulas';
-import Theory from '@/pages/Theory/Theory';
+import { Theory } from '@/features/theory';
 import Problems from '@/pages/Problems/Problems';
 import Bookmarks from '@/pages/Bookmarks/Bookmarks';
 import './styles/global.css';

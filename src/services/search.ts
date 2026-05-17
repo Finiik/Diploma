@@ -4,7 +4,7 @@
 
 import Fuse from 'fuse.js';
 import { getAllFormulas } from '@/features/formulas';
-import { theoryData } from '@/data/theory';
+import { theoryData } from '@/features/theory';
 import { problemsData } from '@/data/problems';
 import type { GraphItem, SearchHit } from '@/shared/types/domain';
 

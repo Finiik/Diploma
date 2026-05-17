@@ -5,7 +5,7 @@
    link chips shared by the Gemini path and the local fallback.
    ============================================ */
 
-import { theoryData } from '@/data/theory';
+import { theoryData } from '@/features/theory';
 import { problemsData } from '@/data/problems';
 import { getAllFormulasFlat, localizedName } from './subjects';
 import { buildCourseGraph, matchConcept, resolveRelated } from './courseGraph';
