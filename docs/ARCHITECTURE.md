@@ -305,8 +305,9 @@ rather than control flow:
   branch. Two mechanisms, with *different* safety guarantees — stated
   precisely rather than conflated:
   - **Keyed maps over a discriminant** (`ITEM_FORMATTERS`,
-    `FALLBACK_RENDERERS`, `SUBJECT_REGISTRY`, `subjectIcon`,
-    `subjectColor`, `SUBJECT_DATA`): typed as `Record<K, …>` / a mapped
+    `FALLBACK_RENDERERS`, `SUBJECT_REGISTRY`, `COUNTER_FIELD`,
+    `subjectIcon`, `subjectColor`, `SUBJECT_DATA`): typed as
+    `Record<K, …>` / a mapped
     type, so an omitted case is a **compile error**. These are
     closed-by-construction. The subject set in particular is now a
     *single* `SUBJECT_REGISTRY` in `shared/lib/subjects.ts` — nav,

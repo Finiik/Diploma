@@ -26,6 +26,23 @@ const db = getDb();
 type InteractionCounters = Required<Interaction>;
 type InteractionType = 'view' | 'calculation' | 'bookmark';
 
+/**
+ * Interaction type → the counter it bumps. `Record<InteractionType,…>`, so
+ * a new interaction type is one entry and a *compile error* if missed —
+ * replacing the `if (type === …)` ladder that was duplicated across both
+ * write branches (Open/Closed + Single Responsibility).
+ */
+const COUNTER_FIELD: Record<InteractionType, keyof InteractionCounters> = {
+  view: 'views',
+  calculation: 'calculations',
+  bookmark: 'bookmarks'
+};
+
+/** A zeroed counter set with one field pre-incremented (first write). */
+function freshCounters(field: keyof InteractionCounters): InteractionCounters {
+  return { views: 0, calculations: 0, bookmarks: 0, [field]: 1 };
+}
+
 /* ============================================
    User Interactions — for collaborative filtering
    ============================================ */
@@ -37,33 +54,19 @@ export async function logInteraction(
 ): Promise<void> {
   if (!userId) return;
   const ref = doc(db, FIRESTORE_COLLECTIONS.userInteractions, userId);
+  const field = COUNTER_FIELD[type];
   const snap = await getDoc(ref);
 
   if (snap.exists()) {
-    const data = snap.data();
-    const interactions: Record<string, InteractionCounters> =
-      data.interactions || {};
-    const current: InteractionCounters = interactions[formulaId] || {
-      views: 0,
-      calculations: 0,
-      bookmarks: 0
-    };
-
-    if (type === 'view') current.views += 1;
-    if (type === 'calculation') current.calculations += 1;
-    if (type === 'bookmark') current.bookmarks += 1;
-
-    interactions[formulaId] = current;
-    await updateDoc(ref, { interactions, updatedAt: serverTimestamp() });
+    // Atomic field increment (server-side): concurrent interactions no
+    // longer race on a read-modify-write of the whole interactions map.
+    await updateDoc(ref, {
+      [`interactions.${formulaId}.${field}`]: increment(1),
+      updatedAt: serverTimestamp()
+    });
   } else {
-    const interactions: Record<string, InteractionCounters> = {};
-    interactions[formulaId] = {
-      views: type === 'view' ? 1 : 0,
-      calculations: type === 'calculation' ? 1 : 0,
-      bookmarks: type === 'bookmark' ? 1 : 0
-    };
     await setDoc(ref, {
-      interactions,
+      interactions: { [formulaId]: freshCounters(field) },
       userId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
