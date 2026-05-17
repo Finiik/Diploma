@@ -66,9 +66,7 @@ export default function Theory() {
                 className={`theory-card subject-${th.subject}`}
               >
                 <div className="theory-card-header">
-                  <span className="theory-icon">
-                    {subjectIcon(th.subject)}
-                  </span>
+                  <span className="theory-icon">{subjectIcon(th.subject)}</span>
                   <div>
                     <h2 className="theory-card-title">{tr(th, 'name')}</h2>
                     <p className="theory-card-topic">{th.topic}</p>

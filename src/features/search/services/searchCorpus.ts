@@ -17,8 +17,7 @@ export interface SearchCorpusSource {
 }
 
 export const formulaCorpusSource: SearchCorpusSource = {
-  load: () =>
-    getAllFormulas().map((f) => ({ ...f, type: 'formula' as const }))
+  load: () => getAllFormulas().map((f) => ({ ...f, type: 'formula' as const }))
 };
 
 export const theoryCorpusSource: SearchCorpusSource = {

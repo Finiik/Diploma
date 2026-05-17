@@ -45,9 +45,7 @@ function geminiUrl(): string {
 
 export const defaultGeminiTransport: GeminiTransport = {
   isConfigured() {
-    return (
-      Boolean(GEMINI_API_KEY) && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY'
-    );
+    return Boolean(GEMINI_API_KEY) && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY';
   },
   async generate(body) {
     const response = await fetch(geminiUrl(), {

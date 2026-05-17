@@ -2,15 +2,10 @@
    Collaborative-filtering math — pure, dependency-free.
    ============================================ */
 
-import type {
-  Interaction,
-  InteractionsByUser
-} from '@/shared/types/domain';
+import type { Interaction, InteractionsByUser } from '@/shared/types/domain';
 import { INTERACTION_WEIGHTS } from './constants';
 
-export function interactionScore(
-  interaction: Interaction | undefined
-): number {
+export function interactionScore(interaction: Interaction | undefined): number {
   if (!interaction) return 0;
   return (
     (interaction.views || 0) * INTERACTION_WEIGHTS.view +

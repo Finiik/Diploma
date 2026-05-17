@@ -38,10 +38,7 @@ import type { ResponderResult } from '@/features/assistant/types';
 const GREETING_RE =
   /^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i;
 
-export function greeting(
-  query: string,
-  isUk: boolean
-): ResponderResult | null {
+export function greeting(query: string, isUk: boolean): ResponderResult | null {
   if (!GREETING_RE.test(query)) return null;
   const allFormulas = getAllFormulasFlat();
   return {

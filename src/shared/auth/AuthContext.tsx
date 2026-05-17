@@ -1,9 +1,6 @@
 import { createContext, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import {
-  useFirebaseAuthState,
-  type AppUser
-} from './useFirebaseAuthState';
+import { useFirebaseAuthState, type AppUser } from './useFirebaseAuthState';
 
 type AuthContextValue = { user: AppUser | null; loading: boolean };
 

@@ -47,9 +47,7 @@ export interface SearchIndex {
  * Build an isolated search index over the given corpus sources. The Fuse
  * instance is created lazily on first query and lives in this closure.
  */
-export function createSearchIndex(
-  sources?: SearchCorpusSource[]
-): SearchIndex {
+export function createSearchIndex(sources?: SearchCorpusSource[]): SearchIndex {
   let fuse: Fuse<GraphItem> | null = null;
   const build = () => new Fuse(composeCorpus(sources), FUSE_OPTIONS);
 

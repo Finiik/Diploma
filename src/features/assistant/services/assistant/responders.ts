@@ -20,13 +20,7 @@ import { mergeById } from '@/shared/lib/mergeById';
 import { MERGED_LINKS_CAP } from './constants';
 import { callGemini, geminiConfigured } from './gemini';
 import { localFallback } from './fallback';
-import {
-  greeting,
-  help,
-  thanks,
-  list,
-  pureSubject
-} from './instantResponders';
+import { greeting, help, thanks, list, pureSubject } from './instantResponders';
 import type {
   AssistantResponse,
   Responder,

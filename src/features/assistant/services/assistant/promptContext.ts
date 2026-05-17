@@ -8,10 +8,7 @@ import { theoryData } from '@/features/theory';
 import { problemsData } from '@/features/problems';
 import { getAllFormulasFlat } from './subjects';
 import { buildCourseGraph } from './courseGraph';
-import {
-  CONTEXT_DESCRIPTION_CHARS,
-  CONTEXT_THEORY_CHARS
-} from './constants';
+import { CONTEXT_DESCRIPTION_CHARS, CONTEXT_THEORY_CHARS } from './constants';
 
 // Build a compact context summary for Gemini
 export function buildPlatformContext(isUk: boolean) {

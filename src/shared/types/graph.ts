@@ -4,12 +4,7 @@
    data; items are content tagged with a discriminant.
    ============================================ */
 
-import type {
-  Formula,
-  ProblemItem,
-  Subject,
-  TheoryItem
-} from './content';
+import type { Formula, ProblemItem, Subject, TheoryItem } from './content';
 
 /** A content item indexed in the graph, tagged with its discriminant. */
 export type GraphItem =
