@@ -15,6 +15,7 @@ import {
   DEFAULT_CORPUS_SOURCES,
   type SearchCorpusSource
 } from './searchCorpus';
+import { MIN_QUERY_LENGTH } from '@/features/search/constants';
 
 const FUSE_OPTIONS: IFuseOptions<GraphItem> = {
   keys: [
@@ -29,7 +30,7 @@ const FUSE_OPTIONS: IFuseOptions<GraphItem> = {
   threshold: 0.35,
   includeScore: true,
   includeMatches: true,
-  minMatchCharLength: 2
+  minMatchCharLength: MIN_QUERY_LENGTH
 };
 
 function toSearchHit(result: FuseResult<GraphItem>): SearchHit {
@@ -59,7 +60,7 @@ export function createSearchIndex(sources: SearchCorpusSource[]): SearchIndex {
 
   return {
     query(queryStr: string): SearchHit[] {
-      if (!queryStr || queryStr.trim().length < 2) return [];
+      if (!queryStr || queryStr.trim().length < MIN_QUERY_LENGTH) return [];
       fuse ??= build();
       return fuse.search(queryStr).map(toSearchHit);
     },

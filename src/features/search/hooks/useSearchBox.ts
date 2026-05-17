@@ -4,9 +4,7 @@ import { search } from '@/features/search/services/search';
 import type { SearchHit } from '@/shared/types/domain';
 import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { resolveNavPath } from '@/shared/lib/navigation';
-
-const MAX_RESULTS = 8;
-const MIN_QUERY_LENGTH = 2;
+import { MIN_QUERY_LENGTH, MAX_RESULTS } from '@/features/search/constants';
 
 /** Search-box state machine: query/results/open state, the min-length
     gate, click-outside dismissal, and navigation on select. */
