@@ -4,6 +4,7 @@ import { ThemeToggleButton } from '@/features/theme';
 import { SearchBar } from '@/features/search';
 import { useMobileMenu } from '@/shared/hooks/useMobileMenu';
 import { useLanguageToggle } from '@/shared/i18n/useLanguageToggle';
+import { subjectIcon } from '@/shared/lib/subjectIcon';
 import './Header.css';
 
 export default function Header() {
@@ -28,15 +29,15 @@ export default function Header() {
           id="header-nav"
         >
           <Link to="/subject/physics" className="nav-link nav-physics">
-            <span className="nav-icon">⚛️</span>
+            <span className="nav-icon">{subjectIcon('physics')}</span>
             {t('nav.physics')}
           </Link>
           <Link to="/subject/chemistry" className="nav-link nav-chemistry">
-            <span className="nav-icon">🧪</span>
+            <span className="nav-icon">{subjectIcon('chemistry')}</span>
             {t('nav.chemistry')}
           </Link>
           <Link to="/subject/biology" className="nav-link nav-biology">
-            <span className="nav-icon">🧬</span>
+            <span className="nav-icon">{subjectIcon('biology')}</span>
             {t('nav.biology')}
           </Link>
           <div className="nav-divider"></div>

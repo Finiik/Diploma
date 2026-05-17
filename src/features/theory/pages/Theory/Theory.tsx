@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { theoryData } from '@/features/theory/data/theory';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useContentFilters } from '@/shared/hooks/useContentFilters';
-import { renderInlineMarkdown } from '@/shared/lib/markdown';
+import { subjectIcon } from '@/shared/lib/subjectIcon';
 import { stripFormulaIdPrefix } from '@/shared/lib/formulaId';
+import Markdown from '@/shared/ui/Markdown/Markdown';
 import SubjectFilterBar from '@/shared/ui/FilterBar/SubjectFilterBar';
 import DifficultyFilterBar, {
   type DifficultyOption
@@ -17,11 +18,6 @@ interface DifficultyBadge {
   icon: string;
 }
 
-const SUBJECT_ICON: Record<string, string> = {
-  physics: '⚛️',
-  chemistry: '🧪',
-  biology: '🧬'
-};
 const DIFF_BADGE: Record<string, DifficultyBadge> = {
   1: { key: 'difficulty.beginner', cls: 'diff-beginner', icon: '🟢' },
   2: { key: 'difficulty.intermediate', cls: 'diff-intermediate', icon: '🟡' },
@@ -40,7 +36,6 @@ export default function Theory() {
   const { subject, setSubject, difficulty, setDifficulty, filtered } =
     useContentFilters(theoryData);
 
-  const getSubjectIcon = (s: string) => SUBJECT_ICON[s] || '📚';
   const getDifficultyBadge = (level: number): DifficultyBadge =>
     DIFF_BADGE[level] || DIFF_BADGE[1];
 
@@ -72,7 +67,7 @@ export default function Theory() {
               >
                 <div className="theory-card-header">
                   <span className="theory-icon">
-                    {getSubjectIcon(th.subject)}
+                    {subjectIcon(th.subject)}
                   </span>
                   <div>
                     <h2 className="theory-card-title">{tr(th, 'name')}</h2>
@@ -84,16 +79,7 @@ export default function Theory() {
                 </div>
                 <p className="theory-card-desc">{tr(th, 'description')}</p>
                 <div className="theory-content">
-                  {tr(th, 'content')
-                    .split('\n\n')
-                    .map((para, i) => (
-                      <p
-                        key={i}
-                        dangerouslySetInnerHTML={{
-                          __html: renderInlineMarkdown(para)
-                        }}
-                      />
-                    ))}
+                  <Markdown text={tr(th, 'content')} />
                 </div>
                 {th.relatedFormulas && th.relatedFormulas.length > 0 && (
                   <div className="theory-related">

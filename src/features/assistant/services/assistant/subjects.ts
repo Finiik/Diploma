@@ -37,9 +37,7 @@ export function formulasBySubject(subject: Subject): Formula[] {
   );
 }
 
-export function getSubjectEmoji(subject: Subject): string {
-  return { physics: '⚛️', chemistry: '🧪', biology: '🧬' }[subject] || '📚';
-}
+export { subjectIcon as getSubjectEmoji } from '@/shared/lib/subjectIcon';
 
 export function getSubjectLabel(subject: Subject, isUk: boolean): string {
   return (

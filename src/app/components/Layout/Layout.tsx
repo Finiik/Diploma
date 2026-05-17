@@ -2,6 +2,7 @@ import { Outlet, useLocation, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from '@/app/components/Header/Header';
 import { AIAssistant } from '@/features/assistant';
+import { subjectIcon } from '@/shared/lib/subjectIcon';
 import './Layout.css';
 import { useTranslation } from 'react-i18next';
 
@@ -28,9 +29,15 @@ export default function Layout() {
           </div>
           <div className="footer-links">
             <h4 className="footer-heading">{t('footer.subjects')}</h4>
-            <Link to="/subject/physics">⚛️ {t('nav.physics')}</Link>
-            <Link to="/subject/chemistry">🧪 {t('nav.chemistry')}</Link>
-            <Link to="/subject/biology">🧬 {t('nav.biology')}</Link>
+            <Link to="/subject/physics">
+              {subjectIcon('physics')} {t('nav.physics')}
+            </Link>
+            <Link to="/subject/chemistry">
+              {subjectIcon('chemistry')} {t('nav.chemistry')}
+            </Link>
+            <Link to="/subject/biology">
+              {subjectIcon('biology')} {t('nav.biology')}
+            </Link>
           </div>
           <div className="footer-links">
             <h4 className="footer-heading">{t('footer.resources')}</h4>
