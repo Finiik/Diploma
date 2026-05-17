@@ -4,7 +4,7 @@ import {
   extractLinks,
   buildConceptLinks
 } from '@/features/assistant/services/assistant/navLinks';
-import { findRelevantContent } from '@/features/assistant/services/assistant/promptContext';
+import { findRelevantContent } from '@/features/assistant/services/assistant/ragContext';
 import { mergeById } from '@/shared/lib/mergeById';
 import { matchConcept } from '@/features/assistant/services/assistant/courseGraph';
 

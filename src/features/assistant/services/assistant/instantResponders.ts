@@ -13,11 +13,13 @@
 import { theoryData } from '@/features/theory';
 import { problemsData } from '@/features/problems';
 import {
+  getAllPhysicsFormulas as getAllFormulas,
+  getAllChemistryFormulas as getAllChemFormulas,
+  getAllBiologyFormulas as getAllBioFormulas
+} from '@/features/formulas';
+import {
   getAllFormulasFlat,
   formulasBySubject,
-  getAllFormulas,
-  getAllChemFormulas,
-  getAllBioFormulas,
   getSubjectEmoji,
   getSubjectLabel
 } from './subjects';

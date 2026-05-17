@@ -12,15 +12,6 @@ import {
 } from '@/features/formulas';
 import type { Formula, Subject } from '@/shared/types/domain';
 
-export {
-  physicsData,
-  chemistryData,
-  biologyData,
-  getAllFormulas,
-  getAllChemFormulas,
-  getAllBioFormulas
-};
-
 export function getAllFormulasFlat(): Formula[] {
   return [...getAllFormulas(), ...getAllChemFormulas(), ...getAllBioFormulas()];
 }

@@ -14,10 +14,10 @@ import {
   physicsData,
   chemistryData,
   biologyData,
-  getAllFormulas,
-  getAllChemFormulas,
-  getAllBioFormulas
-} from './subjects';
+  getAllPhysicsFormulas as getAllFormulas,
+  getAllChemistryFormulas as getAllChemFormulas,
+  getAllBiologyFormulas as getAllBioFormulas
+} from '@/features/formulas';
 import { normalizeConcept, conceptCore, similarity } from './text';
 import {
   FUZZY_MATCH_MAX_WORDS,
