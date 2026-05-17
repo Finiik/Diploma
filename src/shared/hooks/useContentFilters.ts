@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 /** Anything filterable by subject + numeric difficulty (theory & problems). */
 export interface Filterable {
@@ -15,10 +15,18 @@ export function useContentFilters<T extends Filterable>(items: T[]) {
   const [subject, setSubject] = useState('all');
   const [difficulty, setDifficulty] = useState('all');
 
-  const filtered = items.filter(
-    (it) =>
-      (subject === 'all' || it.subject === subject) &&
-      (difficulty === 'all' || it.difficulty === Number(difficulty))
+  // Memoized: the predicate ran over the whole dataset on every render
+  // (incl. unrelated re-renders — language toggle, typing elsewhere) and
+  // returned a new array reference each time, defeating any child
+  // `React.memo`. Recompute only when the inputs actually change.
+  const filtered = useMemo(
+    () =>
+      items.filter(
+        (it) =>
+          (subject === 'all' || it.subject === subject) &&
+          (difficulty === 'all' || it.difficulty === Number(difficulty))
+      ),
+    [items, subject, difficulty]
   );
 
   return { subject, setSubject, difficulty, setDifficulty, filtered };
