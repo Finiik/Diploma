@@ -119,7 +119,8 @@ src/
 │   │                            #   LoadingSkeleton, FilterBar, Markdown, ErrorBoundary
 │   ├── i18n/                    #   i18next config + en/uk locale bundles
 │   ├── firebase/                #   config + firestore data access (infrastructure)
-│   ├── auth/                    #   AuthContext + useFirebaseAuthState hook
+│   ├── auth/                    #   AuthContext + useFirebaseAuthState +
+│   │                            #   authGateway (the firebase/auth port)
 │   └── bookmarks/               #   BookmarkContext + typed local/remote stores
 │
 └── vite-env.d.ts                # ambient Vite/import.meta.env types
@@ -337,8 +338,17 @@ rather than control flow:
   (same compat-shim discipline as the `domain.ts` barrel, §6.3).
 - **Dependency Inversion.** Side-effecting boundaries sit behind injectable
   interfaces: `GeminiTransport` (network + `isConfigured()`),
-  `SearchCorpusSource`, `InteractionsSource`. High-level orchestrators
-  depend on these ports, not on `fetch`/env/SDK concretions. The
+  `SearchCorpusSource`, `InteractionsSource`, and `AuthGateway` (the
+  firebase/auth + Firebase-app coupling). High-level orchestrators
+  depend on these ports, not on `fetch`/env/SDK concretions. Auth was the
+  last stateful boundary without a seam: `useFirebaseAuthState` now
+  orchestrates an `AuthGateway` resolved by `resolveAuthGateway()` (real
+  vs. offline, the same shape as `resolveRemoteBookmarkStore`) and imports
+  no SDK; and `firebase/config` initializes the app **lazily** via
+  `getDb()` / `getFirebaseAuth()` instead of calling `initializeApp` at
+  module load, so placeholder credentials are never used to construct an
+  app in offline mode. DIP is now applied *consistently* across every
+  infrastructure boundary, not just bookmarks/interactions. The
   `GeminiTransport` seam is threaded all the way through the orchestrator:
   `processMessage(query, isUk, transport?)` builds the chain via
   `createResponders(transport)`, so the *whole assistant engine* is

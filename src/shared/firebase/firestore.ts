@@ -13,9 +13,14 @@ import {
   arrayRemove,
   increment
 } from 'firebase/firestore';
-import { db } from './config';
+import { getDb } from './config';
 import { FIRESTORE_COLLECTIONS } from './collections';
 import type { Interaction, InteractionsByUser } from '@/shared/types/domain';
+
+// This module is only ever reached via dynamic import() behind an
+// isFirebaseConfigured() guard, so resolving the (lazily-initialized)
+// Firestore handle here touches the SDK exactly when Firebase is in use.
+const db = getDb();
 
 /** Counters stored per-formula. Non-optional here (Firestore writes all 3). */
 type InteractionCounters = Required<Interaction>;
