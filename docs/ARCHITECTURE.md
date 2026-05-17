@@ -306,8 +306,15 @@ rather than control flow:
 - **Dependency Inversion.** Side-effecting boundaries sit behind injectable
   interfaces: `GeminiTransport` (network + `isConfigured()`),
   `SearchCorpusSource`, `InteractionsSource`. High-level orchestrators
-  depend on these ports, not on `fetch`/env/SDK concretions, which is what
-  makes them unit-testable offline.
+  depend on these ports, not on `fetch`/env/SDK concretions. The
+  `GeminiTransport` seam is threaded all the way through the orchestrator:
+  `processMessage(query, isUk, transport?)` builds the chain via
+  `createResponders(transport)`, so the *whole assistant engine* is
+  exercised offline by injecting a fake transport — `assistantEngine.test.ts`
+  does exactly this (a configured fake proves model text flows through; an
+  unconfigured/throwing fake pins the deterministic fallback path) rather
+  than stubbing global `fetch`. The instant responders take no transport,
+  so the chain abstraction stays segregated.
 
 Stateful React boundaries follow the same rule: provider effects move into
 hooks (`useFirebaseAuthState`), and context values are memoised so the
@@ -317,7 +324,7 @@ provider is a thin boundary, not a state machine.
 
 ## 7. Testing strategy
 
-141 Vitest tests (characterization + unit) run in `jsdom`. Tests are
+143 Vitest tests (characterization + unit) run in `jsdom`. Tests are
 **co-located with the unit they pin**:
 
 - `src/features/<name>/__tests__/…` for feature logic (formulas,

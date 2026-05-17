@@ -16,9 +16,13 @@
    ============================================ */
 
 import {
-  RESPONDERS,
+  createResponders,
   finalizeResponse
 } from '@/features/assistant/services/assistant/responders';
+import {
+  defaultGeminiTransport,
+  type GeminiTransport
+} from '@/features/assistant/services/assistant/geminiClient';
 import type { AssistantResponse } from '@/features/assistant/types';
 
 // ============================================
@@ -26,7 +30,8 @@ import type { AssistantResponse } from '@/features/assistant/types';
 // ============================================
 export async function processMessage(
   query: string,
-  isUk = true
+  isUk = true,
+  transport: GeminiTransport = defaultGeminiTransport
 ): Promise<AssistantResponse> {
   if (!query || query.trim().length === 0) {
     return finalizeResponse({
@@ -38,7 +43,7 @@ export async function processMessage(
 
   const trimmed = query.trim();
 
-  for (const responder of RESPONDERS) {
+  for (const responder of createResponders(transport)) {
     const response = await responder.run(trimmed, isUk);
     if (response) return finalizeResponse(response);
   }
