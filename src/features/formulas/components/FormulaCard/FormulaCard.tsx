@@ -1,15 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
+import { useBookmarkToggle } from '@/shared/bookmarks/useBookmarkToggle';
 import type { FormulaMeta } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import Latex from '@/shared/ui/Latex/Latex';
 import './FormulaCard.css';
-
-const BOOKMARK_KEY: Record<'true' | 'false', string> = {
-  true: 'formula.bookmark_remove',
-  false: 'formula.bookmark_add'
-};
 
 interface FormulaCardProps {
   /** Display-only: the card shows name/latex/description, never computes. */
@@ -18,9 +13,8 @@ interface FormulaCardProps {
 
 export default function FormulaCard({ formula }: FormulaCardProps) {
   const { t } = useTranslation();
-  const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { bookmarked, toggle, labelKey } = useBookmarkToggle(formula.id);
   const tr = useLocalized();
-  const bookmarked = isBookmarked(formula.id);
 
   return (
     <div
@@ -35,9 +29,9 @@ export default function FormulaCard({ formula }: FormulaCardProps) {
           className={`bookmark-btn ${bookmarked ? 'bookmarked' : ''}`}
           onClick={(e) => {
             e.preventDefault();
-            toggleBookmark(formula.id);
+            toggle();
           }}
-          title={t(BOOKMARK_KEY[bookmarked ? 'true' : 'false'])}
+          title={t(labelKey)}
         >
           {bookmarked ? '★' : '☆'}
         </button>

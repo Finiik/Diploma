@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Latex from '@/shared/ui/Latex/Latex';
-import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
+import { useBookmarkToggle } from '@/shared/bookmarks/useBookmarkToggle';
 import { Calculator } from '@/features/calculator';
 import Breadcrumb from '@/shared/ui/Breadcrumb/Breadcrumb';
 import FormulaVariablesTable from '@/features/formulas/components/FormulaVariablesTable/FormulaVariablesTable';
@@ -17,20 +17,16 @@ import { useInteractionLog } from '@/shared/firebase/useInteractionLog';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import './FormulaDetail.css';
 
-const BOOKMARK_KEY: Record<'true' | 'false', string> = {
-  true: 'formula.bookmark_remove',
-  false: 'formula.bookmark_add'
-};
-
 export default function FormulaDetail() {
   const { formulaId } = useParams();
   const { t } = useTranslation();
   const tr = useLocalized();
-  const { isBookmarked, toggleBookmark } = useBookmarks();
   const { logView, logCalculation } = useInteractionLog();
 
   const formula = formulaId ? findFormulaById(formulaId) : undefined;
-  const bookmarked = formula ? isBookmarked(formula.id) : false;
+  // Hook called unconditionally (rules of hooks); '' when no formula —
+  // the not-found branch returns before these values are used.
+  const { bookmarked, toggle, labelKey } = useBookmarkToggle(formula?.id ?? '');
 
   useEffect(() => {
     if (formula) logView(formula.id);
@@ -64,11 +60,11 @@ export default function FormulaDetail() {
             <h1 className="formula-detail-title">{tr(formula, 'name')}</h1>
             <button
               className={`bookmark-btn-lg ${bookmarked ? 'bookmarked' : ''}`}
-              onClick={() => toggleBookmark(formula.id)}
+              onClick={toggle}
               id="formula-bookmark-btn"
             >
               {bookmarked ? '★' : '☆'}
-              <span>{t(BOOKMARK_KEY[bookmarked ? 'true' : 'false'])}</span>
+              <span>{t(labelKey)}</span>
             </button>
           </div>
 
