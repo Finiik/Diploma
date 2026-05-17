@@ -10,6 +10,7 @@ import {
   extractText,
   type GeminiTransport
 } from './geminiClient';
+import type { Lang } from '@/shared/lib/pickLang';
 
 // Gemini 3 thinking allowance: "minimal" | "low" | "medium" | "high".
 // "low" keeps the tutor fast/cheap while leaving enough reasoning for the
@@ -28,10 +29,10 @@ export function geminiConfigured(
 // call to the (injectable) transport, then extract the visible text.
 export async function callGemini(
   userMessage: string,
-  isUk: boolean,
+  lang: Lang,
   transport: GeminiTransport = defaultGeminiTransport
 ): Promise<string> {
-  const systemPrompt = buildSystemPrompt(userMessage, isUk);
+  const systemPrompt = buildSystemPrompt(userMessage, lang);
 
   const body = {
     contents: [

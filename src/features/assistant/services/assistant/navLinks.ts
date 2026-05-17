@@ -10,6 +10,7 @@ import { smartSearch } from './text';
 import { NAV_LINKS_LIMIT } from './constants';
 import type { Concept, GraphItem } from '@/shared/types/domain';
 import type { NavLink } from '@/features/assistant/types';
+import type { Lang } from '@/shared/lib/pickLang';
 
 const LINK_TYPE: Record<GraphItem['type'], NavLink['type']> = {
   formula: 'formula',
@@ -24,12 +25,12 @@ const LINK_EMOJI: Record<GraphItem['type'], string> = {
 
 function itemToLink(
   item: GraphItem,
-  isUk: boolean,
+  lang: Lang,
   withEmoji = false
 ): NavLink | null {
   const type = LINK_TYPE[item.type];
   if (!type) return null;
-  const name = localizedName(item, isUk);
+  const name = localizedName(item, lang);
   return {
     type,
     id: item.id,
@@ -38,10 +39,10 @@ function itemToLink(
 }
 
 // Build navigation links from search results
-export function extractLinks(query: string, isUk: boolean): NavLink[] {
+export function extractLinks(query: string, lang: Lang): NavLink[] {
   return smartSearch(query)
     .slice(0, NAV_LINKS_LIMIT)
-    .map((item) => itemToLink(item, isUk, true))
+    .map((item) => itemToLink(item, lang, true))
     .filter((l): l is NavLink => l !== null);
 }
 
@@ -49,10 +50,10 @@ export function extractLinks(query: string, isUk: boolean): NavLink[] {
 // the Gemini path so the topic still surfaces its connected materials.
 export function buildConceptLinks(
   concept: Concept | null,
-  isUk: boolean
+  lang: Lang
 ): NavLink[] {
   return resolveRelated(concept)
     .slice(0, NAV_LINKS_LIMIT)
-    .map((item) => itemToLink(item, isUk))
+    .map((item) => itemToLink(item, lang))
     .filter((l): l is NavLink => l !== null);
 }

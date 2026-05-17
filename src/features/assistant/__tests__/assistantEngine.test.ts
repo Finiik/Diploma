@@ -31,7 +31,7 @@ function cannedTransport(text: string): GeminiTransport {
 
 describe('input guard', () => {
   it('empty query → localized prompt, no links/suggestions', async () => {
-    const r = await processMessage('', true, offlineTransport);
+    const r = await processMessage('', 'uk', offlineTransport);
     expect(r.text).toBe('Будь ласка, напишіть ваше питання.');
     expect(r.links).toEqual([]);
     expect(r.suggestions).toEqual([]);
@@ -40,32 +40,32 @@ describe('input guard', () => {
 
 describe('instant responders', () => {
   it('greeting reports the catalog size (78 formulas)', async () => {
-    const uk = await processMessage('Привіт', true, offlineTransport);
+    const uk = await processMessage('Привіт', 'uk', offlineTransport);
     expect(uk.text).toContain('SciLearn AI');
     expect(uk.text).toContain('78');
-    const en = await processMessage('hello', false, offlineTransport);
+    const en = await processMessage('hello', 'en', offlineTransport);
     expect(en.text).toContain('78 formulas');
   });
 
   it('help intent returns the capabilities card', async () => {
-    const r = await processMessage('допомога', true, offlineTransport);
+    const r = await processMessage('допомога', 'uk', offlineTransport);
     expect(r.text).toMatch(/^🤖/u);
     expect(r.text).toContain('78');
   });
 
   it('thanks intent returns the acknowledgement', async () => {
-    const r = await processMessage('дякую', true, offlineTransport);
+    const r = await processMessage('дякую', 'uk', offlineTransport);
     expect(r.text).toMatch(/^😊/u);
   });
 
   it('list intent returns the platform breakdown', async () => {
-    const r = await processMessage('які є формули', true, offlineTransport);
+    const r = await processMessage('які є формули', 'uk', offlineTransport);
     expect(r.text).toContain('📊');
     expect(r.text).toContain('30'); // physics formula count
   });
 
   it('pure-subject query returns the subject overview with a subject link', async () => {
-    const r = await processMessage('Формули фізики', true, offlineTransport);
+    const r = await processMessage('Формули фізики', 'uk', offlineTransport);
     expect(r.text).toContain('30');
     expect(
       r.links.some((l) => l.type === 'subject' && l.id === 'physics')
@@ -77,7 +77,7 @@ describe('terminal AI responder → offline fallback', () => {
   it('a known formula query yields a rich card + a nav link to it', async () => {
     const r = await processMessage(
       'Другий закон Ньютона',
-      true,
+      'uk',
       offlineTransport
     );
     expect(r.text).toContain('Ньютона');
@@ -90,7 +90,7 @@ describe('terminal AI responder → offline fallback', () => {
     // test) and no search hits, so the concept-graph link path stays empty.
     const r = await processMessage(
       'qwerty zxcvbn asdf',
-      true,
+      'uk',
       offlineTransport
     );
     expect(r.text.toLowerCase()).toContain('qwerty zxcvbn asdf');
@@ -103,7 +103,7 @@ describe('terminal AI responder → injected Gemini transport (DIP seam)', () =>
   it('a configured fake transport: its text flows through processMessage', async () => {
     const r = await processMessage(
       'Другий закон Ньютона',
-      true,
+      'uk',
       cannedTransport('CANNED_MODEL_ANSWER')
     );
     expect(r.text).toBe('CANNED_MODEL_ANSWER');
@@ -117,7 +117,7 @@ describe('terminal AI responder → injected Gemini transport (DIP seam)', () =>
       isConfigured: () => true,
       generate: () => Promise.reject(new Error('simulated API 500'))
     };
-    const r = await processMessage('Другий закон Ньютона', true, throwing);
+    const r = await processMessage('Другий закон Ньютона', 'uk', throwing);
     expect(r.text).toContain('Ньютона'); // offline fallback card, not a throw
     expect(r.links.some((l) => l.id === 'phys_newton2')).toBe(true);
   });

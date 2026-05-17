@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { processMessage } from '@/features/assistant/services/assistantEngine';
 import type { ChatMessage } from '@/features/assistant/components/AIAssistant/types';
-import { SUPPORTED_LANGUAGES } from '@/shared/i18n/constants';
+import { resolveLang } from '@/shared/i18n/lang';
 
 /**
  * Owns the chat transcript, the input box and the typing flag. `send` and
@@ -11,7 +11,7 @@ import { SUPPORTED_LANGUAGES } from '@/shared/i18n/constants';
  */
 export function useChatSession() {
   const { t, i18n } = useTranslation();
-  const isUk = i18n.language === SUPPORTED_LANGUAGES.uk;
+  const lang = resolveLang(i18n.language);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -26,7 +26,7 @@ export function useChatSession() {
       setInput('');
       setIsTyping(true);
       try {
-        const response = await processMessage(text, isUk);
+        const response = await processMessage(text, lang);
         setMessages((prev) => [
           ...prev,
           { role: 'bot', ...response, timestamp: Date.now() }
@@ -46,7 +46,7 @@ export function useChatSession() {
         setIsTyping(false);
       }
     },
-    [isUk, t]
+    [lang, t]
   );
 
   const send = useCallback(() => {
@@ -73,7 +73,7 @@ export function useChatSession() {
     seedingRef.current = true;
     setIsTyping(true);
     try {
-      const welcome = await processMessage('привіт', isUk);
+      const welcome = await processMessage('привіт', lang);
       setMessages([{ role: 'bot', ...welcome, timestamp: Date.now() }]);
     } catch {
       setMessages([
@@ -89,7 +89,7 @@ export function useChatSession() {
       setIsTyping(false);
       seedingRef.current = false;
     }
-  }, [isUk, t]);
+  }, [lang, t]);
 
   return {
     messages,

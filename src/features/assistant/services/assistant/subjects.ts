@@ -13,6 +13,7 @@ import {
 import { theoryData } from '@/features/theory';
 import { problemsData } from '@/features/problems';
 import type { Formula, Subject } from '@/shared/types/domain';
+import { pick, type Lang } from '@/shared/lib/pickLang';
 
 /** Platform-wide content tallies. */
 export interface PlatformStats {
@@ -62,20 +63,20 @@ export function formulasBySubject(subject: Subject): Formula[] {
 
 export { subjectIcon as getSubjectEmoji } from '@/shared/lib/subjectIcon';
 
-export function getSubjectLabel(subject: Subject, isUk: boolean): string {
+export function getSubjectLabel(subject: Subject, lang: Lang): string {
   return (
     {
-      physics: isUk ? 'Фізика' : 'Physics',
-      chemistry: isUk ? 'Хімія' : 'Chemistry',
-      biology: isUk ? 'Біологія' : 'Biology'
+      physics: pick(lang, 'Фізика', 'Physics'),
+      chemistry: pick(lang, 'Хімія', 'Chemistry'),
+      biology: pick(lang, 'Біологія', 'Biology')
     }[subject] || subject
   );
 }
 
-// The repeated `isUk ? x.name : (x.nameEn || x.name)` pick, in one place.
+// The repeated `name : (nameEn || name)` pick, in one place.
 export function localizedName(
   item: { name: string; nameEn?: string },
-  isUk: boolean
+  lang: Lang
 ): string {
-  return isUk ? item.name : item.nameEn || item.name;
+  return pick(lang, item.name, item.nameEn || item.name);
 }

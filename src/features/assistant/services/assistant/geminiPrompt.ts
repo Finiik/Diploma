@@ -7,22 +7,23 @@ import { theoryData } from '@/features/theory';
 import { problemsData } from '@/features/problems';
 import { buildPlatformContext } from './promptContext';
 import { findRelevantContent } from './ragContext';
+import { pick, type Lang } from '@/shared/lib/pickLang';
 
 /**
  * Assembles the full SciLearn-AI system prompt: the static answering rules
  * plus the auto-derived course topic map and platform catalog, ending with
  * the per-query retrieval (RAG) block.
  */
-export function buildSystemPrompt(userMessage: string, isUk: boolean): string {
+export function buildSystemPrompt(userMessage: string, lang: Lang): string {
   const { formulaList, theoryList, problemList, topicOutline, totalFormulas } =
-    buildPlatformContext(isUk);
-  const relevantContent = findRelevantContent(userMessage, isUk);
-  const lang = isUk ? 'Ukrainian' : 'English';
+    buildPlatformContext(lang);
+  const relevantContent = findRelevantContent(userMessage, lang);
+  const langName = pick(lang, 'Ukrainian', 'English');
 
   return `You are SciLearn AI — a friendly, knowledgeable science tutor for a learning platform covering Physics, Chemistry and Biology.
 
 HOW TO ANSWER:
-1. ALWAYS respond in ${lang}.
+1. ALWAYS respond in ${langName}.
 2. Answer the student's ACTUAL question first, directly and clearly, using your own knowledge.
 3. For broad or conceptual questions (e.g. "what is physics?", "why does X happen?", "what is energy?"), give a clear GENERAL explanation in plain language, framed by the scope the platform actually teaches (see COURSE TOPIC MAP). Do NOT jump to a single specific formula unless the student explicitly asked for one.
 4. Bring up a specific platform formula/topic/problem ONLY when it genuinely helps answer THIS question. When you do, name it and say the student can open it on the platform. Never force an unrelated formula into the answer. If a "CONNECTED PLATFORM MATERIALS" block is provided below, the question is about a concept the course covers across those materials — build the explanation by SYNTHESIZING them: explain how they relate, ground every claim in what those materials show (don't pad with facts the platform doesn't cover), and point the student to each one so they see the bigger picture.

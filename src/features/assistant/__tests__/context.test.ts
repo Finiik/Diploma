@@ -42,7 +42,7 @@ describe('mergeById', () => {
 
 describe('extractLinks', () => {
   it('builds emoji-prefixed nav chips from search hits', () => {
-    const links = extractLinks("Newton's second law", false);
+    const links = extractLinks("Newton's second law", 'en');
     expect(links.length).toBeGreaterThan(0);
     expect(links.length).toBeLessThanOrEqual(4);
     expect(links.some((l) => l.id === 'phys_newton2')).toBe(true);
@@ -52,7 +52,7 @@ describe('extractLinks', () => {
 
 describe('buildConceptLinks', () => {
   it('builds nav chips (no emoji) from a matched concept', () => {
-    const links = buildConceptLinks(matchConcept('Механіка'), true);
+    const links = buildConceptLinks(matchConcept('Механіка'), 'uk');
     expect(links.length).toBeGreaterThan(0);
     expect(links.length).toBeLessThanOrEqual(4);
     for (const l of links) expect(l).toHaveProperty('id');
@@ -61,11 +61,11 @@ describe('buildConceptLinks', () => {
 
 describe('findRelevantContent', () => {
   it('emits a CONNECTED MATERIALS block for a known concept', () => {
-    const ctx = findRelevantContent('Механіка', true);
+    const ctx = findRelevantContent('Механіка', 'uk');
     expect(ctx).toContain('CONNECTED PLATFORM MATERIALS');
   });
 
   it('returns an empty string when nothing relevant matches', () => {
-    expect(findRelevantContent('qwerty zxcvbn asdf', true)).toBe('');
+    expect(findRelevantContent('qwerty zxcvbn asdf', 'uk')).toBe('');
   });
 });

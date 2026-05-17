@@ -119,7 +119,8 @@ src/
 │   ├── hooks/                   #   generic hooks: useLocalized, useClickOutside, …
 │   ├── ui/                      #   presentation primitives: Latex, Breadcrumb,
 │   │                            #   LoadingSkeleton, FilterBar, Markdown, ErrorBoundary
-│   ├── i18n/                    #   i18next config + en/uk locale bundles
+│   ├── i18n/                    #   i18next config + en/uk bundles +
+│   │                            #   lang.ts (i18n code → Lang resolver)
 │   ├── firebase/                #   config + firestore data access (infrastructure)
 │   ├── auth/                    #   AuthContext + useFirebaseAuthState +
 │   │                            #   authGateway (the firebase/auth port)
@@ -331,6 +332,18 @@ rather than control flow:
     behavioural gap, not a type error. They are still OCP for *adding*
     a strategy; they just don't carry the exhaustiveness guarantee the
     keyed maps do.
+
+  The **locale axis** was the last open/closed offender: a raw
+  `isUk: boolean` was threaded through ~14 files / 140+ sites, so a third
+  locale meant reinterpreting every signature and every `isUk ? a : b`
+  ternary. It is now a named `Lang` union plus a single `pick(lang, uk,
+  en)` seam (`shared/lib/pickLang.ts`); the two origins resolve it once
+  via `resolveLang(i18n.language)`. Adding a locale is a `Lang` member +
+  new `pick`/string arms, not a boolean every call site has to second-
+  guess — and the assistant's bilingual prose now reads as data
+  (`pick(lang, …, …)`) rather than control flow. The change was
+  behaviour-identical (the 148-test suite pins the exact uk *and* en
+  outputs).
 - **Liskov / Interface Segregation.** The bookmark stores carry explicit,
   intentionally asymmetric interfaces (`LocalBookmarkStore` sync cache vs.
   `RemoteBookmarkStore` async per-user sync target) so the contract is

@@ -22,6 +22,7 @@ import {
 } from './constants';
 import type { GraphItem, SearchHit } from '@/shared/types/domain';
 import type { ResponderResult } from '@/features/assistant/types';
+import { pick, type Lang } from '@/shared/lib/pickLang';
 
 // Offline concept answer, fully SYNTHESIZED from the course data — no
 // hardcoded prose. A matched concept (topic/subtopic) leads with its
@@ -30,20 +31,20 @@ import type { ResponderResult } from '@/features/assistant/types';
 // in the same subject. When Gemini is up this path is unused.
 export function detectConceptualAnswer(
   query: string,
-  isUk: boolean
+  lang: Lang
 ): ResponderResult | null {
   const c = matchConcept(query);
   if (!c) return null;
   const related = resolveRelated(c);
   if (related.length === 0) return null;
 
-  const title = isUk ? c.label : c.labelEn;
+  const title = pick(lang, c.label, c.labelEn);
   const emoji = getSubjectEmoji(c.subject);
 
   const theory = related.find((r) => r.type === 'theory');
   let body;
   if (theory) {
-    const content = (isUk ? theory.content : theory.contentEn) || '';
+    const content = pick(lang, theory.content, theory.contentEn) || '';
     body =
       content.length > FALLBACK_THEORY_CHARS
         ? `${content.slice(0, FALLBACK_THEORY_CHARS).trimEnd()}…`
@@ -53,8 +54,8 @@ export function detectConceptualAnswer(
       .filter((r) => r.type === 'formula')
       .slice(0, FALLBACK_FORMULA_SUMMARY_LIMIT)
       .map((f) => {
-        const n = localizedName(f, isUk);
-        const d = isUk ? f.description : f.descriptionEn || f.description;
+        const n = localizedName(f, lang);
+        const d = pick(lang, f.description, f.descriptionEn || f.description);
         return `• **${n}** — $${f.latex}$${d ? ` — ${d}` : ''}`;
       })
       .join('\n');
@@ -62,8 +63,8 @@ export function detectConceptualAnswer(
   if (!body) return null;
 
   let text = `${emoji} **${title}**\n\n${body}`;
-  const names = related.map((r) => localizedName(r, isUk));
-  text += `\n\n${isUk ? '🔗 На платформі це пов’язано з' : '🔗 On the platform this connects to'}: ${names.join(', ')}.`;
+  const names = related.map((r) => localizedName(r, lang));
+  text += `\n\n${pick(lang, '🔗 На платформі це пов’язано з', '🔗 On the platform this connects to')}: ${names.join(', ')}.`;
 
   const { concepts } = buildCourseGraph();
   const suggestions = concepts
@@ -71,7 +72,7 @@ export function detectConceptualAnswer(
       (o) => o.subject === c.subject && o.label !== c.label && o.itemIds.length
     )
     .slice(0, SUGGESTIONS_LIMIT)
-    .map((o) => (isUk ? o.label : o.labelEn));
+    .map((o) => pick(lang, o.label, o.labelEn));
 
   return { text, suggestions };
 }
@@ -86,31 +87,37 @@ function classifyTopResult(results: SearchHit[]): 'none' | 'weak' | 'strong' {
   return 'strong';
 }
 
-function noResultsCard(query: string, isUk: boolean): ResponderResult {
+function noResultsCard(query: string, lang: Lang): ResponderResult {
   return {
-    text: isUk
-      ? `🤔 На жаль, не знайшов точної відповіді на **"${query}"**.\n\nСпробуйте:\n• Використати ключові слова (напр. "закон Ома", "pH", "ДНК")\n• Написати назву формули або теми\n• Запитати "допомога" для списку можливостей`
-      : `🤔 Sorry, I couldn't find a precise answer for **"${query}"**.\n\nTry:\n• Using key terms (e.g., "Ohm's law", "pH", "DNA")\n• Typing a formula or topic name\n• Asking "help" for available capabilities`,
-    suggestions: isUk
-      ? ['Які є формули?', 'Допомога', 'Закон Ньютона']
-      : ['Available formulas?', 'Help', "Newton's law"]
+    text: pick(
+      lang,
+      `🤔 На жаль, не знайшов точної відповіді на **"${query}"**.\n\nСпробуйте:\n• Використати ключові слова (напр. "закон Ома", "pH", "ДНК")\n• Написати назву формули або теми\n• Запитати "допомога" для списку можливостей`,
+      `🤔 Sorry, I couldn't find a precise answer for **"${query}"**.\n\nTry:\n• Using key terms (e.g., "Ohm's law", "pH", "DNA")\n• Typing a formula or topic name\n• Asking "help" for available capabilities`
+    ),
+    suggestions: pick(
+      lang,
+      ['Які є формули?', 'Допомога', 'Закон Ньютона'],
+      ['Available formulas?', 'Help', "Newton's law"]
+    )
   };
 }
 
 function weakMatchCard(
   query: string,
   results: SearchHit[],
-  isUk: boolean
+  lang: Lang
 ): ResponderResult {
   // Offer the weak match as a suggestion instead of asserting it as THE
   // answer.
   return {
-    text: isUk
-      ? `🤔 Точної відповіді на **"${query}"** не знайшов. Можливо, ви мали на увазі щось із наведеного нижче — або уточніть питання.`
-      : `🤔 I couldn't find an exact answer for **"${query}"**. You might mean one of the items below — or try rephrasing the question.`,
+    text: pick(
+      lang,
+      `🤔 Точної відповіді на **"${query}"** не знайшов. Можливо, ви мали на увазі щось із наведеного нижче — або уточніть питання.`,
+      `🤔 I couldn't find an exact answer for **"${query}"**. You might mean one of the items below — or try rephrasing the question.`
+    ),
     suggestions: results
       .slice(0, SUGGESTIONS_LIMIT)
-      .map((r) => localizedName(r, isUk))
+      .map((r) => localizedName(r, lang))
   };
 }
 
@@ -120,18 +127,18 @@ function weakMatchCard(
 type FallbackRenderer<T extends GraphItem['type']> = (
   top: Extract<GraphItem, { type: T }>,
   others: GraphItem[],
-  isUk: boolean
+  lang: Lang
 ) => ResponderResult;
 
 const FALLBACK_RENDERERS: { [T in GraphItem['type']]: FallbackRenderer<T> } = {
   // Formula response — rich with variables
-  formula: (top, others, isUk) => {
-    const name = localizedName(top, isUk);
-    const desc = isUk ? top.description : top.descriptionEn;
+  formula: (top, others, lang) => {
+    const name = localizedName(top, lang);
+    const desc = pick(lang, top.description, top.descriptionEn);
     const vars = top.variables
       ? top.variables
           .map((v) => {
-            const vName = isUk ? v.name : v.nameEn;
+            const vName = pick(lang, v.name, v.nameEn);
             return `  • **${v.symbol}** — ${vName} (${v.unit})`;
           })
           .join('\n')
@@ -140,18 +147,18 @@ const FALLBACK_RENDERERS: { [T in GraphItem['type']]: FallbackRenderer<T> } = {
 
     let text = `${subjEmoji} **${name}**\n\n$$${top.latex}$$\n\n${desc}`;
     if (vars) {
-      text += `\n\n**${isUk ? 'Змінні' : 'Variables'}:**\n${vars}`;
+      text += `\n\n**${pick(lang, 'Змінні', 'Variables')}:**\n${vars}`;
     }
-    text += `\n\n${isUk ? '💡 Натисніть кнопку нижче, щоб перейти до формули з калькулятором.' : '💡 Click the button below to open the formula with calculator.'}`;
+    text += `\n\n${pick(lang, '💡 Натисніть кнопку нижче, щоб перейти до формули з калькулятором.', '💡 Click the button below to open the formula with calculator.')}`;
 
     // Add related formulas
     if (others.length > 0) {
       const related = others
         .filter((o) => o.type === 'formula')
         .slice(0, FALLBACK_RELATED_FORMULAS)
-        .map((o) => (isUk ? o.name : o.nameEn));
+        .map((o) => pick(lang, o.name, o.nameEn));
       if (related.length > 0) {
-        text += `\n\n${isUk ? '🔗 Також дивіться' : '🔗 Also see'}: ${related.join(', ')}`;
+        text += `\n\n${pick(lang, '🔗 Також дивіться', '🔗 Also see')}: ${related.join(', ')}`;
       }
     }
 
@@ -159,10 +166,10 @@ const FALLBACK_RENDERERS: { [T in GraphItem['type']]: FallbackRenderer<T> } = {
   },
 
   // Theory response — preview with content
-  theory: (top, _others, isUk) => {
-    const name = localizedName(top, isUk);
-    const desc = isUk ? top.description : top.descriptionEn;
-    const content = (isUk ? top.content : top.contentEn) || '';
+  theory: (top, _others, lang) => {
+    const name = localizedName(top, lang);
+    const desc = pick(lang, top.description, top.descriptionEn);
+    const content = pick(lang, top.content, top.contentEn) || '';
     const preview = content
       .split('\n\n')
       .slice(0, THEORY_PREVIEW_PARAGRAPHS)
@@ -172,48 +179,48 @@ const FALLBACK_RENDERERS: { [T in GraphItem['type']]: FallbackRenderer<T> } = {
     let text = `📖 **${name}** ${diffLabels[top.difficulty] || ''}\n\n${desc}\n\n${preview.slice(0, THEORY_PREVIEW_CHARS)}${content.length > THEORY_PREVIEW_CHARS ? '...' : ''}`;
 
     if (top.relatedFormulas && top.relatedFormulas.length > 0) {
-      text += `\n\n${isUk ? "📐 Пов'язані формули" : '📐 Related formulas'}: ${top.relatedFormulas.join(', ')}`;
+      text += `\n\n${pick(lang, "📐 Пов'язані формули", '📐 Related formulas')}: ${top.relatedFormulas.join(', ')}`;
     }
 
     return { text, suggestions: [] };
   },
 
   // Problem response — with steps preview
-  problem: (top, _others, isUk) => {
-    const name = localizedName(top, isUk);
-    const desc = isUk ? top.description : top.descriptionEn;
+  problem: (top, _others, lang) => {
+    const name = localizedName(top, lang);
+    const desc = pick(lang, top.description, top.descriptionEn);
     const stepsPreview = top.steps
       ? top.steps
           .slice(0, PROBLEM_STEPS_PREVIEW)
           .map((s, i) => {
-            const stepText = isUk ? s.text : s.textEn;
+            const stepText = pick(lang, s.text, s.textEn);
             return `  ${i + 1}. ${stepText}`;
           })
           .join('\n')
       : '';
-    const answer = isUk ? top.answer : top.answerEn;
+    const answer = pick(lang, top.answer, top.answerEn);
 
-    let text = `📝 **${name}** ${'⭐'.repeat(top.difficulty || 1)}\n\n${desc}\n\n**${isUk ? "Розв'язок" : 'Solution'}:**\n${stepsPreview}`;
+    let text = `📝 **${name}** ${'⭐'.repeat(top.difficulty || 1)}\n\n${desc}\n\n**${pick(lang, "Розв'язок", 'Solution')}:**\n${stepsPreview}`;
     if (top.steps && top.steps.length > PROBLEM_STEPS_PREVIEW) {
-      text += `\n  ... ${isUk ? 'ще' : 'more'} ${top.steps.length - PROBLEM_STEPS_PREVIEW} ${isUk ? 'кроків' : 'steps'}`;
+      text += `\n  ... ${pick(lang, 'ще', 'more')} ${top.steps.length - PROBLEM_STEPS_PREVIEW} ${pick(lang, 'кроків', 'steps')}`;
     }
-    text += `\n\n**${isUk ? 'Відповідь' : 'Answer'}:** ${answer}`;
+    text += `\n\n**${pick(lang, 'Відповідь', 'Answer')}:** ${answer}`;
 
     return { text, suggestions: [] };
   }
 };
 
-export function localFallback(query: string, isUk: boolean): ResponderResult {
+export function localFallback(query: string, lang: Lang): ResponderResult {
   // Broad conceptual question (e.g. "що таке фізика?") — answer the concept
   // generally instead of forcing the nearest specific formula.
-  const concept = detectConceptualAnswer(query, isUk);
+  const concept = detectConceptualAnswer(query, lang);
   if (concept) return concept;
 
   // Search-based response
   const results = smartSearch(query);
   const classification = classifyTopResult(results);
-  if (classification === 'none') return noResultsCard(query, isUk);
-  if (classification === 'weak') return weakMatchCard(query, results, isUk);
+  if (classification === 'none') return noResultsCard(query, lang);
+  if (classification === 'weak') return weakMatchCard(query, results, lang);
 
   const top = results[0];
   const others = results.slice(1, 1 + FALLBACK_RELATED_RESULTS);
@@ -223,7 +230,7 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
   const render = FALLBACK_RENDERERS[top.type] as (
     t: GraphItem,
     o: GraphItem[],
-    uk: boolean
+    l: Lang
   ) => ResponderResult;
-  return render(top, others, isUk);
+  return render(top, others, lang);
 }

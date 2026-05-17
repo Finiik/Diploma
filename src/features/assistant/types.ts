@@ -6,6 +6,8 @@
    rather than in src/shared/types.
    ============================================ */
 
+import type { Lang } from '@/shared/lib/pickLang';
+
 /** Navigation link chip surfaced under an assistant answer. */
 export interface NavLink {
   type: 'formula' | 'theory' | 'problems' | 'subject';
@@ -35,6 +37,6 @@ export interface Responder {
   id: string;
   run: (
     query: string,
-    isUk: boolean
+    lang: Lang
   ) => ResponderResult | null | Promise<ResponderResult | null>;
 }

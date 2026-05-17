@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { pickLang, type Localized } from '@/shared/lib/pickLang';
-import { SUPPORTED_LANGUAGES } from '@/shared/i18n/constants';
+import { resolveLang } from '@/shared/i18n/lang';
 
 /**
  * Reactive localized-content selector.
@@ -14,10 +14,10 @@ import { SUPPORTED_LANGUAGES } from '@/shared/i18n/constants';
  */
 export function useLocalized() {
   const { i18n } = useTranslation();
-  const isUk = i18n.language === SUPPORTED_LANGUAGES.uk;
+  const lang = resolveLang(i18n.language);
   return useCallback(
     <K extends string>(item: Localized<K>, baseKey: K): string =>
-      pickLang(item, baseKey, isUk),
-    [isUk]
+      pickLang(item, baseKey, lang),
+    [lang]
   );
 }

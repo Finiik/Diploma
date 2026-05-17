@@ -3,7 +3,7 @@
 
    processMessage is just "run the query through an ordered list of
    responders; first one that owns it wins". Each responder is
-   (query, isUk) => partial response | null:
+   (query, lang) => partial response | null:
      - return null  → "not mine", try the next responder
      - return {...} → this is the answer; the loop stops here
 
@@ -34,6 +34,7 @@ import type {
   Responder,
   ResponderResult
 } from '@/features/assistant/types';
+import type { Lang } from '@/shared/lib/pickLang';
 
 // Normalize any responder's partial result into the full response contract.
 export function finalizeResponse(partial: ResponderResult): AssistantResponse {
@@ -49,25 +50,25 @@ export function finalizeResponse(partial: ResponderResult): AssistantResponse {
 
 async function aiOrFallback(
   query: string,
-  isUk: boolean,
+  lang: Lang,
   transport: GeminiTransport
 ): Promise<ResponderResult> {
   // Navigation links: search hits first, then curated concept-graph links so
   // a topic like "стала Авогадро" still surfaces its connected materials
   // (mole, molarity, ideal-gas law) even with no direct search hit.
   const conceptMatch = matchConcept(query);
-  let links = extractLinks(query, isUk);
+  let links = extractLinks(query, lang);
   if (conceptMatch) {
     links = mergeById(
       links,
-      buildConceptLinks(conceptMatch, isUk),
+      buildConceptLinks(conceptMatch, lang),
       MERGED_LINKS_CAP
     );
   }
 
   if (geminiConfigured(transport)) {
     try {
-      const text = await callGemini(query, isUk, transport);
+      const text = await callGemini(query, lang, transport);
       return { text, links };
     } catch (err) {
       console.warn(
@@ -77,7 +78,7 @@ async function aiOrFallback(
     }
   }
 
-  const fallback = localFallback(query, isUk);
+  const fallback = localFallback(query, lang);
   return {
     text: fallback.text,
     links,
@@ -101,6 +102,6 @@ export function createResponders(
     { id: 'list', run: list },
     { id: 'pure-subject', run: pureSubject },
     // terminal — never returns null
-    { id: 'ai', run: (q, isUk) => aiOrFallback(q, isUk, transport) }
+    { id: 'ai', run: (q, lang) => aiOrFallback(q, lang, transport) }
   ];
 }
