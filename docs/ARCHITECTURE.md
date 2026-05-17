@@ -108,15 +108,18 @@ src/
 │   └── theme/                   #   ThemeContext + persistence service
 │
 ├── shared/                      # Horizontal foundation (shared imports only shared)
-│   ├── types/domain.ts          #   the ubiquitous domain model (single source of truth)
-│   ├── lib/                     #   pure utils: env, pickLang, katex, navigation (+ tests)
+│   ├── types/                   #   domain model split per bounded context:
+│   │                            #   content · graph · search · recommendations,
+│   │                            #   re-exported by a thin domain.ts barrel
+│   ├── lib/                     #   pure utils: env, pickLang, katex, navigation,
+│   │                            #   subjectColor, subjectIcon, mergeById, … (+ tests)
 │   ├── hooks/                   #   generic hooks: useLocalized, useClickOutside, …
 │   ├── ui/                      #   presentation primitives: Latex, Breadcrumb,
-│   │                            #   LoadingSkeleton, FilterBar, ErrorBoundary
+│   │                            #   LoadingSkeleton, FilterBar, Markdown, ErrorBoundary
 │   ├── i18n/                    #   i18next config + en/uk locale bundles
 │   ├── firebase/                #   config + firestore data access (infrastructure)
-│   ├── auth/                    #   AuthContext (cross-cutting provider)
-│   └── bookmarks/               #   BookmarkContext + persistence (cross-cutting state)
+│   ├── auth/                    #   AuthContext + useFirebaseAuthState hook
+│   └── bookmarks/               #   BookmarkContext + typed local/remote stores
 │
 └── vite-env.d.ts                # ambient Vite/import.meta.env types
 ```
@@ -222,12 +225,38 @@ incomplete feature. Keeping the routable screen under `pages/<Name>/` (vs a
 bare `Name.tsx`) also keeps its co-located CSS and future `__tests__`
 consistent with every other feature, and gives the slice a place to grow.
 
-### 6.3 The domain model stays a single shared module
+### 6.3 The domain model is split per bounded context, behind a barrel
 
-`shared/types/domain.ts` is imported by almost every file. Splitting it per
-feature would be high-churn, high-risk, and would fragment the *ubiquitous
-language* the whole app speaks. It is deliberately kept as one canonical
-shared type module.
+The domain model was originally one `shared/types/domain.ts` grab-bag. It
+grew to cover five unrelated bounded contexts (course content, the
+knowledge graph, search, the assistant responder chain, recommendations)
+and was imported by ~35 files, so a type change in one context forced
+recompilation/coupling of files that only needed another (an
+Interface-Segregation smell at module granularity).
+
+It is now split under `src/shared/types/`:
+
+| Module | Owns |
+|---|---|
+| `content.ts` | `Subject`, `Formula`, `Topic`, `SubjectData`, `TheoryItem`, `ProblemItem`, … |
+| `graph.ts` | `GraphItem`, `Concept`, `SubjectOutline`, `CourseGraph` |
+| `search.ts` | `SearchHit` |
+| `recommendations.ts` | `Interaction`, `InteractionsByUser`, `Recommendation` |
+| `domain.ts` | **thin barrel** re-exporting the four above |
+
+Two deliberate choices keep this principled rather than churny:
+
+1. **The barrel stays.** `domain.ts` re-exports every shared type, so the
+   ~35 existing `@/shared/types/domain` imports keep working — the split
+   was a **zero-behaviour, non-breaking** refactor. New code should import
+   the specific context module; the barrel preserves the *ubiquitous
+   language* as one discoverable entry point.
+2. **Assistant types left `shared/`.** `NavLink`, `Responder`,
+   `ResponderResult` and `AssistantResponse` are the responder-chain
+   contract — consumed *only* by the assistant feature. By the placement
+   rule (§6.1, *location follows consumers*) they are not shared domain,
+   so they moved to `src/features/assistant/types.ts`. `shared/` no longer
+   carries a type only one feature speaks.
 
 ### 6.4 Path alias and import convention
 
@@ -242,17 +271,51 @@ shared type module.
 This keeps moves cheap (rename the target, rewrite specifiers) and makes the
 layer of any import obvious from its first path segment.
 
+### 6.5 SOLID decomposition: one reason to change per module
+
+After the slice migration, a dedicated **SOLID hardening pass** drove every
+module to a single responsibility, with type dispatch expressed as data
+rather than control flow:
+
+- **Single Responsibility.** Modules that mixed concerns were split along
+  the seam: the search service → an encapsulated `SearchIndex` + a
+  swappable corpus-source registry + hit-mapping; the recommender → a thin
+  pipeline over pure CF helpers in `lib/`; the assistant responder file →
+  chain wiring vs. `instantResponders` content; the Gemini prompt context →
+  static catalog (`promptContext`) vs. per-query retrieval (`ragContext`);
+  `Home` → `SubjectsGrid` + `RecommendationsFeed`.
+- **Open/Closed.** Variant handling uses exhaustive lookup/strategy maps
+  keyed by a discriminant (`ITEM_FORMATTERS`, `subjectIcon`,
+  `subjectColor`, the responder list, corpus/interaction source arrays), so
+  adding a case is a new entry — and a *compile error* if a case is missed
+  — never an edit to an `if`/`switch` ladder.
+- **Liskov / Interface Segregation.** The bookmark stores carry explicit,
+  intentionally asymmetric interfaces (`LocalBookmarkStore` sync cache vs.
+  `RemoteBookmarkStore` async per-user sync target) so the contract is
+  visible rather than implied; the domain types are segregated per context
+  (§6.3).
+- **Dependency Inversion.** Side-effecting boundaries sit behind injectable
+  interfaces: `GeminiTransport` (network + `isConfigured()`),
+  `SearchCorpusSource`, `InteractionsSource`. High-level orchestrators
+  depend on these ports, not on `fetch`/env/SDK concretions, which is what
+  makes them unit-testable offline.
+
+Stateful React boundaries follow the same rule: provider effects move into
+hooks (`useFirebaseAuthState`), and context values are memoised so the
+provider is a thin boundary, not a state machine.
+
 ---
 
 ## 7. Testing strategy
 
-129 Vitest characterization tests run in `jsdom`. Tests are **co-located
-with the unit they pin**:
+141 Vitest tests (characterization + unit) run in `jsdom`. Tests are
+**co-located with the unit they pin**:
 
-- `src/features/<name>/__tests__/…` for feature logic
-  (formulas, calculator, recommendations, search, and the assistant pipeline);
+- `src/features/<name>/__tests__/…` for feature logic (formulas,
+  calculator, recommendations + the extracted CF helpers in
+  `similarity.test.ts`, search, and the assistant pipeline);
 - `src/shared/lib/__tests__/…` for shared pure utilities
-  (env, katex, navigation, pickLang).
+  (env, katex, navigation, pickLang, symbol-tex).
 
 They import the **concrete module**, not the barrel, so a failure points at
 a specific unit rather than a re-export surface. The quality gate for any
@@ -271,7 +334,15 @@ previous layer-based layout (`components/`, `pages/`, `services/`, …). The
 work was executed as **17 sequential commits, one per migration phase**
 (`shared/types` → `shared/lib` → `shared/hooks` → `shared/ui` →
 `shared/i18n`+`firebase` → `shared/bookmarks` → the eight feature slices →
-`shared/auth` → `theme` → the `app/` shell). The full quality gate
-(typecheck + 129 tests + production build + formatter) was run **green
-before every commit**, so the migration is bisectable and no commit ships a
-broken tree.
+`shared/auth` → `theme` → the `app/` shell).
+
+A subsequent **SOLID hardening pass** (§6.5) followed the same discipline:
+**11 sequential refactor commits**, each one isolated concern (domain-type
+split, search corpus registry, CF-helper extraction, instant-responder
+split, context memoisation, typed bookmark stores, shared `Markdown` +
+`subjectIcon`, `getSubjectTopics`, Gemini config behind the transport,
+`Home` decomposition, RAG/promptContext split).
+
+The full quality gate (`typecheck` + the Vitest suite + production build +
+formatter) was run **green before every commit** across both passes, so the
+history is bisectable and no commit ships a broken tree.
