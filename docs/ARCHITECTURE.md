@@ -252,11 +252,21 @@ It is now split under `src/shared/types/`:
 
 Two deliberate choices keep this principled rather than churny:
 
-1. **The barrel stays.** `domain.ts` re-exports every shared type, so the
-   ~35 existing `@/shared/types/domain` imports keep working — the split
-   was a **zero-behaviour, non-breaking** refactor. New code should import
-   the specific context module; the barrel preserves the *ubiquitous
-   language* as one discoverable entry point.
+1. **The barrel is the canonical entry point.** `domain.ts` re-exports
+   every shared type, so the ~35 existing `@/shared/types/domain` imports
+   keep working — the split was a **zero-behaviour, non-breaking**
+   refactor. Honest scope of the win: **every consumer imports the barrel**
+   (0 of ~42 import sites reference a specific context module). Because the
+   barrel re-exports all four contexts, a consumer's transitive
+   type-dependency surface is *unchanged* from the pre-split grab-bag — the
+   Interface-Segregation benefit is therefore realized at **authoring**
+   granularity (four small, single-context files instead of one ~130-line
+   file, with the *ubiquitous language* preserved as one discoverable entry
+   point), **not** at *consumer recompilation* granularity. Per-context
+   imports would realize the latter too, but that convention is
+   deliberately not adopted; the barrel is the public API and the typecheck
+   + test + build gate (not module-graph pruning) is what keeps the split
+   honest.
 2. **Assistant types left `shared/`.** `NavLink`, `Responder`,
    `ResponderResult` and `AssistantResponse` are the responder-chain
    contract — consumed *only* by the assistant feature. By the placement
@@ -304,8 +314,13 @@ rather than control flow:
   `ProblemCard`, `FormulaDetail` → `FormulaVariablesTable` +
   `DerivedFormulasGrid`, so every routable screen is now filter/data
   wiring delegating to presentational components, and the difficulty
-  scale lives once in `shared/lib/difficulty` instead of a badge map in
-  `Theory` diverging from a stars map in `Problems`. `Layout` was likewise
+  *card* scale lives once in `shared/lib/difficulty` (the `BADGE`/`STARS`
+  keyed maps) instead of a badge map in `Theory` diverging from a stars
+  map in `Problems`. One residual duplication is *not* yet closed: `Theory`
+  and `Problems` still re-declare the same icons/labels as their
+  filter-pill `DIFF_OPTIONS` literals, so the drift surface moved from
+  card-vs-card to card-vs-filter rather than being eliminated. `Layout`
+  was likewise
   reduced to pure shell composition — scroll restoration (`ScrollToTop`,
   renders `null`) and the footer markup (`Footer`) became their own
   components instead of three reasons-to-change in one shell file.
@@ -343,14 +358,27 @@ rather than control flow:
   guess — and the assistant's bilingual prose now reads as data
   (`pick(lang, …, …)`) rather than control flow. The change was
   behaviour-identical (the 148-test suite pins the exact uk *and* en
-  outputs).
+  outputs). One honesty caveat — the same class as the ordered registries
+  above: a new locale touches **three uncoupled places** — a `Lang` member
+  (`shared/lib/pickLang.ts`), a `SUPPORTED_LANGUAGES` entry
+  (`shared/i18n/constants.ts`), and a `resolveLang` arm — with **no
+  compile-time tie** between `Lang` and `SupportedLanguage`. Adding `'de'`
+  to `SUPPORTED_LANGUAGES` without extending `Lang` is *not* a type error;
+  `resolveLang` silently falls back. So the axis is named and
+  single-seamed (a large improvement over the threaded boolean), but its
+  completeness is **convention, not compile-checked** — it does *not*
+  carry the closed-by-construction guarantee the keyed maps do.
 - **Liskov / Interface Segregation.** The bookmark stores carry explicit,
   intentionally asymmetric interfaces (`LocalBookmarkStore` sync cache vs.
   `RemoteBookmarkStore` async per-user sync target) so the contract is
   visible rather than implied; the domain types are segregated per context
   (§6.3). The formula type is split the same way: `FormulaMeta` is the
-  pure, serializable display shape (all search / graph / recommendations /
-  `FormulaCard` consumers narrow to it), while `ComputableFormula =
+  pure, serializable display shape (the search / graph / `FormulaCard`
+  consumers narrow to it; the **recommendations** display path still
+  annotates the `@deprecated Formula` alias rather than `FormulaMeta` —
+  behaviour-identical, since `Formula = ComputableFormula` and the data
+  carries `compute`, but the narrowing the split intends is not yet
+  applied on that one path), while `ComputableFormula =
   FormulaMeta & { compute; resultVar; multiResult }` adds the calculator
   contract and is depended on only by the calculator feature and the
   catalog datasets that define `compute`. `GraphItem` (hence `SearchHit`,
@@ -369,20 +397,33 @@ rather than control flow:
   no SDK; and `firebase/config` initializes the app **lazily** via
   `getDb()` / `getFirebaseAuth()` instead of calling `initializeApp` at
   module load, so placeholder credentials are never used to construct an
-  app in offline mode. DIP is now applied *consistently* across every
-  infrastructure boundary, not just bookmarks/interactions. Likewise
+  app in offline mode. The injectable **port exists at every
+  infrastructure boundary**, with two honest qualifications on how tightly
+  it is enforced: (a) `firestore.ts` resolves `getDb()` at *module
+  evaluation* (`const db = getDb()`), so the lazy-init guarantee holds by
+  **caller discipline** — every caller checks `isFirebaseConfigured()`
+  before the dynamic `import()` — not by construction; and (b) see the
+  `GeminiTransport` note below. Likewise
   `createSearchIndex(sources)` no longer carries a hidden default that
   silently re-coupled it: the default index is built **lazily on first
   use** (not at module import) with `DEFAULT_CORPUS_SOURCES` injected
   explicitly at that one wiring point, so the factory stays a pure seam.
-  The `GeminiTransport` seam is threaded all the way through the orchestrator:
-  `processMessage(query, isUk, transport?)` builds the chain via
-  `createResponders(transport)`, so the *whole assistant engine* is
+  The `GeminiTransport` seam runs through the orchestrator as an *optional*
+  parameter: `processMessage(query, lang, transport?)` builds the chain via
+  `createResponders(transport)`, so the *whole assistant engine* can be
   exercised offline by injecting a fake transport — `assistantEngine.test.ts`
   does exactly this (a configured fake proves model text flows through; an
   unconfigured/throwing fake pins the deterministic fallback path) rather
-  than stubbing global `fetch`. The instant responders take no transport,
-  so the chain abstraction stays segregated. The same inversion applies to
+  than stubbing global `fetch`. Honest qualification: the **running app
+  does not inject** — `useChatSession` calls `processMessage(text, lang)`
+  with no transport, so the default parameter re-binds the concrete
+  `defaultGeminiTransport` *inside* the orchestrator. The seam is therefore
+  a genuine test seam but a *convenience* default in production: the app
+  path still names the concretion, and only the test path exercises the
+  inverted dependency end-to-end. (Closing this would mean threading one
+  app-level transport instance the way `getDefaultIndex()` threads
+  `DEFAULT_CORPUS_SOURCES` at a single wiring point.) The instant
+  responders take no transport, so the chain abstraction stays segregated. The same inversion applies to
   analytics: `useCalculator(formula, onCalculated?)` fires an *injected*
   callback on a successful calculation rather than importing
   `useInteractionLog` itself, so the hook stays pure and the page owns the
