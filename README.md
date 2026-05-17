@@ -5,7 +5,7 @@
 [![Built with React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9_strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Vitest-48_passing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Vitest-129_passing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-11.x-FFCA28?logo=firebase)](https://firebase.google.com/)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-2.0_Flash-4285F4?logo=google)](https://ai.google.dev/)
 
@@ -16,7 +16,7 @@
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
+- [Architecture](#-architecture) · [full architecture doc](docs/ARCHITECTURE.md)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Testing](#-testing)
@@ -98,7 +98,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 | **Language** | TypeScript 5.9 (`strict`) | Static typing across the entire codebase |
 | **Frontend** | React 19 | Component-based UI framework |
 | **Build** | Vite 6 | Lightning-fast dev server & bundler |
-| **Testing** | Vitest 4 + jsdom | Characterization suite (48 tests) for the core logic |
+| **Testing** | Vitest 4 + jsdom | Characterization suite (129 tests) for the core logic |
 | **Routing** | React Router DOM 7 | Client-side SPA navigation |
 | **Math** | KaTeX 0.16 | LaTeX formula rendering |
 | **Search** | Fuse.js 7 | Client-side fuzzy search |
@@ -108,8 +108,8 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 | **Styling** | CSS Custom Properties | Theme-aware design system |
 
 ### Design Decisions
-- **Strict TypeScript, zero `any`** — the whole codebase compiles under `tsconfig` `strict: true` with no `any` and no `@ts-ignore`/`@ts-expect-error` in source; a typed domain model (`src/types/domain.ts`) is the single source of truth for the data, knowledge-graph, responder and search shapes
-- **Behavior pinned by characterization tests** — a 48-test Vitest suite locks the *observed* behavior of the algorithmic core, so refactors (e.g. the JS → TS migration) cannot silently change results (see [Testing](#-testing))
+- **Strict TypeScript, zero `any`** — the whole codebase compiles under `tsconfig` `strict: true` with no `any` and no `@ts-ignore`/`@ts-expect-error` in source; a typed domain model (`src/shared/types/domain.ts`) is the single source of truth for the data, knowledge-graph, responder and search shapes
+- **Behavior pinned by characterization tests** — a 129-test Vitest suite locks the *observed* behavior of the algorithmic core, so refactors (e.g. the JS → TS migration) cannot silently change results (see [Testing](#-testing))
 - **No CSS framework** — Custom design system with CSS custom properties for full control
 - **No external AI dependency** — Smart local fallback ensures the AI assistant works even without API
 - **Auto-derived concept graph (graph/keyword RAG)** — no hardcoded concept table; concepts/edges are computed from the course data itself, and the AI explains by synthesizing the connected materials. Covering a new topic in any subject is a pure content change, no engine code
@@ -119,6 +119,15 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 ---
 
 ## 🏛️ Architecture
+
+The frontend uses a **feature-sliced, layered modular architecture**. `src/`
+is split into three layers with a strict downward dependency rule —
+`app/` → `features/` → `shared/` — and each feature exposes a single public
+`index.ts` barrel. The full rationale (layering rules, the cycle-breaking
+decisions, the public-API convention, testing strategy and migration
+provenance) is documented in **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)**.
+
+The runtime composition is:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -147,16 +156,16 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 │  ├── assistantEngine.ts (entry → responder chain)         │
 │  └── assistant/* (responders, RAG graph, Gemini 3)        │
 ├──────────────────────────────────────────────────────────┤
-│  Domain Types — src/types/domain.ts                       │
+│  Domain Types — src/shared/types/domain.ts                │
 │  └── single source of truth: Formula / GraphItem /        │
 │      Concept / Responder / SearchHit / Recommendation …   │
 ├──────────────────────────────────────────────────────────┤
 │  Data Layer (Static TS modules, typed via domain model)   │
-│  ├── physics.ts    — 30 formulas, 10 topics               │
-│  ├── chemistry.ts  — 25 formulas, 8 topics                │
-│  ├── biology.ts    — 23 formulas, 9 topics                │
-│  ├── theory.ts     — 15 articles with difficulty          │
-│  └── problems.ts   — 25 problems with step-by-step       │
+│  ├── features/formulas/data/physics.ts   — 30 formulas    │
+│  ├── features/formulas/data/chemistry.ts — 25 formulas    │
+│  ├── features/formulas/data/biology.ts   — 23 formulas    │
+│  ├── features/theory/data/theory.ts      — 15 articles    │
+│  └── features/problems/data/problems.ts  — 25 problems    │
 ├──────────────────────────────────────────────────────────┤
 │  External Services                                        │
 │  ├── Google Gemini API (AI chatbot)                       │
@@ -183,86 +192,50 @@ SciLearn/
 ├── PROJECT_DOCUMENTATION.md         # Detailed technical documentation
 ├── README.md                        # This file
 │
-└── src/
-    ├── App.tsx                      # Route definitions
-    ├── main.tsx                     # Entry point with context providers
-    ├── vite-env.d.ts                # Vite/import.meta.env ambient types
+└── src/                            # Feature-sliced, 3-layer architecture
+    │                               # (see docs/ARCHITECTURE.md)
+    ├── vite-env.d.ts               # Vite/import.meta.env ambient types
     │
-    ├── types/
-    │   └── domain.ts               # 🧩 Domain model — single source of truth
+    ├── app/                         # ▸ Composition root
+    │   ├── App.tsx                  #   route table
+    │   ├── main.tsx                 #   entry — mounts the provider tree
+    │   ├── components/
+    │   │   ├── Layout/              #   shell: header + outlet + AIAssistant
+    │   │   └── Header/              #   nav bar + mobile menu
+    │   └── styles/                  #   global.css, variables.css (tokens)
     │
-    ├── __tests__/                   # 🧪 Vitest characterization suite (48)
-    │   ├── text.test.ts            #    NLP primitives
-    │   ├── intents.test.ts         #    intent detectors
-    │   ├── courseGraph.test.ts     #    graph RAG structure
-    │   ├── search.test.ts          #    Fuse.js search
-    │   ├── context.test.ts         #    RAG context + nav links
-    │   ├── recommendations.test.ts #    collaborative filtering
-    │   └── assistantEngine.test.ts #    end-to-end responder chain
+    ├── features/                    # ▸ Vertical slices (each has index.ts barrel)
+    │   ├── formulas/                #   data (phys/chem/bio) + catalog lib +
+    │   │                            #   FormulaCard + Subject/FormulaDetail pages
+    │   ├── calculator/              #   pure calc lib + useCalculator + UI
+    │   ├── recommendations/         #   collaborative filtering + Home page
+    │   ├── theory/                  #   theory dataset + Theory page
+    │   ├── problems/                #   problems dataset + Problems page
+    │   ├── bookmarks/               #   Bookmarks page (state → shared/bookmarks)
+    │   ├── search/                  #   Fuse.js service + SearchBar
+    │   ├── assistant/               #   🤖 AIAssistant UI + chat hooks +
+    │   │                            #   assistantEngine + services/assistant/*
+    │   └── theme/                   #   ThemeContext + persistence service
     │
-    ├── components/
-    │   ├── AIAssistant/             # 🤖 Floating Gemini-powered chatbot
-    │   │   ├── AIAssistant.tsx      #    Chat UI with message bubbles
-    │   │   └── AIAssistant.css      #    Glassmorphism styles
-    │   ├── Header/                  # Navigation bar + mobile menu
-    │   ├── Layout/                  # App shell (header + main + footer)
-    │   ├── SearchBar/               # Fuse.js search with dropdown
-    │   ├── FormulaCard/             # Reusable formula preview card
-    │   ├── Calculator/              # Dynamic formula calculator
-    │   ├── Breadcrumb/              # Navigation breadcrumbs
-    │   ├── LoadingSkeleton/         # Shimmer loading placeholders
-    │   └── ErrorBoundary/           # Crash recovery wrapper
-    │
-    ├── pages/
-    │   ├── Home/                    # Landing page with hero & recommendations
-    │   ├── Subject/                 # Subject detail with topic tree
-    │   ├── FormulaDetail/           # Formula view with calculator
-    │   ├── Theory/                  # Theory articles with difficulty filters
-    │   ├── Problems/                # Problem examples with solutions
-    │   └── Bookmarks/               # User's saved formulas
-    │
-    ├── data/                        # Static content database (typed)
-    │   ├── physics.ts               # Physics formulas & compute functions
-    │   ├── chemistry.ts             # Chemistry formulas
-    │   ├── biology.ts               # Biology formulas
-    │   ├── theory.ts                # Theory articles (with difficulty)
-    │   └── problems.ts              # Problem examples with steps
-    │
-    ├── services/                    # Business logic
-    │   ├── assistantEngine.ts       # AI entry — runs the responder chain
-    │   ├── assistant/               # AI assistant modules:
-    │   │   ├── responders.ts        #   ordered responder chain (strategy)
-    │   │   ├── intents.ts           #   instant-intent detectors
-    │   │   ├── text.ts              #   intent stripping + fuzzy matching
-    │   │   ├── courseGraph.ts       #   auto-derived concept graph (RAG)
-    │   │   ├── context.ts           #   RAG context block + nav links
-    │   │   ├── gemini.ts            #   Gemini 3 REST client
-    │   │   ├── fallback.ts          #   offline graph-synthesis answers
-    │   │   └── subjects.ts          #   formula catalogs + localization
-    │   ├── recommendations.ts       # Collaborative filtering engine
-    │   ├── search.ts                # Fuse.js search index
-    │   ├── bookmarks.ts             # Bookmark CRUD operations
-    │   └── theme.ts                 # Light/dark theme persistence
-    │
-    ├── contexts/                    # React context providers
-    │   ├── ThemeContext.tsx          # Dark/light mode state
-    │   ├── AuthContext.tsx           # Firebase auth state
-    │   └── BookmarkContext.tsx       # Bookmarks state
-    │
-    ├── firebase/                    # Firebase integration
-    │   ├── config.ts                # Firebase app initialization
-    │   └── firestore.ts             # Firestore read/write helpers
-    │
-    ├── i18n/                        # Internationalization
-    │   ├── index.ts                 # i18next configuration
-    │   └── locales/
-    │       ├── uk.json              # 🇺🇦 Ukrainian translations
-    │       └── en.json              # 🇬🇧 English translations
-    │
-    └── styles/                      # Global styles
-        ├── global.css               # Animations, utilities, layouts
-        └── variables.css            # CSS custom properties (design tokens)
+    └── shared/                      # ▸ Horizontal foundation (imports only shared)
+        ├── types/domain.ts          #   🧩 domain model — single source of truth
+        ├── lib/                     #   pure utils: env, pickLang, katex,
+        │                            #   navigation (+ co-located tests)
+        ├── hooks/                   #   generic hooks (useLocalized, …)
+        ├── ui/                      #   Latex, Breadcrumb, LoadingSkeleton,
+        │                            #   FilterBar, ErrorBoundary
+        ├── i18n/                    #   i18next config + uk/en locales
+        ├── firebase/                #   config + firestore helpers (infra)
+        ├── auth/                    #   AuthContext (cross-cutting provider)
+        └── bookmarks/               #   BookmarkContext + persistence
 ```
+
+> **Tests** are co-located with the unit they pin —
+> `src/features/*/__tests__/` and `src/shared/lib/__tests__/` — 129 Vitest
+> characterization tests in total. See
+> [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the layering rules,
+> the public-API convention, and the rationale behind placing cross-cutting
+> state (`auth`, `bookmarks`) in `shared/`.
 
 ---
 
@@ -325,7 +298,7 @@ VITE_GEMINI_THINKING=low          # minimal | low | medium | high
 The algorithmic core is covered by a **Vitest characterization suite** — 48 tests that pin the *current, observed* behavior of the non-UI logic so refactors (notably the JavaScript → TypeScript migration) cannot silently change results.
 
 ```bash
-npm test            # run the suite once (48 tests)
+npm test            # run the suite once (129 tests)
 npm run test:watch  # watch mode
 npm run typecheck   # tsc --noEmit (strict, must report 0 errors)
 ```
@@ -340,7 +313,7 @@ npm run typecheck   # tsc --noEmit (strict, must report 0 errors)
 | `recommendations.test.ts` | Cold-start popularity order + collaborative-filtering path |
 | `assistantEngine.test.ts` | Full responder chain end-to-end |
 
-Tests run in a `jsdom` environment (configured in `vite.config.js`) and deterministically force the offline paths — Firebase and Gemini are stubbed and `fetch` is mocked — so the suite needs **no API keys and no network**. They are a behavioral contract: the migration kept all 48 green at every commit, and `tsc --noEmit` reports zero errors under `strict: true`.
+Tests run in a `jsdom` environment (configured in `vite.config.js`) and deterministically force the offline paths — Firebase and Gemini are stubbed and `fetch` is mocked — so the suite needs **no API keys and no network**. They are a behavioral contract: the migration kept all 129 green at every commit, and `tsc --noEmit` reports zero errors under `strict: true`.
 
 ---
 
@@ -431,7 +404,7 @@ finalizeResponse()  ──────────► always { text, links[], su
 
 Instant intents (1–5) stay zero-latency — no API call. `finalizeResponse()` centralizes the response contract so handlers declare only non-default fields. **Adding an intent = write a function and slot it into `RESPONDERS`**; the orchestrator never changes. The engine is split into one focused module each:
 
-| Module (`src/services/assistant/`) | Responsibility |
+| Module (`src/features/assistant/services/assistant/`) | Responsibility |
 |---|---|
 | `../assistantEngine.ts` | thin entry: validate input → run the chain |
 | `responders.ts` | the ordered responder chain (strategy) |
@@ -485,7 +458,7 @@ Offline synthesis fallback
 
 ### Gemini Client Configuration & Gemini 3 Gotchas
 
-The chatbot calls the Gemini REST API directly via `fetch` — **no SDK**: it makes exactly one `generateContent` call, the app has no backend, and a native call keeps the client bundle lean (the SDK gives no security benefit since the key is client-side either way). Model: **`gemini-3.1-flash-lite`**. Moving to a Gemini 3 model is *not* just a string swap — these are the hard-won specifics, all in `src/services/assistant/gemini.ts`:
+The chatbot calls the Gemini REST API directly via `fetch` — **no SDK**: it makes exactly one `generateContent` call, the app has no backend, and a native call keeps the client bundle lean (the SDK gives no security benefit since the key is client-side either way). Model: **`gemini-3.1-flash-lite`**. Moving to a Gemini 3 model is *not* just a string swap — these are the hard-won specifics, all in `src/features/assistant/services/assistant/gemini.ts`:
 
 | Setting | Value | Why it matters on Gemini 3 |
 |---|---|---|
@@ -663,7 +636,7 @@ Step-by-step problem solutions with expandable sections, star difficulty ratings
 | `npm run build` | Create production build |
 | `npm run preview` | Preview production build locally |
 | `npm run typecheck` | Type-check the project (`tsc --noEmit`, strict) |
-| `npm test` | Run the Vitest suite once (48 tests) |
+| `npm test` | Run the Vitest suite once (129 tests) |
 | `npm run test:watch` | Run Vitest in watch mode |
 | `npm run deploy` | Build + deploy to Firebase Hosting |
 | `npm run deploy:rules` | Deploy Firestore security rules only |
