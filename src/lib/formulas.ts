@@ -6,7 +6,7 @@
 import { getAllFormulas as getPhysFormulas } from '@/data/physics';
 import { getAllFormulas as getChemFormulas } from '@/data/chemistry';
 import { getAllFormulas as getBioFormulas } from '@/data/biology';
-import type { Formula, Subject } from '@/types/domain';
+import type { Formula, Subject } from '@/shared/types/domain';
 
 /**
  * A formula guaranteed to carry its `subject`. The per-subject data modules

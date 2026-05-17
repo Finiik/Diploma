@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Formula } from '@/types/domain';
+import type { Formula } from '@/shared/types/domain';
 import { useLocalized } from '@/hooks/useLocalized';
 import {
   runCalculation,

@@ -10,7 +10,7 @@ import { problemsData } from '@/data/problems';
 import { getAllFormulasFlat, localizedName } from './subjects';
 import { buildCourseGraph, matchConcept, resolveRelated } from './courseGraph';
 import { smartSearch } from './text';
-import type { Concept, GraphItem, NavLink } from '@/types/domain';
+import type { Concept, GraphItem, NavLink } from '@/shared/types/domain';
 
 // Build a compact context summary for Gemini
 export function buildPlatformContext(isUk: boolean) {

@@ -25,7 +25,7 @@ import type {
   GraphItem,
   Subject,
   SubjectData
-} from '@/types/domain';
+} from '@/shared/types/domain';
 
 // Concept under construction: itemIds is a Set while we accumulate, then
 // frozen to the array `Concept` declares once the graph is finalized.

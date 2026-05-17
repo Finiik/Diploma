@@ -5,7 +5,11 @@
    ============================================ */
 
 import { getAllFormulas, findFormulasByIds } from '@/lib/formulas';
-import type { Formula, Interaction, InteractionsByUser } from '@/types/domain';
+import type {
+  Formula,
+  Interaction,
+  InteractionsByUser
+} from '@/shared/types/domain';
 import { isFirebaseConfigured } from '@/lib/env';
 
 // Pre-seeded demo users for initial recommendations

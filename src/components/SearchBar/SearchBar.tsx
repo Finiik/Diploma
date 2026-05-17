@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { search } from '@/services/search';
-import type { SearchHit, ContentType, Subject } from '@/types/domain';
+import type { SearchHit, ContentType, Subject } from '@/shared/types/domain';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { resolveNavPath } from '@/lib/navigation';

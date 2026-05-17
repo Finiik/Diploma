@@ -2,7 +2,7 @@
    Chemistry Formula Data
    ============================================ */
 
-import type { SubjectData, Formula } from '@/types/domain';
+import type { SubjectData, Formula } from '@/shared/types/domain';
 
 export const chemistryData: SubjectData = {
   id: 'chemistry',

@@ -5,7 +5,7 @@ import { chemistryData } from '@/data/chemistry';
 import { biologyData } from '@/data/biology';
 import FormulaCard from '@/components/FormulaCard/FormulaCard';
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb';
-import type { SubjectData } from '@/types/domain';
+import type { SubjectData } from '@/shared/types/domain';
 import { useLocalized } from '@/hooks/useLocalized';
 import './Subject.css';
 

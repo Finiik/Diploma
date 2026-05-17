@@ -11,7 +11,7 @@ import Breadcrumb, {
 import { physicsData } from '@/data/physics';
 import { chemistryData } from '@/data/chemistry';
 import { biologyData } from '@/data/biology';
-import type { Formula, Subject, SubjectData } from '@/types/domain';
+import type { Formula, Subject, SubjectData } from '@/shared/types/domain';
 import { isFirebaseConfigured } from '@/lib/env';
 import { findFormulaById, findFormulasByIds } from '@/lib/formulas';
 import { useLocalized } from '@/hooks/useLocalized';

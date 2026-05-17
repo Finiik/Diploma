@@ -16,7 +16,7 @@
    ============================================ */
 
 import { RESPONDERS, finalizeResponse } from '@/services/assistant/responders';
-import type { AssistantResponse } from '@/types/domain';
+import type { AssistantResponse } from '@/shared/types/domain';
 
 // ============================================
 // Main entry point — async

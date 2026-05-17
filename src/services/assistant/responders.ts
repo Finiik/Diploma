@@ -38,7 +38,7 @@ import type {
   AssistantResponse,
   Responder,
   ResponderResult
-} from '@/types/domain';
+} from '@/shared/types/domain';
 
 const GREETING_RE =
   /^(?:привіт|hello|hi|hey|вітаю|добрий|доброго|good|здрастуй|здоров)/i;

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { FormulaVariable } from '@/types/domain';
+import type { FormulaVariable } from '@/shared/types/domain';
 
 interface CalcFieldProps {
   variable: FormulaVariable;

@@ -3,7 +3,7 @@
    Organized by topic → subtopics → formulas
    ============================================ */
 
-import type { SubjectData, Formula } from '@/types/domain';
+import type { SubjectData, Formula } from '@/shared/types/domain';
 
 export const physicsData: SubjectData = {
   id: 'physics',

@@ -11,7 +11,7 @@ import {
   biologyData,
   getAllFormulas as getAllBioFormulas
 } from '@/data/biology';
-import type { Formula, Subject } from '@/types/domain';
+import type { Formula, Subject } from '@/shared/types/domain';
 
 export {
   physicsData,

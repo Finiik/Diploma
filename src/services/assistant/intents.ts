@@ -2,7 +2,7 @@
    Instant intent detectors (no API call needed)
    ============================================ */
 
-import type { Subject } from '@/types/domain';
+import type { Subject } from '@/shared/types/domain';
 
 export function detectHelpIntent(query: string): boolean {
   return /(?:допомог[аи]|help|що ти (?:вмієш|можеш|знаєш)|what can you|можливості|capabilities|як (?:користуватись|працюєш|працює)|how (?:do you work|to use)|menu|меню|інструкція|instructions)/i.test(

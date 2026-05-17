@@ -2,7 +2,7 @@
    Pure calculator domain logic (no React, no i18n)
    ============================================ */
 
-import type { Formula, FormulaVariable } from '@/types/domain';
+import type { Formula, FormulaVariable } from '@/shared/types/domain';
 
 /** Field values: numeric defaults or raw `<input>` strings. */
 export type CalcValues = Record<string, string | number>;

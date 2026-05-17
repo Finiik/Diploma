@@ -2,7 +2,7 @@
    Problem Examples Data
    ============================================ */
 
-import type { ProblemItem } from '@/types/domain';
+import type { ProblemItem } from '@/shared/types/domain';
 
 export const problemsData: ProblemItem[] = [
   {

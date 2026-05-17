@@ -4,7 +4,7 @@
    ============================================ */
 
 import { search } from '@/services/search';
-import type { SearchHit } from '@/types/domain';
+import type { SearchHit } from '@/shared/types/domain';
 
 // Intent words to strip before searching
 export const INTENT_WORDS_UK = [

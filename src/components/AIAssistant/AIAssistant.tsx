@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import 'katex/dist/katex.min.css';
-import type { NavLink } from '@/types/domain';
+import type { NavLink } from '@/shared/types/domain';
 import { resolveNavPath } from '@/lib/navigation';
 import { useChatSession } from '@/hooks/useChatSession';
 import { useChatScroll } from '@/hooks/useChatScroll';

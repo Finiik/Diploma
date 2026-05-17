@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { Formula } from '@/types/domain';
+import type { Formula } from '@/shared/types/domain';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useCalculator } from '@/hooks/useCalculator';
 import Latex from '@/components/Latex/Latex';
