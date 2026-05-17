@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from '@/components/Layout/Layout';
 import ErrorBoundary from '@/shared/ui/ErrorBoundary/ErrorBoundary';
-import Home from '@/pages/Home/Home';
+import { Home } from '@/features/recommendations';
 import { Subject, FormulaDetail } from '@/features/formulas';
 import Theory from '@/pages/Theory/Theory';
 import Problems from '@/pages/Problems/Problems';
