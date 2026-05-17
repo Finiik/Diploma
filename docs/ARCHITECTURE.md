@@ -90,8 +90,10 @@ src/
 │   ├── App.tsx                  #   route table
 │   ├── main.tsx                 #   entry — mounts provider tree (index.html → here)
 │   ├── components/
-│   │   ├── Layout/              #   shell: header + <Outlet/> + footer + AIAssistant
-│   │   └── Header/              #   nav bar (consumes search + theme features)
+│   │   ├── Layout/              #   shell: pure composition of the pieces
+│   │   ├── Header/              #   nav bar (consumes search + theme features)
+│   │   ├── Footer/              #   site footer (presentational)
+│   │   └── ScrollToTop/         #   scroll-restoration behaviour (renders null)
 │   └── styles/                  #   global.css, variables.css (design tokens)
 │
 ├── features/                    # Vertical slices (each has an index.ts barrel)
@@ -299,7 +301,10 @@ rather than control flow:
   `DerivedFormulasGrid`, so every routable screen is now filter/data
   wiring delegating to presentational components, and the difficulty
   scale lives once in `shared/lib/difficulty` instead of a badge map in
-  `Theory` diverging from a stars map in `Problems`.
+  `Theory` diverging from a stars map in `Problems`. `Layout` was likewise
+  reduced to pure shell composition — scroll restoration (`ScrollToTop`,
+  renders `null`) and the footer markup (`Footer`) became their own
+  components instead of three reasons-to-change in one shell file.
 - **Open/Closed.** Variant handling uses lookup/strategy data instead of
   `if`/`switch` ladders, so adding a case is a new entry, never an edited
   branch. Two mechanisms, with *different* safety guarantees — stated
