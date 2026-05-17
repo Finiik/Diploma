@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { theoryData } from '@/features/theory/data/theory';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useContentFilters } from '@/shared/hooks/useContentFilters';
+import { renderInlineMarkdown } from '@/shared/lib/markdown';
+import { stripFormulaIdPrefix } from '@/shared/lib/formulaId';
 import SubjectFilterBar from '@/shared/ui/FilterBar/SubjectFilterBar';
 import DifficultyFilterBar, {
   type DifficultyOption
@@ -88,9 +90,7 @@ export default function Theory() {
                       <p
                         key={i}
                         dangerouslySetInnerHTML={{
-                          __html: para
-                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/\n/g, '<br/>')
+                          __html: renderInlineMarkdown(para)
                         }}
                       />
                     ))}
@@ -106,7 +106,7 @@ export default function Theory() {
                         to={`/formula/${fId}`}
                         className="theory-related-link"
                       >
-                        {fId.replace(/^(phys_|chem_|bio_)/, '')}
+                        {stripFormulaIdPrefix(fId)}
                       </Link>
                     ))}
                   </div>
