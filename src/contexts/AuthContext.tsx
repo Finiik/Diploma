@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { auth } from '@/firebase/config';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
-import { isFirebaseConfigured } from '@/lib/env';
+import { isFirebaseConfigured } from '@/shared/lib/env';
 
 /**
  * Either a real Firebase user or the synthetic offline user the app falls

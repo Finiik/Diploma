@@ -2,7 +2,7 @@
    `!!key && key !== 'YOUR_API_KEY' && !key.startsWith('YOUR_')`, read at
    call time so VITE_FIREBASE_API_KEY can be stubbed per case. */
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { isFirebaseConfigured } from '@/lib/env';
+import { isFirebaseConfigured } from '@/shared/lib/env';
 
 afterEach(() => {
   vi.unstubAllEnvs();

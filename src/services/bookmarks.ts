@@ -3,7 +3,7 @@
    Only syncs to Firebase when it's configured
    ============================================ */
 
-import { isFirebaseConfigured } from '@/lib/env';
+import { isFirebaseConfigured } from '@/shared/lib/env';
 
 const BOOKMARKS_KEY = 'bookmarks';
 

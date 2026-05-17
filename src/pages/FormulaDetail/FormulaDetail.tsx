@@ -12,7 +12,7 @@ import { physicsData } from '@/data/physics';
 import { chemistryData } from '@/data/chemistry';
 import { biologyData } from '@/data/biology';
 import type { Formula, Subject, SubjectData } from '@/shared/types/domain';
-import { isFirebaseConfigured } from '@/lib/env';
+import { isFirebaseConfigured } from '@/shared/lib/env';
 import { findFormulaById, findFormulasByIds } from '@/lib/formulas';
 import { useLocalized } from '@/hooks/useLocalized';
 import './FormulaDetail.css';

@@ -5,7 +5,7 @@ import { search } from '@/services/search';
 import type { SearchHit, ContentType, Subject } from '@/shared/types/domain';
 import { useLocalized } from '@/hooks/useLocalized';
 import { useClickOutside } from '@/hooks/useClickOutside';
-import { resolveNavPath } from '@/lib/navigation';
+import { resolveNavPath } from '@/shared/lib/navigation';
 import './SearchBar.css';
 
 const SEARCH_TYPE_KEY: Record<ContentType, string> = {

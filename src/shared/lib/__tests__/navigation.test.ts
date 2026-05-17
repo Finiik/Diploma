@@ -2,7 +2,7 @@
    resolveNavPath handles two unions in one place (assistant NavLink uses
    'problems'/'subject'; search ContentType uses 'problem'). */
 import { describe, it, expect } from 'vitest';
-import { resolveNavPath, type Routable } from '@/lib/navigation';
+import { resolveNavPath, type Routable } from '@/shared/lib/navigation';
 
 describe('resolveNavPath — id-bearing routes', () => {
   it('routes formula with its id', () => {

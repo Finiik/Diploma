@@ -2,7 +2,7 @@
    pickLang(item, baseKey, isUk): uk → base; en → `${baseKey}En` when it's a
    non-empty string, else base. Missing base coerces to ''. */
 import { describe, it, expect } from 'vitest';
-import { pickLang } from '@/lib/pickLang';
+import { pickLang } from '@/shared/lib/pickLang';
 
 describe('pickLang — language selection', () => {
   const item = { name: 'Маса', nameEn: 'Mass' };

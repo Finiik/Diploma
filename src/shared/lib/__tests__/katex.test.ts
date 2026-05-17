@@ -2,7 +2,7 @@
    throwOnError:false, so malformed input renders an error node rather than
    throwing; the catch-fallback is therefore not reachable from here. */
 import { describe, it, expect } from 'vitest';
-import { renderLatex } from '@/lib/katex';
+import { renderLatex } from '@/shared/lib/katex';
 
 describe('renderLatex', () => {
   it('produces KaTeX markup', () => {

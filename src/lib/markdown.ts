@@ -1,4 +1,4 @@
-import { renderLatex } from './katex';
+import { renderLatex } from '@/shared/lib/katex';
 
 /**
  * Sentinel wrapping a stashed-math index. It's a NUL char (built at runtime

@@ -10,7 +10,7 @@ import type {
   Interaction,
   InteractionsByUser
 } from '@/shared/types/domain';
-import { isFirebaseConfigured } from '@/lib/env';
+import { isFirebaseConfigured } from '@/shared/lib/env';
 
 // Pre-seeded demo users for initial recommendations
 const DEMO_INTERACTIONS: InteractionsByUser = {

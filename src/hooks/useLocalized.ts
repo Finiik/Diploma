@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { pickLang, type Localized } from '@/lib/pickLang';
+import { pickLang, type Localized } from '@/shared/lib/pickLang';
 
 /**
  * Reactive localized-content selector.
