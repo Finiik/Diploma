@@ -3,8 +3,10 @@
 
    Thin orchestrator: validate input, then run the query through the ordered
    responder chain (strategy / chain-of-responsibility). The first responder
-   that owns the query produces the answer; the terminal AI responder always
-   answers, so the loop never falls through. The pieces live in ./assistant/*:
+   that owns the query produces the answer; otherwise the **total** terminal
+   answers. Totality is type-enforced (TerminalResponder.run is
+   non-nullable), so there is no fall-through case to handle. The pieces
+   live in ./assistant/*:
      text        — intent stripping, fuzzy/concept matching primitives
      subjects    — formula catalogs, labels, localization
      courseGraph — auto-derived concept knowledge graph (graph/keyword RAG)
@@ -45,18 +47,14 @@ export async function processMessage(
   }
 
   const trimmed = query.trim();
+  const { responders, terminal } = createResponders(transport);
 
-  for (const responder of createResponders(transport)) {
+  for (const responder of responders) {
     const response = await responder.run(trimmed, lang);
     if (response) return finalizeResponse(response);
   }
 
-  // Unreachable: the terminal 'ai' responder always returns a response.
-  return finalizeResponse({
-    text: pick(
-      lang,
-      'Вибачте, не вдалося обробити запит.',
-      'Sorry, could not process the request.'
-    )
-  });
+  // The terminal is total (type-enforced) — it always returns a result, so
+  // this is the single, guaranteed exit; no post-loop fallback needed.
+  return finalizeResponse(await terminal.run(trimmed, lang));
 }

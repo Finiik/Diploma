@@ -32,11 +32,29 @@ export interface AssistantResponse {
   suggestions: string[];
 }
 
-/** One link in the chain-of-responsibility. */
+/** One fallible link in the chain-of-responsibility. */
 export interface Responder {
   id: string;
   run: (
     query: string,
     lang: Lang
   ) => ResponderResult | null | Promise<ResponderResult | null>;
+}
+
+/**
+ * The chain's terminal link. Unlike a `Responder` it is **total**: it
+ * always produces a result (Gemini → rich offline fallback → hard
+ * last-resort line), so `run` is non-nullable. This makes the "the chain
+ * never falls through" guarantee a *type*, not a comment — a future edit
+ * that returns `null` here is a compile error, not a silent gap.
+ */
+export interface TerminalResponder {
+  id: string;
+  run: (query: string, lang: Lang) => Promise<ResponderResult>;
+}
+
+/** Ordered fallible responders followed by exactly one total terminal. */
+export interface ResponderChain {
+  responders: Responder[];
+  terminal: TerminalResponder;
 }

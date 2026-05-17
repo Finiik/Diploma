@@ -31,10 +31,11 @@ import { localFallback } from './fallback';
 import { greeting, help, thanks, list, pureSubject } from './instantResponders';
 import type {
   AssistantResponse,
-  Responder,
+  NavLink,
+  ResponderChain,
   ResponderResult
 } from '@/features/assistant/types';
-import type { Lang } from '@/shared/lib/pickLang';
+import { pick, type Lang } from '@/shared/lib/pickLang';
 
 // Normalize any responder's partial result into the full response contract.
 export function finalizeResponse(partial: ResponderResult): AssistantResponse {
@@ -46,7 +47,9 @@ export function finalizeResponse(partial: ResponderResult): AssistantResponse {
 }
 
 // --- Terminal responder: Gemini, then rich local fallback -------------------
-// Always returns a response, so the chain never falls through.
+// TOTAL by construction: every branch (and every failure of a branch)
+// returns a ResponderResult, so `TerminalResponder.run` is non-nullable and
+// the chain provably never falls through.
 
 async function aiOrFallback(
   query: string,
@@ -55,14 +58,23 @@ async function aiOrFallback(
 ): Promise<ResponderResult> {
   // Navigation links: search hits first, then curated concept-graph links so
   // a topic like "стала Авогадро" still surfaces its connected materials
-  // (mole, molarity, ideal-gas law) even with no direct search hit.
-  const conceptMatch = matchConcept(query);
-  let links = extractLinks(query, lang);
-  if (conceptMatch) {
-    links = mergeById(
-      links,
-      buildConceptLinks(conceptMatch, lang),
-      MERGED_LINKS_CAP
+  // (mole, molarity, ideal-gas law) even with no direct search hit. Links
+  // are best-effort — a content/search edge case must not break totality.
+  let links: NavLink[] = [];
+  try {
+    links = extractLinks(query, lang);
+    const conceptMatch = matchConcept(query);
+    if (conceptMatch) {
+      links = mergeById(
+        links,
+        buildConceptLinks(conceptMatch, lang),
+        MERGED_LINKS_CAP
+      );
+    }
+  } catch (err) {
+    console.warn(
+      'link assembly failed, answering without links:',
+      err instanceof Error ? err.message : err
     );
   }
 
@@ -78,30 +90,51 @@ async function aiOrFallback(
     }
   }
 
-  const fallback = localFallback(query, lang);
-  return {
-    text: fallback.text,
-    links,
-    suggestions: fallback.suggestions || []
-  };
+  try {
+    const fallback = localFallback(query, lang);
+    return {
+      text: fallback.text,
+      links,
+      suggestions: fallback.suggestions || []
+    };
+  } catch (err) {
+    // Last resort: localFallback itself failed. Still answer, never throw —
+    // this is the slot where a fall-through would be catastrophic.
+    console.warn(
+      'local fallback failed, using last-resort line:',
+      err instanceof Error ? err.message : err
+    );
+    return {
+      text: pick(
+        lang,
+        'Вибачте, не вдалося обробити запит.',
+        'Sorry, could not process the request.'
+      ),
+      links
+    };
+  }
 }
 
 /**
- * Build the ordered chain. First responder to return non-null answers the
- * query. The terminal AI responder closes over the injected `transport`
- * (default = the real Gemini HTTP transport); tests pass a fake to exercise
- * the chain offline without stubbing global fetch.
+ * Build the chain: ordered fallible responders + one **total** terminal
+ * that closes over the injected `transport` (default = the real Gemini
+ * HTTP transport); tests pass a fake to exercise the chain offline
+ * without stubbing global fetch.
  */
 export function createResponders(
   transport: GeminiTransport = defaultGeminiTransport
-): Responder[] {
-  return [
-    { id: 'greeting', run: greeting },
-    { id: 'help', run: help },
-    { id: 'thanks', run: thanks },
-    { id: 'list', run: list },
-    { id: 'pure-subject', run: pureSubject },
-    // terminal — never returns null
-    { id: 'ai', run: (q, lang) => aiOrFallback(q, lang, transport) }
-  ];
+): ResponderChain {
+  return {
+    responders: [
+      { id: 'greeting', run: greeting },
+      { id: 'help', run: help },
+      { id: 'thanks', run: thanks },
+      { id: 'list', run: list },
+      { id: 'pure-subject', run: pureSubject }
+    ],
+    terminal: {
+      id: 'ai',
+      run: (q, lang) => aiOrFallback(q, lang, transport)
+    }
+  };
 }
