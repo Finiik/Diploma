@@ -15,10 +15,12 @@
 
    The Gemini transport is injected into the terminal responder via the
    createResponders(transport) factory (Dependency Inversion): the chain
-   depends on the GeminiTransport port, not on global fetch/env, so the
-   whole engine is unit-testable offline by passing a fake (see
-   assistantEngine.test.ts). The instant responders are transport-free, so
-   the chain abstraction stays segregated.
+   depends on the GeminiTransport port — never on global fetch/env and
+   never on a concrete default — so the whole engine is unit-testable
+   offline by passing a fake (see assistantEngine.test.ts). The single
+   composition point that picks the real adapter is the app boundary
+   (useChatSession), not this module. The instant responders are
+   transport-free, so the chain abstraction stays segregated.
    ============================================ */
 
 import { matchConcept } from './courseGraph';
@@ -26,7 +28,7 @@ import { extractLinks, buildConceptLinks } from './navLinks';
 import { mergeById } from '@/shared/lib/mergeById';
 import { MERGED_LINKS_CAP } from './constants';
 import { callGemini, geminiConfigured } from './gemini';
-import { defaultGeminiTransport, type GeminiTransport } from './geminiClient';
+import type { GeminiTransport } from './geminiClient';
 import { localFallback } from './fallback';
 import { greeting, help, thanks, list, pureSubject } from './instantResponders';
 import type {
@@ -117,13 +119,11 @@ async function aiOrFallback(
 
 /**
  * Build the chain: ordered fallible responders + one **total** terminal
- * that closes over the injected `transport` (default = the real Gemini
- * HTTP transport); tests pass a fake to exercise the chain offline
- * without stubbing global fetch.
+ * that closes over the injected `transport`. There is no concrete default —
+ * the caller (ultimately the app boundary) must supply the port, so the
+ * orchestrator never names the Gemini concretion. Tests pass a fake.
  */
-export function createResponders(
-  transport: GeminiTransport = defaultGeminiTransport
-): ResponderChain {
+export function createResponders(transport: GeminiTransport): ResponderChain {
   return {
     responders: [
       { id: 'greeting', run: greeting },

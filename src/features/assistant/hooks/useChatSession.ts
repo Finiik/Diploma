@@ -1,8 +1,19 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { processMessage } from '@/features/assistant/services/assistantEngine';
+import { defaultGeminiTransport } from '@/features/assistant/services/assistant/geminiClient';
 import type { ChatMessage } from '@/features/assistant/components/AIAssistant/types';
 import { resolveLang } from '@/shared/i18n/lang';
+
+/**
+ * The single composition point: the app boundary picks the real Gemini
+ * adapter and threads it into the engine (mirroring how `getDefaultIndex()`
+ * injects `DEFAULT_CORPUS_SOURCES` at one wiring point). The orchestrator,
+ * responder chain and gemini client name only the `GeminiTransport` port —
+ * the concretion lives here, so the dependency is genuinely inverted (and
+ * a test can swap it without stubbing global fetch).
+ */
+const transport = defaultGeminiTransport;
 
 /**
  * Owns the chat transcript, the input box and the typing flag. `send` and
@@ -26,7 +37,7 @@ export function useChatSession() {
       setInput('');
       setIsTyping(true);
       try {
-        const response = await processMessage(text, lang);
+        const response = await processMessage(text, lang, transport);
         setMessages((prev) => [
           ...prev,
           { role: 'bot', ...response, timestamp: Date.now() }
@@ -73,7 +84,7 @@ export function useChatSession() {
     seedingRef.current = true;
     setIsTyping(true);
     try {
-      const welcome = await processMessage('привіт', lang);
+      const welcome = await processMessage('привіт', lang, transport);
       setMessages([{ role: 'bot', ...welcome, timestamp: Date.now() }]);
     } catch {
       setMessages([

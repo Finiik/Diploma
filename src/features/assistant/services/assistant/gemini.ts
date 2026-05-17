@@ -5,11 +5,7 @@
 
 import { GEMINI_MAX_OUTPUT_TOKENS } from './constants';
 import { buildSystemPrompt } from './geminiPrompt';
-import {
-  defaultGeminiTransport,
-  extractText,
-  type GeminiTransport
-} from './geminiClient';
+import { extractText, type GeminiTransport } from './geminiClient';
 import type { Lang } from '@/shared/lib/pickLang';
 
 // Gemini 3 thinking allowance: "minimal" | "low" | "medium" | "high".
@@ -18,10 +14,9 @@ import type { Lang } from '@/shared/lib/pickLang';
 const GEMINI_THINKING = import.meta.env.VITE_GEMINI_THINKING || 'low';
 
 // Configuration is the transport's concern; delegate so the orchestrator
-// never reads env and stays test-injectable.
-export function geminiConfigured(
-  transport: GeminiTransport = defaultGeminiTransport
-): boolean {
+// never reads env and stays test-injectable. Transport is required — no
+// concrete default leaks back into this module.
+export function geminiConfigured(transport: GeminiTransport): boolean {
   return transport.isConfigured();
 }
 
@@ -30,7 +25,7 @@ export function geminiConfigured(
 export async function callGemini(
   userMessage: string,
   lang: Lang,
-  transport: GeminiTransport = defaultGeminiTransport
+  transport: GeminiTransport
 ): Promise<string> {
   const systemPrompt = buildSystemPrompt(userMessage, lang);
 

@@ -21,20 +21,22 @@ import {
   createResponders,
   finalizeResponse
 } from '@/features/assistant/services/assistant/responders';
-import {
-  defaultGeminiTransport,
-  type GeminiTransport
-} from '@/features/assistant/services/assistant/geminiClient';
+import type { GeminiTransport } from '@/features/assistant/services/assistant/geminiClient';
 import type { AssistantResponse } from '@/features/assistant/types';
 import { pick, type Lang } from '@/shared/lib/pickLang';
 
 // ============================================
 // Main entry point — async
+//
+// `transport` is required: the orchestrator depends only on the
+// GeminiTransport port, never on a concrete default. The app boundary
+// (useChatSession) is the single composition point that supplies the real
+// adapter; tests supply a fake.
 // ============================================
 export async function processMessage(
   query: string,
-  lang: Lang = 'uk',
-  transport: GeminiTransport = defaultGeminiTransport
+  lang: Lang,
+  transport: GeminiTransport
 ): Promise<AssistantResponse> {
   if (!query || query.trim().length === 0) {
     return finalizeResponse({
