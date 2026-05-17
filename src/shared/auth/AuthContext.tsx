@@ -4,6 +4,7 @@ import { auth } from '@/shared/firebase/config';
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { isFirebaseConfigured } from '@/shared/lib/env';
+import { OFFLINE_USER_ID, AUTH_FALLBACK_TIMEOUT_MS } from './constants';
 
 /**
  * Either a real Firebase user or the synthetic offline user the app falls
@@ -25,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // If Firebase is not configured, skip auth entirely
     if (!isFirebaseConfigured()) {
       console.info('Firebase not configured — running in offline mode');
-      setUser({ uid: 'local_user', isAnonymous: true, offline: true });
+      setUser({ uid: OFFLINE_USER_ID, isAnonymous: true, offline: true });
       setLoading(false);
       return;
     }
@@ -39,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const authTimeout = setTimeout(() => {
       setLoading(false);
       console.warn('Auth timed out — running without authentication');
-    }, 3000);
+    }, AUTH_FALLBACK_TIMEOUT_MS);
 
     signInAnonymously(auth)
       .then(() => clearTimeout(authTimeout))
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           'Anonymous auth failed, app will work in offline mode:',
           error
         );
-        setUser({ uid: 'local_user', isAnonymous: true, offline: true });
+        setUser({ uid: OFFLINE_USER_ID, isAnonymous: true, offline: true });
         setLoading(false);
       });
 
