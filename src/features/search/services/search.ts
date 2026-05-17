@@ -10,7 +10,11 @@
 
 import Fuse, { type FuseResult, type IFuseOptions } from 'fuse.js';
 import type { GraphItem, SearchHit } from '@/shared/types/domain';
-import { composeCorpus, type SearchCorpusSource } from './searchCorpus';
+import {
+  composeCorpus,
+  DEFAULT_CORPUS_SOURCES,
+  type SearchCorpusSource
+} from './searchCorpus';
 
 const FUSE_OPTIONS: IFuseOptions<GraphItem> = {
   keys: [
@@ -44,10 +48,12 @@ export interface SearchIndex {
 }
 
 /**
- * Build an isolated search index over the given corpus sources. The Fuse
- * instance is created lazily on first query and lives in this closure.
+ * Build an isolated search index over the given corpus sources. Sources
+ * are required — there is no hidden default, so the dependency inversion
+ * the factory provides cannot be silently undone. The Fuse instance is
+ * created lazily on first query and lives in this closure.
  */
-export function createSearchIndex(sources?: SearchCorpusSource[]): SearchIndex {
+export function createSearchIndex(sources: SearchCorpusSource[]): SearchIndex {
   let fuse: Fuse<GraphItem> | null = null;
   const build = () => new Fuse(composeCorpus(sources), FUSE_OPTIONS);
 
@@ -63,13 +69,21 @@ export function createSearchIndex(sources?: SearchCorpusSource[]): SearchIndex {
   };
 }
 
-/** Process-wide default index used by the app. */
-const defaultIndex = createSearchIndex();
+/**
+ * Process-wide default index, lazily constructed on first use (not at
+ * module import) with the default corpus sources injected *explicitly*
+ * here — the one composition point. `createSearchIndex` itself stays a
+ * pure seam with no default wiring.
+ */
+let defaultIndex: SearchIndex | null = null;
+function getDefaultIndex(): SearchIndex {
+  return (defaultIndex ??= createSearchIndex(DEFAULT_CORPUS_SOURCES));
+}
 
 export function search(queryStr: string): SearchHit[] {
-  return defaultIndex.query(queryStr);
+  return getDefaultIndex().query(queryStr);
 }
 
 export function rebuildIndex(): void {
-  defaultIndex.rebuild();
+  getDefaultIndex().rebuild();
 }

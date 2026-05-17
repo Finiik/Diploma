@@ -357,8 +357,12 @@ rather than control flow:
   `getDb()` / `getFirebaseAuth()` instead of calling `initializeApp` at
   module load, so placeholder credentials are never used to construct an
   app in offline mode. DIP is now applied *consistently* across every
-  infrastructure boundary, not just bookmarks/interactions. The
-  `GeminiTransport` seam is threaded all the way through the orchestrator:
+  infrastructure boundary, not just bookmarks/interactions. Likewise
+  `createSearchIndex(sources)` no longer carries a hidden default that
+  silently re-coupled it: the default index is built **lazily on first
+  use** (not at module import) with `DEFAULT_CORPUS_SOURCES` injected
+  explicitly at that one wiring point, so the factory stays a pure seam.
+  The `GeminiTransport` seam is threaded all the way through the orchestrator:
   `processMessage(query, isUk, transport?)` builds the chain via
   `createResponders(transport)`, so the *whole assistant engine* is
   exercised offline by injecting a fake transport — `assistantEngine.test.ts`

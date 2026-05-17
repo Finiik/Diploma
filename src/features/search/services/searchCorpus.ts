@@ -34,9 +34,10 @@ export const DEFAULT_CORPUS_SOURCES: SearchCorpusSource[] = [
   problemCorpusSource
 ];
 
-/** Flatten all sources into one document list, in source order. */
-export function composeCorpus(
-  sources: SearchCorpusSource[] = DEFAULT_CORPUS_SOURCES
-): GraphItem[] {
+/** Flatten the given sources into one document list, in source order.
+    Sources are required: the default set is injected explicitly at the
+    one wiring point (search.ts), never defaulted-in here, so the factory's
+    inversion isn't silently re-coupled. */
+export function composeCorpus(sources: SearchCorpusSource[]): GraphItem[] {
   return sources.flatMap((source) => source.load());
 }
