@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useBookmarks } from '@/contexts/BookmarkContext';
+import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
 import type { Formula } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import Latex from '@/shared/ui/Latex/Latex';

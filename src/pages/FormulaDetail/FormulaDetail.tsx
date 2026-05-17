@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Latex from '@/shared/ui/Latex/Latex';
-import { useBookmarks } from '@/contexts/BookmarkContext';
+import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Calculator from '@/components/Calculator/Calculator';
 import Breadcrumb, {

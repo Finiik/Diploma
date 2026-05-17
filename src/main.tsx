@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { BookmarkProvider } from '@/contexts/BookmarkContext';
+import { BookmarkProvider } from '@/shared/bookmarks/BookmarkContext';
 import '@/shared/i18n/index.js';
 
 const rootElement = document.getElementById('root');

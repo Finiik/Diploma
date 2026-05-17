@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useBookmarks } from '@/contexts/BookmarkContext';
+import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
 import FormulaCard from '@/components/FormulaCard/FormulaCard';
 import { findFormulasByIds } from '@/lib/formulas';
 import './Bookmarks.css';

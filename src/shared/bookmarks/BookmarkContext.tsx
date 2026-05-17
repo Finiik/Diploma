@@ -11,8 +11,8 @@ import {
   addBookmark,
   removeBookmark,
   isBookmarked as checkBookmarked
-} from '@/services/bookmarks';
-import { useAuth } from './AuthContext';
+} from '@/shared/bookmarks/bookmarks';
+import { useAuth } from '@/contexts/AuthContext';
 
 type BookmarkContextValue = {
   bookmarks: string[];
