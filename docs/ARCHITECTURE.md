@@ -25,7 +25,11 @@ The codebase is partitioned into **three layers**, each a directory under
 
 The guiding principle is **high cohesion, low coupling**: everything that
 changes together for one capability lives together in one feature folder,
-and what is shared is shared deliberately, not by accident.
+and what is shared is shared deliberately, not by accident. The operative
+rule for *where any module lives* — **location follows its consumers, not
+its kind** — is stated in full in [§6.1](#61-the-placement-rule-location-follows-consumers-not-kind),
+and is what makes the auth/bookmarks/theme split principled rather than
+arbitrary.
 
 ---
 
@@ -156,33 +160,76 @@ Every arrow points down or sideways-through-a-barrel; none point back up.
 
 ## 6. Notable design decisions (and why)
 
-### 6.1 Cross-cutting state is `shared`, not a feature
+### 6.1 The placement rule: location follows *consumers*, not *kind*
 
-`FormulaCard` (a `formulas` component) shows a bookmark toggle, so it depends
-on the bookmark context. The `Bookmarks` page depends on `FormulaCard`. Naive
-slicing would put the bookmark context in a `bookmarks` feature and produce a
-`formulas ⇄ bookmarks` **cycle**.
+The single most important principle in this codebase:
 
-Resolution: a bookmark is **application-wide state mounted as a top-level
-provider** — it is genuinely cross-cutting, not a property of either slice.
-So `BookmarkContext` + its persistence service live in `shared/bookmarks`.
-The `bookmarks` *feature* keeps only the page. The cycle disappears with
-**zero behavioural change**.
+> **A module's home is decided by who consumes it — not by what kind of
+> thing it is.** "It's a React context / a provider / a hook" is *not* a
+> reason to put something in `shared/`. The test is the consumer set.
 
-The same reasoning promoted **`AuthContext` to `shared/auth`**: a *shared*
-module (`BookmarkContext`) calls `useAuth`, so auth must sit in `shared` to
-keep the "shared imports only shared" rule intact. `ThemeContext` stays a
-feature because nothing in `shared` depends on it — the rule is applied by
-consequence, not dogma.
+Concretely, a stateful provider goes in `shared/` **only if** a `shared/`
+module depends on it **or** two or more features depend on it. Otherwise it
+stays inside the one feature that owns it (or, if only `app/` consumes it,
+it can remain a feature — `app/` is allowed to import features).
 
-### 6.2 The domain model stays a single shared module
+The three top-level providers (auth, bookmarks, theme) are *the same kind of
+thing* (a React context mounted in `main.tsx`) yet land in **different
+layers**, purely because their consumer sets differ. This is the rule
+applied **by consequence, not by dogma**:
+
+| Provider | Actual consumers (verified) | Decision | Why |
+|---|---|---|---|
+| **bookmarks** (`useBookmarks`) | `features/formulas` (`FormulaCard`, `FormulaDetail`), `features/bookmarks` (page), `app/main.tsx` | → `shared/bookmarks` | Consumed by **two features**. Leaving it in `features/bookmarks` creates a cycle: `FormulaCard` (formulas) needs it, while the Bookmarks page needs `FormulaCard` ⇒ `formulas ⇄ bookmarks`. |
+| **auth** (`useAuth`) | `shared/bookmarks` (!), `features/formulas` (`FormulaDetail`), `features/recommendations` (`Home`), `app/main.tsx` | → `shared/auth` | **Forced.** A *shared* module (`BookmarkContext`) calls `useAuth`. `shared` may not import a feature, so auth *must* be shared. |
+| **theme** (`useTheme`) | `app/main.tsx`, `app/components/Header` | → `features/theme` | No `shared/` module and no other feature consumes it; both consumers are in `app/`, which may import features. **No layering pressure to promote it.** |
+
+Two consequences the committee should note:
+
+1. The cycle-break and the auth promotion were achieved with **zero
+   behavioural change** — only the module's *location* moved; its code and
+   public API are identical.
+2. If a `shared/` module or a second feature ever starts consuming
+   `useTheme`, theme moves to `shared/` by *this exact rule* — the decision
+   is mechanical, not aesthetic.
+
+The same rule explains an asymmetry inside the slices: the
+`recommendations` *service* is consumed only by its own `Home` page, so it
+stays private to `features/recommendations`; the bookmarks *context* is
+consumed across slices, so it is shared. Different kinds, same rule.
+
+### 6.2 Features carry only the kinds they need (thin is not a smell)
+
+A feature folder is layered *internally* by kind (`data/`, `lib/`, `hooks/`,
+`components/`, `pages/`, `services/`). Feature-Sliced Design does **not**
+require every feature to contain every kind — each slice carries only what
+it needs:
+
+| Feature | Internal layers it owns |
+|---|---|
+| `formulas` | `data/` + `lib/` + `components/` + `pages/` |
+| `calculator` | `lib/` + `hooks/` + `components/` |
+| `assistant` | `components/` + `hooks/` + `lib/` + `services/` |
+| `theory` / `problems` | `data/` + `pages/` |
+| `bookmarks` | `pages/` only (its state lives in `shared/bookmarks`) |
+
+So a `pages/` subfolder is the feature's **internal routing layer**, *not* a
+relapse to the old global `src/pages/`. `theory`/`problems` are thin because
+the capability genuinely *is* "a typed dataset + one filtered list screen";
+`bookmarks` is thin because its state was correctly hoisted to `shared`
+(§6.1). Thinness here is **honest signal that the slice is small**, not an
+incomplete feature. Keeping the routable screen under `pages/<Name>/` (vs a
+bare `Name.tsx`) also keeps its co-located CSS and future `__tests__`
+consistent with every other feature, and gives the slice a place to grow.
+
+### 6.3 The domain model stays a single shared module
 
 `shared/types/domain.ts` is imported by almost every file. Splitting it per
 feature would be high-churn, high-risk, and would fragment the *ubiquitous
 language* the whole app speaks. It is deliberately kept as one canonical
 shared type module.
 
-### 6.3 Path alias and import convention
+### 6.4 Path alias and import convention
 
 `@/*` resolves to `src/*` (declared once in `tsconfig.json`, mirrored in
 `vite.config.js`, which Vitest also reads). Convention:
