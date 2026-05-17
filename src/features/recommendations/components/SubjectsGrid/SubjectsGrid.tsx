@@ -1,10 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { subjectIcon } from '@/shared/lib/subjectIcon';
-import type { Subject } from '@/shared/types/domain';
-
-/** The subjects surfaced on the landing page, in display order. */
-const HOME_SUBJECTS: Subject[] = ['physics', 'chemistry', 'biology'];
+import { SUBJECTS } from '@/shared/lib/subjects';
 
 /** The subject-cards grid on the home page. Presentational only. */
 export default function SubjectsGrid() {
@@ -14,7 +11,7 @@ export default function SubjectsGrid() {
     <section className="subjects-section">
       <div className="container">
         <div className="subjects-grid stagger-children">
-          {HOME_SUBJECTS.map((id) => (
+          {SUBJECTS.map((id) => (
             <Link
               key={id}
               to={`/subject/${id}`}

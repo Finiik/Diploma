@@ -5,6 +5,7 @@ import { SearchBar } from '@/features/search';
 import { useMobileMenu } from '@/shared/hooks/useMobileMenu';
 import { useLanguageToggle } from '@/shared/i18n/useLanguageToggle';
 import { subjectIcon } from '@/shared/lib/subjectIcon';
+import { SUBJECTS, SUBJECT_REGISTRY } from '@/shared/lib/subjects';
 import './Header.css';
 
 export default function Header() {
@@ -28,18 +29,16 @@ export default function Header() {
           className={`header-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}
           id="header-nav"
         >
-          <Link to="/subject/physics" className="nav-link nav-physics">
-            <span className="nav-icon">{subjectIcon('physics')}</span>
-            {t('nav.physics')}
-          </Link>
-          <Link to="/subject/chemistry" className="nav-link nav-chemistry">
-            <span className="nav-icon">{subjectIcon('chemistry')}</span>
-            {t('nav.chemistry')}
-          </Link>
-          <Link to="/subject/biology" className="nav-link nav-biology">
-            <span className="nav-icon">{subjectIcon('biology')}</span>
-            {t('nav.biology')}
-          </Link>
+          {SUBJECTS.map((s) => (
+            <Link
+              key={s}
+              to={SUBJECT_REGISTRY[s].route}
+              className={`nav-link nav-${s}`}
+            >
+              <span className="nav-icon">{subjectIcon(s)}</span>
+              {t(SUBJECT_REGISTRY[s].navKey)}
+            </Link>
+          ))}
           <div className="nav-divider"></div>
           <Link to="/theory" className="nav-link">
             <span className="nav-icon">📖</span>

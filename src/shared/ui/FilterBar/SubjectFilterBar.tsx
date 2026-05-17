@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { SUBJECTS } from '@/shared/lib/subjects';
 
-const SUBJECT_FILTERS = ['all', 'physics', 'chemistry', 'biology'];
+const SUBJECT_FILTERS = ['all', ...SUBJECTS];
 
 interface SubjectFilterBarProps {
   value: string;

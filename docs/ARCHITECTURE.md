@@ -112,7 +112,8 @@ src/
 │   │                            #   content · graph · search · recommendations,
 │   │                            #   re-exported by a thin domain.ts barrel
 │   ├── lib/                     #   pure utils: env, pickLang, katex, navigation,
-│   │                            #   subjectColor, subjectIcon, mergeById, … (+ tests)
+│   │                            #   subjects (registry), subjectColor/Icon,
+│   │                            #   mergeById, … (+ tests)
 │   ├── hooks/                   #   generic hooks: useLocalized, useClickOutside, …
 │   ├── ui/                      #   presentation primitives: Latex, Breadcrumb,
 │   │                            #   LoadingSkeleton, FilterBar, Markdown, ErrorBoundary
@@ -289,9 +290,16 @@ rather than control flow:
   branch. Two mechanisms, with *different* safety guarantees — stated
   precisely rather than conflated:
   - **Keyed maps over a discriminant** (`ITEM_FORMATTERS`,
-    `FALLBACK_RENDERERS`, `subjectIcon`, `subjectColor`, `SUBJECT_DATA`):
-    typed as `Record<K, …>` / a mapped type, so an omitted case is a
-    **compile error**. These are closed-by-construction.
+    `FALLBACK_RENDERERS`, `SUBJECT_REGISTRY`, `subjectIcon`,
+    `subjectColor`, `SUBJECT_DATA`): typed as `Record<K, …>` / a mapped
+    type, so an omitted case is a **compile error**. These are
+    closed-by-construction. The subject set in particular is now a
+    *single* `SUBJECT_REGISTRY` in `shared/lib/subjects.ts` — nav,
+    footer, home grid, filter pills, icon/colour, free-text detection
+    and catalog aggregation all derive from it instead of re-declaring
+    `['physics','chemistry','biology']` in ~7 files. Even the canonical
+    *ordered* `SUBJECTS` list carries a compile-time exhaustiveness
+    guard, so iteration order is closed too, not just keyed lookup.
   - **Ordered registries** (the `createResponders()` chain, the
     `SearchCorpusSource` / `InteractionsSource` arrays): open for
     extension by appending an entry, but completeness is **convention,

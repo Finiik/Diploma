@@ -15,6 +15,7 @@ import {
   biologyData,
   getAllFormulas as getBioFormulas
 } from '@/features/formulas/data/biology';
+import { SUBJECTS } from '@/shared/lib/subjects';
 import type {
   ComputableFormula,
   Subject,
@@ -32,13 +33,26 @@ import type {
  */
 export type SubjectFormula = ComputableFormula & { subject: Subject };
 
-/** Every formula across all subjects (each tagged with its `subject`). */
+/**
+ * Subject → its per-dataset formula accessor. `Record<Subject,…>`, so an
+ * added subject without an entry is a compile error (Open/Closed).
+ */
+const SUBJECT_FORMULAS: Record<Subject, () => ComputableFormula[]> = {
+  physics: getPhysFormulas,
+  chemistry: getChemFormulas,
+  biology: getBioFormulas
+};
+
+/**
+ * Every formula across all subjects, in canonical `SUBJECTS` order, each
+ * explicitly tagged with its `subject`. The spread *constructs* the tagged
+ * shape, so this needs no `as SubjectFormula[]` cast — the invariant is
+ * proven by the type, not asserted.
+ */
 export function getAllFormulas(): SubjectFormula[] {
-  return [
-    ...getPhysFormulas(),
-    ...getChemFormulas(),
-    ...getBioFormulas()
-  ] as SubjectFormula[];
+  return SUBJECTS.flatMap((s) =>
+    SUBJECT_FORMULAS[s]().map((f) => ({ ...f, subject: s }))
+  );
 }
 
 /** Single source of the subject → full dataset mapping. */

@@ -3,6 +3,7 @@
    ============================================ */
 
 import type { Subject } from '@/shared/types/domain';
+import { SUBJECTS, SUBJECT_REGISTRY } from '@/shared/lib/subjects';
 
 export function detectHelpIntent(query: string): boolean {
   return /(?:допомог[аи]|help|що ти (?:вмієш|можеш|знаєш)|what can you|можливості|capabilities|як (?:користуватись|працюєш|працює)|how (?:do you work|to use)|menu|меню|інструкція|instructions)/i.test(
@@ -23,8 +24,5 @@ export function detectThanksIntent(query: string): boolean {
 }
 
 export function detectSubjectIntent(query: string): Subject | null {
-  if (/(?:фізик|physic)/i.test(query)) return 'physics';
-  if (/(?:хім|chem)/i.test(query)) return 'chemistry';
-  if (/(?:біолог|bio)/i.test(query)) return 'biology';
-  return null;
+  return SUBJECTS.find((s) => SUBJECT_REGISTRY[s].pattern.test(query)) ?? null;
 }

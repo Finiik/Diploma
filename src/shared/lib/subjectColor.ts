@@ -1,13 +1,9 @@
 import type { Subject } from '@/shared/types/domain';
+import { SUBJECT_REGISTRY } from '@/shared/lib/subjects';
 
-/** Subject → its CSS color custom-property. Exhaustive over `Subject`,
-    so a new subject is a compile error here rather than a silent default. */
-const SUBJECT_COLOR: Record<Subject, string> = {
-  physics: 'var(--color-physics)',
-  chemistry: 'var(--color-chemistry)',
-  biology: 'var(--color-biology)'
-};
-
+/** Subject → its CSS color custom-property. Reads the single
+    SUBJECT_REGISTRY, which is `Record<Subject,…>` so a new subject is a
+    compile error rather than a silent default. */
 export function subjectColor(subject: Subject): string {
-  return SUBJECT_COLOR[subject];
+  return SUBJECT_REGISTRY[subject].color;
 }
