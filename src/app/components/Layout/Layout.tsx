@@ -1,6 +1,6 @@
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import { useEffect } from 'react';
-import Header from '@/components/Header/Header';
+import Header from '@/app/components/Header/Header';
 import { AIAssistant } from '@/features/assistant';
 import './Layout.css';
 import { useTranslation } from 'react-i18next';

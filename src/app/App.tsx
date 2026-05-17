@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Layout from '@/components/Layout/Layout';
+import Layout from '@/app/components/Layout/Layout';
 import ErrorBoundary from '@/shared/ui/ErrorBoundary/ErrorBoundary';
 import { Home } from '@/features/recommendations';
 import { Subject, FormulaDetail } from '@/features/formulas';
