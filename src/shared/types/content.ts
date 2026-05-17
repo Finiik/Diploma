@@ -23,8 +23,14 @@ export interface FormulaVariable {
   defaultValue?: number;
 }
 
-/** A single formula with its interactive calculator metadata. */
-export interface Formula {
+/**
+ * The pure, serializable shape of a formula: identity, presentation and
+ * cross-links. This is all a *display* consumer (search, the knowledge
+ * graph, recommendations, the formula card) ever needs — it deliberately
+ * carries no executable member, so those modules do not depend on the
+ * calculator contract (Interface Segregation).
+ */
+export interface FormulaMeta {
   id: string;
   name: string;
   nameEn: string;
@@ -32,14 +38,6 @@ export interface Formula {
   description: string;
   descriptionEn: string;
   variables: FormulaVariable[];
-  /**
-   * Pure calculator function. Most formulas return a single number; a few
-   * (e.g. Hardy-Weinberg, dihybrid cross) return several labelled results.
-   */
-  compute: (values: Record<string, number>) => number | Record<string, number>;
-  resultVar: string;
-  /** True when `compute` returns several labelled results instead of one. */
-  multiResult?: boolean;
   topic: string;
   subtopic: string;
   /** Cross-links that become knowledge-graph edges. */
@@ -49,11 +47,35 @@ export interface Formula {
   subject?: Subject;
 }
 
+/**
+ * A formula plus its interactive calculator contract. Only the calculator
+ * feature (and the catalog datasets that define `compute`) depend on this
+ * fatter shape; every other consumer narrows to {@link FormulaMeta}.
+ */
+export interface ComputableFormula extends FormulaMeta {
+  /**
+   * Pure calculator function. Most formulas return a single number; a few
+   * (e.g. Hardy-Weinberg, dihybrid cross) return several labelled results.
+   */
+  compute: (values: Record<string, number>) => number | Record<string, number>;
+  resultVar: string;
+  /** True when `compute` returns several labelled results instead of one. */
+  multiResult?: boolean;
+}
+
+/**
+ * @deprecated Use {@link FormulaMeta} for display or {@link ComputableFormula}
+ * where the calculator contract is required. Retained as a non-breaking alias
+ * so the catalog datasets and legacy imports keep compiling (same
+ * compat-shim approach as the `domain.ts` barrel).
+ */
+export type Formula = ComputableFormula;
+
 export interface Subtopic {
   id: string;
   name: string;
   nameEn: string;
-  formulas: Formula[];
+  formulas: ComputableFormula[];
 }
 
 export interface Topic {

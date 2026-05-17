@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
-import type { Formula } from '@/shared/types/domain';
+import type { FormulaMeta } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import Latex from '@/shared/ui/Latex/Latex';
 import './FormulaCard.css';
@@ -12,7 +12,8 @@ const BOOKMARK_KEY: Record<'true' | 'false', string> = {
 };
 
 interface FormulaCardProps {
-  formula: Formula;
+  /** Display-only: the card shows name/latex/description, never computes. */
+  formula: FormulaMeta;
 }
 
 export default function FormulaCard({ formula }: FormulaCardProps) {

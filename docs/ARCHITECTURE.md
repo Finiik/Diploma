@@ -238,7 +238,7 @@ It is now split under `src/shared/types/`:
 
 | Module | Owns |
 |---|---|
-| `content.ts` | `Subject`, `Formula`, `Topic`, `SubjectData`, `TheoryItem`, `ProblemItem`, … |
+| `content.ts` | `Subject`, `FormulaMeta`, `ComputableFormula`, `Topic`, `SubjectData`, `TheoryItem`, `ProblemItem`, … |
 | `graph.ts` | `GraphItem`, `Concept`, `SubjectOutline`, `CourseGraph` |
 | `search.ts` | `SearchHit` |
 | `recommendations.ts` | `Interaction`, `InteractionsByUser`, `Recommendation` |
@@ -293,7 +293,16 @@ rather than control flow:
   intentionally asymmetric interfaces (`LocalBookmarkStore` sync cache vs.
   `RemoteBookmarkStore` async per-user sync target) so the contract is
   visible rather than implied; the domain types are segregated per context
-  (§6.3).
+  (§6.3). The formula type is split the same way: `FormulaMeta` is the
+  pure, serializable display shape (all search / graph / recommendations /
+  `FormulaCard` consumers narrow to it), while `ComputableFormula =
+  FormulaMeta & { compute; resultVar; multiResult }` adds the calculator
+  contract and is depended on only by the calculator feature and the
+  catalog datasets that define `compute`. `GraphItem` (hence `SearchHit`,
+  `CourseGraph.byId`) therefore carries no executable member and stays
+  serializable. `Formula` remains as a `@deprecated` alias of
+  `ComputableFormula` so the change was zero-behaviour and non-breaking
+  (same compat-shim discipline as the `domain.ts` barrel, §6.3).
 - **Dependency Inversion.** Side-effecting boundaries sit behind injectable
   interfaces: `GeminiTransport` (network + `isConfigured()`),
   `SearchCorpusSource`, `InteractionsSource`. High-level orchestrators

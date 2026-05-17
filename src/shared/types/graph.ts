@@ -4,11 +4,16 @@
    data; items are content tagged with a discriminant.
    ============================================ */
 
-import type { Formula, ProblemItem, Subject, TheoryItem } from './content';
+import type { FormulaMeta, ProblemItem, Subject, TheoryItem } from './content';
 
-/** A content item indexed in the graph, tagged with its discriminant. */
+/**
+ * A content item indexed in the graph, tagged with its discriminant. The
+ * formula arm is {@link FormulaMeta}, not the computable shape: the graph /
+ * RAG / search path only ever displays formulas, never runs `compute`, so
+ * `GraphItem` (and thus `SearchHit`, `CourseGraph.byId`) stays serializable.
+ */
 export type GraphItem =
-  | (Formula & { type: 'formula'; subject: Subject })
+  | (FormulaMeta & { type: 'formula'; subject: Subject })
   | (TheoryItem & { type: 'theory' })
   | (ProblemItem & { type: 'problem' });
 

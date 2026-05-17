@@ -2,7 +2,7 @@
    Pure calculator domain logic (no React, no i18n)
    ============================================ */
 
-import type { Formula, FormulaVariable } from '@/shared/types/domain';
+import type { ComputableFormula, FormulaVariable } from '@/shared/types/domain';
 
 /** Field values: numeric defaults or raw `<input>` strings. */
 export type CalcValues = Record<string, string | number>;
@@ -21,7 +21,7 @@ export type CalcOutcome =
  * variable failed (not a message) so the component can localize it.
  */
 export function runCalculation(
-  formula: Formula,
+  formula: ComputableFormula,
   values: CalcValues
 ): CalcOutcome {
   const inputVars = formula.variables.filter((v) => v.type === 'input');

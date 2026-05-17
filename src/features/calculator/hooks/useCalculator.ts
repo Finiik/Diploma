@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Formula } from '@/shared/types/domain';
+import type { ComputableFormula } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import {
   runCalculation,
@@ -13,7 +13,7 @@ import {
  * `runCalculation` to localized error messages. The component stays
  * presentational.
  */
-export function useCalculator(formula: Formula) {
+export function useCalculator(formula: ComputableFormula) {
   const { t } = useTranslation();
   const tr = useLocalized();
 

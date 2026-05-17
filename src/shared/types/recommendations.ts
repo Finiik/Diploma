@@ -3,7 +3,7 @@
    by the collaborative filter.
    ============================================ */
 
-import type { Formula, Subject } from './content';
+import type { FormulaMeta, Subject } from './content';
 
 /** A user→item interaction tally used by the collaborative filter. */
 export interface Interaction {
@@ -15,5 +15,5 @@ export interface Interaction {
 /** userId → (formulaId → interaction). */
 export type InteractionsByUser = Record<string, Record<string, Interaction>>;
 
-/** A recommended formula (carries its stamped subject). */
-export type Recommendation = Formula & { subject: Subject };
+/** A recommended formula (display-only, carries its stamped subject). */
+export type Recommendation = FormulaMeta & { subject: Subject };

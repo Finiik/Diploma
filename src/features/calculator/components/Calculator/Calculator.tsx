@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { Formula } from '@/shared/types/domain';
+import type { ComputableFormula } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useCalculator } from '@/features/calculator/hooks/useCalculator';
 import Latex from '@/shared/ui/Latex/Latex';
@@ -8,7 +8,7 @@ import CalcResult from './CalcResult';
 import './Calculator.css';
 
 interface CalculatorProps {
-  formula: Formula;
+  formula: ComputableFormula;
 }
 
 export default function Calculator({ formula }: CalculatorProps) {

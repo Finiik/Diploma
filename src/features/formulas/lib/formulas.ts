@@ -16,7 +16,7 @@ import {
   getAllFormulas as getBioFormulas
 } from '@/features/formulas/data/biology';
 import type {
-  Formula,
+  ComputableFormula,
   Subject,
   SubjectData,
   Subtopic,
@@ -26,9 +26,11 @@ import type {
 /**
  * A formula guaranteed to carry its `subject`. The per-subject data modules
  * always tag formulas (`{ ...formula, subject: 'physics' }`), so the optional
- * `Formula.subject` is in fact always present once aggregated here.
+ * `FormulaMeta.subject` is in fact always present once aggregated here. It
+ * stays {@link ComputableFormula} because the catalog feeds the calculator
+ * (FormulaDetail → Calculator) downstream of these accessors.
  */
-export type SubjectFormula = Formula & { subject: Subject };
+export type SubjectFormula = ComputableFormula & { subject: Subject };
 
 /** Every formula across all subjects (each tagged with its `subject`). */
 export function getAllFormulas(): SubjectFormula[] {
