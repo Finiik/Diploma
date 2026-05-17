@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { search } from '@/services/search';
+import { search } from '@/features/search/services/search';
 import type { SearchHit, ContentType, Subject } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useClickOutside } from '@/shared/hooks/useClickOutside';

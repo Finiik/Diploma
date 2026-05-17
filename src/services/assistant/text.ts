@@ -3,7 +3,7 @@
    Intent stripping, tolerant concept matching, fuzzy search.
    ============================================ */
 
-import { search } from '@/services/search';
+import { search } from '@/features/search';
 import type { SearchHit } from '@/shared/types/domain';
 
 // Intent words to strip before searching

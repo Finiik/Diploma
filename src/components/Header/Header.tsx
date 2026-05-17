@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useBodyScrollLock } from '@/shared/hooks/useBodyScrollLock';
-import SearchBar from '@/components/SearchBar/SearchBar';
+import { SearchBar } from '@/features/search';
 import './Header.css';
 
 const THEME_TITLE_KEY: Record<string, string> = {
