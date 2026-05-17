@@ -10,7 +10,39 @@ import {
   getAllChemistryFormulas as getAllChemFormulas,
   getAllBiologyFormulas as getAllBioFormulas
 } from '@/features/formulas';
+import { theoryData } from '@/features/theory';
+import { problemsData } from '@/features/problems';
 import type { Formula, Subject } from '@/shared/types/domain';
+
+/** Platform-wide content tallies. */
+export interface PlatformStats {
+  /** Total formulas across all subjects. */
+  formulas: number;
+  theory: number;
+  problems: number;
+  /** Per-subject formula counts (`Record<Subject,…>` — exhaustive). */
+  byKind: Record<Subject, number>;
+}
+
+/**
+ * The single source of truth for "how much content the platform has".
+ * `greeting`/`help`/`list` each recomputed these counts a *different* way
+ * (flat concat vs. three separate getters); now they all read this, so
+ * the total can't diverge from the per-subject breakdown.
+ */
+export function platformStats(): PlatformStats {
+  const byKind: Record<Subject, number> = {
+    physics: getAllFormulas().length,
+    chemistry: getAllChemFormulas().length,
+    biology: getAllBioFormulas().length
+  };
+  return {
+    formulas: byKind.physics + byKind.chemistry + byKind.biology,
+    theory: theoryData.length,
+    problems: problemsData.length,
+    byKind
+  };
+}
 
 export function getAllFormulasFlat(): Formula[] {
   return [...getAllFormulas(), ...getAllChemFormulas(), ...getAllBioFormulas()];

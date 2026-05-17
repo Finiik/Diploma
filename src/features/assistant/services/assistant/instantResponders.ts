@@ -10,15 +10,8 @@
    responders.ts.
    ============================================ */
 
-import { theoryData } from '@/features/theory';
-import { problemsData } from '@/features/problems';
 import {
-  getAllPhysicsFormulas as getAllFormulas,
-  getAllChemistryFormulas as getAllChemFormulas,
-  getAllBiologyFormulas as getAllBioFormulas
-} from '@/features/formulas';
-import {
-  getAllFormulasFlat,
+  platformStats,
   formulasBySubject,
   getSubjectEmoji,
   getSubjectLabel
@@ -40,11 +33,11 @@ const GREETING_RE =
 
 export function greeting(query: string, isUk: boolean): ResponderResult | null {
   if (!GREETING_RE.test(query)) return null;
-  const allFormulas = getAllFormulasFlat();
+  const s = platformStats();
   return {
     text: isUk
-      ? `👋 Привіт! Я — **SciLearn AI** на базі Google Gemini. Я знаю всі ${allFormulas.length} формул, ${theoryData.length} теоретичних статей та ${problemsData.length} задач на платформі. Запитуйте що завгодно!`
-      : `👋 Hi! I'm **SciLearn AI** powered by Google Gemini. I know all ${allFormulas.length} formulas, ${theoryData.length} theory articles, and ${problemsData.length} problems on the platform. Ask me anything!`,
+      ? `👋 Привіт! Я — **SciLearn AI** на базі Google Gemini. Я знаю всі ${s.formulas} формул, ${s.theory} теоретичних статей та ${s.problems} задач на платформі. Запитуйте що завгодно!`
+      : `👋 Hi! I'm **SciLearn AI** powered by Google Gemini. I know all ${s.formulas} formulas, ${s.theory} theory articles, and ${s.problems} problems on the platform. Ask me anything!`,
     suggestions: isUk
       ? ['Поясни закон Ома', 'Як обчислити pH?', 'Що таке E=mc²?']
       : ["Explain Ohm's law", 'How to calculate pH?', 'What is E=mc²?']
@@ -53,11 +46,11 @@ export function greeting(query: string, isUk: boolean): ResponderResult | null {
 
 export function help(query: string, isUk: boolean): ResponderResult | null {
   if (!detectHelpIntent(query)) return null;
-  const allFormulas = getAllFormulasFlat();
+  const s = platformStats();
   return {
     text: isUk
-      ? `🤖 Ось що я вмію:\n\n• **Формули** — знайду будь-яку з ${allFormulas.length} формул та поясню її\n• **Теорія** — розкажу про теоретичні матеріали (${theoryData.length} статей)\n• **Задачі** — допоможу знайти приклади розв'язків (${problemsData.length} задач)\n• **Калькулятор** — підкажу, де обчислити значення\n\nПросто напишіть назву формули, теми або запитання!`
-      : `🤖 Here's what I can do:\n\n• **Formulas** — find any of ${allFormulas.length} formulas and explain them\n• **Theory** — explain theoretical materials (${theoryData.length} articles)\n• **Problems** — help find example solutions (${problemsData.length} problems)\n• **Calculator** — point you to the right calculator\n\nJust type a formula name, topic, or question!`,
+      ? `🤖 Ось що я вмію:\n\n• **Формули** — знайду будь-яку з ${s.formulas} формул та поясню її\n• **Теорія** — розкажу про теоретичні матеріали (${s.theory} статей)\n• **Задачі** — допоможу знайти приклади розв'язків (${s.problems} задач)\n• **Калькулятор** — підкажу, де обчислити значення\n\nПросто напишіть назву формули, теми або запитання!`
+      : `🤖 Here's what I can do:\n\n• **Formulas** — find any of ${s.formulas} formulas and explain them\n• **Theory** — explain theoretical materials (${s.theory} articles)\n• **Problems** — help find example solutions (${s.problems} problems)\n• **Calculator** — point you to the right calculator\n\nJust type a formula name, topic, or question!`,
     suggestions: isUk
       ? ['Закон Ома', 'Що таке pH?', 'Задачі з біології']
       : ["Ohm's law", 'What is pH?', 'Biology problems']
@@ -98,10 +91,11 @@ export function list(query: string, isUk: boolean): ResponderResult | null {
     };
   }
 
+  const s = platformStats();
   return {
     text: isUk
-      ? `📊 На платформі доступно:\n\n• ⚛️ Фізика — ${getAllFormulas().length} формул\n• 🧪 Хімія — ${getAllChemFormulas().length} формул\n• 🧬 Біологія — ${getAllBioFormulas().length} формул\n• 📖 ${theoryData.length} теоретичних статей\n• 📝 ${problemsData.length} прикладів задач\n\nОберіть предмет для деталей!`
-      : `📊 Available on the platform:\n\n• ⚛️ Physics — ${getAllFormulas().length} formulas\n• 🧪 Chemistry — ${getAllChemFormulas().length} formulas\n• 🧬 Biology — ${getAllBioFormulas().length} formulas\n• 📖 ${theoryData.length} theory articles\n• 📝 ${problemsData.length} problem examples\n\nPick a subject for details!`,
+      ? `📊 На платформі доступно:\n\n• ⚛️ Фізика — ${s.byKind.physics} формул\n• 🧪 Хімія — ${s.byKind.chemistry} формул\n• 🧬 Біологія — ${s.byKind.biology} формул\n• 📖 ${s.theory} теоретичних статей\n• 📝 ${s.problems} прикладів задач\n\nОберіть предмет для деталей!`
+      : `📊 Available on the platform:\n\n• ⚛️ Physics — ${s.byKind.physics} formulas\n• 🧪 Chemistry — ${s.byKind.chemistry} formulas\n• 🧬 Biology — ${s.byKind.biology} formulas\n• 📖 ${s.theory} theory articles\n• 📝 ${s.problems} problem examples\n\nPick a subject for details!`,
     suggestions: isUk
       ? ['Формули фізики', 'Формули хімії', 'Формули біології']
       : ['Physics formulas', 'Chemistry formulas', 'Biology formulas']

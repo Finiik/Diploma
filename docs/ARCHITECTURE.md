@@ -286,7 +286,10 @@ rather than control flow:
   the seam: the search service → an encapsulated `SearchIndex` + a
   swappable corpus-source registry + hit-mapping; the recommender → a thin
   pipeline over pure CF helpers in `lib/`; the assistant responder file →
-  chain wiring vs. `instantResponders` content; the Gemini prompt context →
+  chain wiring vs. `instantResponders` content (whose three responders no
+  longer each recompute the platform tallies a different way — they read
+  one `platformStats()` selector, so the total can't drift from the
+  per-subject breakdown); the Gemini prompt context →
   static catalog (`promptContext`) vs. per-query retrieval (`ragContext`);
   `Home` → `SubjectsGrid` + `RecommendationsFeed`; and `buildCourseGraph`
   (a 127-line procedure hard-bound to five concrete datasets) → a pure
