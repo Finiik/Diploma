@@ -4,7 +4,7 @@ import {
   initTheme,
   toggleTheme as toggleThemeService,
   setTheme as setThemeService
-} from '@/services/theme';
+} from '@/features/theme/services/theme';
 
 type ThemeContextValue = { theme: string; toggleTheme: () => void };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/features/theme';
 import { useBodyScrollLock } from '@/shared/hooks/useBodyScrollLock';
 import { SearchBar } from '@/features/search';
 import './Header.css';
