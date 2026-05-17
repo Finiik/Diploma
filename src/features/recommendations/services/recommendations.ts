@@ -11,6 +11,13 @@ import type {
   InteractionsByUser
 } from '@/shared/types/domain';
 import { isFirebaseConfigured } from '@/shared/lib/env';
+import {
+  DEFAULT_RECOMMENDATION_COUNT,
+  INTERACTION_WEIGHTS,
+  SIMILAR_USERS_NEIGHBOURHOOD,
+  FIREBASE_READ_TIMEOUT_MS,
+  LOCAL_INTERACTIONS_STORAGE_KEY
+} from '@/features/recommendations/lib/constants';
 
 // Pre-seeded demo users for initial recommendations
 const DEMO_INTERACTIONS: InteractionsByUser = {
@@ -54,9 +61,9 @@ const DEMO_INTERACTIONS: InteractionsByUser = {
 function interactionScore(interaction: Interaction | undefined): number {
   if (!interaction) return 0;
   return (
-    (interaction.views || 0) * 1 +
-    (interaction.calculations || 0) * 3 +
-    (interaction.bookmarks || 0) * 5
+    (interaction.views || 0) * INTERACTION_WEIGHTS.view +
+    (interaction.calculations || 0) * INTERACTION_WEIGHTS.calculation +
+    (interaction.bookmarks || 0) * INTERACTION_WEIGHTS.bookmark
   );
 }
 
@@ -84,7 +91,7 @@ function cosineSimilarity(a: number[], b: number[]): number {
 
 export async function getRecommendations(
   userId: string | null | undefined,
-  topN = 6
+  topN = DEFAULT_RECOMMENDATION_COUNT
 ): Promise<Formula[]> {
   const allFormulas = getAllFormulas();
   const allFormulaIds = allFormulas.map((f) => f.id);
@@ -101,7 +108,10 @@ export async function getRecommendations(
       // Add a timeout so we don't block the UI
       const firebasePromise = getAllInteractions();
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Firebase timeout')), 2000)
+        setTimeout(
+          () => reject(new Error('Firebase timeout')),
+          FIREBASE_READ_TIMEOUT_MS
+        )
       );
       const firebaseInteractions = (await Promise.race([
         firebasePromise,
@@ -124,7 +134,7 @@ export async function getRecommendations(
     // Check localStorage for local user interactions
     try {
       const local = JSON.parse(
-        localStorage.getItem('userInteractions') || '{}'
+        localStorage.getItem(LOCAL_INTERACTIONS_STORAGE_KEY) || '{}'
       ) as Record<string, Interaction>;
       userInteractions = local;
     } catch {
@@ -160,7 +170,7 @@ export async function getRecommendations(
   }
 
   similarities.sort((a, b) => b.similarity - a.similarity);
-  const topSimilar = similarities.slice(0, 5);
+  const topSimilar = similarities.slice(0, SIMILAR_USERS_NEIGHBOURHOOD);
 
   // Aggregate weighted scores from similar users
   const formulaScores: Record<string, number> = {};

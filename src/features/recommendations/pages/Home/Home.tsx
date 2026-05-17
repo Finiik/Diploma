@@ -5,6 +5,7 @@ import { getRecommendations } from '@/features/recommendations/services/recommen
 import { FormulaCard } from '@/features/formulas';
 import { SkeletonGrid } from '@/shared/ui/LoadingSkeleton/LoadingSkeleton';
 import { useAsyncResource } from '@/shared/hooks/useAsyncResource';
+import { DEFAULT_RECOMMENDATION_COUNT } from '@/features/recommendations/lib/constants';
 import type { Formula } from '@/shared/types/domain';
 import './Home.css';
 
@@ -19,7 +20,11 @@ export default function Home() {
   const { user } = useAuth();
   const { data: recommendations, loading: recsLoading } = useAsyncResource<
     Formula[]
-  >(() => getRecommendations(user?.uid, 6), [user], []);
+  >(
+    () => getRecommendations(user?.uid, DEFAULT_RECOMMENDATION_COUNT),
+    [user],
+    []
+  );
 
   return (
     <div className="home-page">
@@ -64,7 +69,7 @@ export default function Home() {
         <div className="container">
           <h2 className="section-title">{t('home.recommended')}</h2>
           {recsLoading ? (
-            <SkeletonGrid count={3} />
+            <SkeletonGrid count={DEFAULT_RECOMMENDATION_COUNT} />
           ) : recommendations.length > 0 ? (
             <div className="formulas-grid">
               {recommendations.map((formula) => (
