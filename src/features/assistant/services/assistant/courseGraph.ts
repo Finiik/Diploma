@@ -28,8 +28,10 @@ import type {
   Concept,
   CourseGraph,
   GraphItem,
+  ProblemItem,
   Subject,
-  SubjectData
+  SubjectData,
+  TheoryItem
 } from '@/shared/types/domain';
 
 // Concept under construction: itemIds is a Set while we accumulate, then
@@ -42,55 +44,46 @@ interface ConceptBuilder {
   itemIds: Set<string>;
 }
 
-let _graph: CourseGraph | null = null;
-export function buildCourseGraph(): CourseGraph {
-  if (_graph) return _graph;
+/**
+ * The raw inputs the graph is assembled from, decoupled from where they
+ * come from. `buildCourseGraph()` wires the real `@/features/*` datasets;
+ * a test can pass a small fixture (Dependency Inversion — `assembleGraph`
+ * is pure and no longer hard-bound to the whole course corpus).
+ */
+export interface GraphSubjectSource {
+  key: Subject;
+  data: SubjectData;
+  /** This subject's formulas, already tagged `type:'formula'` + subject. */
+  formulas: GraphItem[];
+}
+export interface GraphSource {
+  subjects: GraphSubjectSource[];
+  theory: TheoryItem[];
+  problems: ProblemItem[];
+}
 
-  const subjects: { key: Subject; data: SubjectData; list: GraphItem[] }[] = [
-    {
-      key: 'physics',
-      data: physicsData,
-      list: getAllFormulas().map((f) => ({
-        ...f,
-        type: 'formula' as const,
-        subject: 'physics' as const
-      }))
-    },
-    {
-      key: 'chemistry',
-      data: chemistryData,
-      list: getAllChemFormulas().map((f) => ({
-        ...f,
-        type: 'formula' as const,
-        subject: 'chemistry' as const
-      }))
-    },
-    {
-      key: 'biology',
-      data: biologyData,
-      list: getAllBioFormulas().map((f) => ({
-        ...f,
-        type: 'formula' as const,
-        subject: 'biology' as const
-      }))
-    }
-  ];
-
-  // 1. Flat index of every platform item by id.
+// 1. Flat index of every platform item by id (formulas, then theory, then
+//    problems — insertion order preserved; ids are disjoint).
+function indexById(source: GraphSource): Record<string, GraphItem> {
   const byId: Record<string, GraphItem> = {};
-  subjects.forEach(({ list }) =>
-    list.forEach((f) => {
+  source.subjects.forEach(({ formulas }) =>
+    formulas.forEach((f) => {
       byId[f.id] = f;
     })
   );
-  theoryData.forEach((t) => {
+  source.theory.forEach((t) => {
     byId[t.id] = { ...t, type: 'theory' as const };
   });
-  problemsData.forEach((p) => {
+  source.problems.forEach((p) => {
     byId[p.id] = { ...p, type: 'problem' as const };
   });
+  return byId;
+}
 
-  // 2. Undirected relationship edges from the data's own cross-links.
+// 2. Undirected relationship edges from the data's own cross-links.
+function deriveEdges(
+  byId: Record<string, GraphItem>
+): Record<string, Set<string>> {
   const edges: Record<string, Set<string>> = {};
   const link = (a: string | undefined, b: string | undefined) => {
     if (!a || !b || a === b || !byId[a] || !byId[b]) return;
@@ -106,10 +99,13 @@ export function buildCourseGraph(): CourseGraph {
     (related || []).forEach((id) => link(item.id, id));
     if (relatedOne) link(item.id, relatedOne);
   });
+  return edges;
+}
 
-  // 3. Concept index: every topic and subtopic name (uk + en) is a concept
-  //    that owns the items living under it. Theory/problems attach to the
-  //    concept whose label matches their declared topic.
+// 3. Concept index: every topic and subtopic name (uk + en) is a concept
+//    that owns the items living under it. Theory/problems attach to the
+//    concept whose label matches their declared topic.
+function buildConcepts(source: GraphSource): Concept[] {
   const concepts: ConceptBuilder[] = [];
   const addConcept = (
     label: string,
@@ -125,7 +121,7 @@ export function buildCourseGraph(): CourseGraph {
     concepts.push(c);
     return c;
   };
-  subjects.forEach(({ key, data }) => {
+  source.subjects.forEach(({ key, data }) => {
     (data.topics || []).forEach((topic) => {
       const tc = addConcept(topic.name, topic.nameEn, key);
       (topic.subtopics || []).forEach((sub) => {
@@ -141,20 +137,22 @@ export function buildCourseGraph(): CourseGraph {
   concepts.forEach((c) => {
     conceptByLabel[normalizeConcept(c.label)] = c;
   });
-  [...theoryData, ...problemsData].forEach((item) => {
+  [...source.theory, ...source.problems].forEach((item) => {
     const c = conceptByLabel[normalizeConcept(item.topic || '')];
     if (c) c.itemIds.add(item.id);
   });
-  const finalConcepts: Concept[] = concepts.map((c) => ({
+  return concepts.map((c) => ({
     label: c.label,
     labelEn: c.labelEn,
     subject: c.subject,
     keys: [c.label, c.labelEn].filter(Boolean).map(normalizeConcept),
     itemIds: [...c.itemIds]
   }));
+}
 
-  // 4. Per-subject topic → subtopic outline for the model prompt.
-  const outline = subjects.map(({ key, data }) => ({
+// 4. Per-subject topic → subtopic outline for the model prompt.
+function projectOutline(source: GraphSource): CourseGraph['outline'] {
+  return source.subjects.map(({ key, data }) => ({
     subject: key,
     label: data.name,
     labelEn: data.nameEn,
@@ -167,8 +165,69 @@ export function buildCourseGraph(): CourseGraph {
       }))
     }))
   }));
+}
 
-  _graph = { byId, edges, concepts: finalConcepts, outline };
+/**
+ * Pure: build the whole graph from an injected source. No module-level
+ * data, no memoization — unit-testable on a fixture in isolation.
+ */
+export function assembleGraph(source: GraphSource): CourseGraph {
+  const byId = indexById(source);
+  return {
+    byId,
+    edges: deriveEdges(byId),
+    concepts: buildConcepts(source),
+    outline: projectOutline(source)
+  };
+}
+
+/** Adapter: the real course datasets shaped into a {@link GraphSource}. */
+function realGraphSource(): GraphSource {
+  const subject = (
+    key: Subject,
+    data: SubjectData,
+    list: GraphItem[]
+  ): GraphSubjectSource => ({ key, data, formulas: list });
+  return {
+    subjects: [
+      subject(
+        'physics',
+        physicsData,
+        getAllFormulas().map((f) => ({
+          ...f,
+          type: 'formula' as const,
+          subject: 'physics' as const
+        }))
+      ),
+      subject(
+        'chemistry',
+        chemistryData,
+        getAllChemFormulas().map((f) => ({
+          ...f,
+          type: 'formula' as const,
+          subject: 'chemistry' as const
+        }))
+      ),
+      subject(
+        'biology',
+        biologyData,
+        getAllBioFormulas().map((f) => ({
+          ...f,
+          type: 'formula' as const,
+          subject: 'biology' as const
+        }))
+      )
+    ],
+    theory: theoryData,
+    problems: problemsData
+  };
+}
+
+// Thin memoizing wirer: assemble once from the real datasets, then cache.
+let _graph: CourseGraph | null = null;
+export function buildCourseGraph(): CourseGraph {
+  if (_graph) return _graph;
+  _graph = assembleGraph(realGraphSource());
   return _graph;
 }
 

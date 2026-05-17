@@ -5,7 +5,7 @@
 [![Built with React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9_strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite)](https://vitejs.dev/)
-[![Tests](https://img.shields.io/badge/Vitest-143_passing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Vitest-148_passing-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev/)
 [![Firebase](https://img.shields.io/badge/Firebase-11.x-FFCA28?logo=firebase)](https://firebase.google.com/)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-3.1_Flash--Lite-4285F4?logo=google)](https://ai.google.dev/)
 
@@ -98,7 +98,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 | **Language** | TypeScript 5.9 (`strict`) | Static typing across the entire codebase |
 | **Frontend** | React 19 | Component-based UI framework |
 | **Build** | Vite 6 | Lightning-fast dev server & bundler |
-| **Testing** | Vitest 4 + jsdom | Characterization + unit suite (143 tests) for the core logic |
+| **Testing** | Vitest 4 + jsdom | Characterization + unit suite (148 tests) for the core logic |
 | **Routing** | React Router DOM 7 | Client-side SPA navigation |
 | **Math** | KaTeX 0.16 | LaTeX formula rendering |
 | **Search** | Fuse.js 7 | Client-side fuzzy search |
@@ -110,7 +110,7 @@ The platform's unique differentiator is a **Gemini-powered AI assistant** that a
 ### Design Decisions
 - **Strict TypeScript, zero `any`** — the whole codebase compiles under `tsconfig` `strict: true` with no `any` and no `@ts-ignore`/`@ts-expect-error` in source; the domain model is split per bounded context under `src/shared/types/` (`content` / `graph` / `search` / `recommendations`) behind a thin `domain.ts` barrel, while the assistant responder-chain contract is feature-owned in `src/features/assistant/types.ts`
 - **SOLID, single-responsibility modules** — each module has one reason to change: data fetching, transformation and presentation are separated; type dispatch uses exhaustive lookup/strategy maps (not `if`/`switch` ladders); service boundaries (Gemini transport, bookmark/interaction/search corpus sources) sit behind injectable interfaces
-- **Behavior pinned by tests** — a 143-test Vitest suite (characterization + unit) locks the *observed* behavior of the algorithmic core, so refactors cannot silently change results (see [Testing](#-testing))
+- **Behavior pinned by tests** — a 148-test Vitest suite (characterization + unit) locks the *observed* behavior of the algorithmic core, so refactors cannot silently change results (see [Testing](#-testing))
 - **No CSS framework** — Custom design system with CSS custom properties for full control
 - **No external AI dependency** — Smart local fallback ensures the AI assistant works even without API
 - **Auto-derived concept graph (graph/keyword RAG)** — no hardcoded concept table; concepts/edges are computed from the course data itself, and the AI explains by synthesizing the connected materials. Covering a new topic in any subject is a pure content change, no engine code
@@ -238,7 +238,7 @@ SciLearn/
 ```
 
 > **Tests** are co-located with the unit they pin —
-> `src/features/*/__tests__/` and `src/shared/lib/__tests__/` — 143 Vitest
+> `src/features/*/__tests__/` and `src/shared/lib/__tests__/` — 148 Vitest
 > characterization + unit tests in total. See
 > [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the layering rules,
 > the public-API convention, and the rationale behind placing cross-cutting
@@ -302,10 +302,10 @@ VITE_GEMINI_THINKING=low          # minimal | low | medium | high
 
 ## 🧪 Testing
 
-The algorithmic core is covered by a **Vitest suite** — 143 characterization + unit tests that pin the *current, observed* behavior of the non-UI logic so refactors (the JS → TS migration and the later SOLID hardening pass) cannot silently change results.
+The algorithmic core is covered by a **Vitest suite** — 148 characterization + unit tests that pin the *current, observed* behavior of the non-UI logic so refactors (the JS → TS migration and the later SOLID hardening pass) cannot silently change results.
 
 ```bash
-npm test            # run the suite once (143 tests)
+npm test            # run the suite once (148 tests)
 npm run test:watch  # watch mode
 npm run typecheck   # tsc --noEmit (strict, must report 0 errors)
 ```
@@ -327,7 +327,7 @@ Suites are co-located with the unit they pin (`src/features/*/__tests__/`, `src/
 | `calculator/calculator.test.ts` | Pure calculator outcomes |
 | `shared/lib/*.test.ts` | env, katex, navigation, pickLang, symbol-tex utilities |
 
-Tests run in a `jsdom` environment (configured in `vite.config.js`) and deterministically force the offline paths: the assistant engine is exercised by **injecting a fake `GeminiTransport`** through its Dependency-Inversion seam (`processMessage(query, isUk, transport)`) rather than monkey-patching global `fetch`, and Firebase is gated off. The suite needs **no API keys and no network**. It is a behavioral contract: the TS migration and every SOLID refactor kept all 143 green at every commit, and `tsc --noEmit` reports zero errors under `strict: true`.
+Tests run in a `jsdom` environment (configured in `vite.config.js`) and deterministically force the offline paths: the assistant engine is exercised by **injecting a fake `GeminiTransport`** through its Dependency-Inversion seam (`processMessage(query, isUk, transport)`) rather than monkey-patching global `fetch`, and Firebase is gated off. The suite needs **no API keys and no network**. It is a behavioral contract: the TS migration and every SOLID refactor kept all 148 green at every commit, and `tsc --noEmit` reports zero errors under `strict: true`.
 
 ---
 
@@ -655,7 +655,7 @@ Step-by-step problem solutions with expandable sections, star difficulty ratings
 | `npm run build` | Create production build |
 | `npm run preview` | Preview production build locally |
 | `npm run typecheck` | Type-check the project (`tsc --noEmit`, strict) |
-| `npm test` | Run the Vitest suite once (143 tests) |
+| `npm test` | Run the Vitest suite once (148 tests) |
 | `npm run test:watch` | Run Vitest in watch mode |
 | `npm run deploy` | Build + deploy to Firebase Hosting |
 | `npm run deploy:rules` | Deploy Firestore security rules only |

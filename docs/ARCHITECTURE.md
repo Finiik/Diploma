@@ -284,7 +284,13 @@ rather than control flow:
   pipeline over pure CF helpers in `lib/`; the assistant responder file →
   chain wiring vs. `instantResponders` content; the Gemini prompt context →
   static catalog (`promptContext`) vs. per-query retrieval (`ragContext`);
-  `Home` → `SubjectsGrid` + `RecommendationsFeed`.
+  `Home` → `SubjectsGrid` + `RecommendationsFeed`; and `buildCourseGraph`
+  (a 127-line procedure hard-bound to five concrete datasets) → a pure
+  `assembleGraph(source: GraphSource)` composed of single-purpose helpers
+  (`indexById` · `deriveEdges` · `buildConcepts` · `projectOutline`) plus a
+  thin memoizing wirer that injects the real data. The algorithm is now
+  unit-tested on a hand-built fixture, not only against the whole corpus
+  (also a Dependency-Inversion fix — `GraphSource` is the injected port).
 - **Open/Closed.** Variant handling uses lookup/strategy data instead of
   `if`/`switch` ladders, so adding a case is a new entry, never an edited
   branch. Two mechanisms, with *different* safety guarantees — stated
@@ -352,7 +358,7 @@ two in the SOLID hardening pass; the claim is now uniform, not aspirational.)
 
 ## 7. Testing strategy
 
-143 Vitest tests (characterization + unit) run in `jsdom`. Tests are
+148 Vitest tests (characterization + unit) run in `jsdom`. Tests are
 **co-located with the unit they pin**:
 
 - `src/features/<name>/__tests__/…` for feature logic (formulas,
