@@ -2,10 +2,11 @@ import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Latex from '@/shared/ui/Latex/Latex';
-import { symbolToTex } from '@/shared/lib/symbol-tex';
 import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
 import { Calculator } from '@/features/calculator';
 import Breadcrumb from '@/shared/ui/Breadcrumb/Breadcrumb';
+import FormulaVariablesTable from '@/features/formulas/components/FormulaVariablesTable/FormulaVariablesTable';
+import DerivedFormulasGrid from '@/features/formulas/components/DerivedFormulasGrid/DerivedFormulasGrid';
 import {
   findFormulaById,
   findFormulasByIds,
@@ -78,38 +79,10 @@ export default function FormulaDetail() {
             <p>{tr(formula, 'description')}</p>
           </div>
 
-          <div className="formula-detail-vars">
-            <h2>{t('formula.variables')}</h2>
-            <div className="vars-table">
-              {formula.variables.map((v) => (
-                <div key={v.symbol} className="var-row">
-                  <Latex tex={symbolToTex(v.symbol)} className="var-symbol" />
-                  <span className="var-name">{tr(v, 'name')}</span>
-                  <span className="var-unit">{v.unit}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <FormulaVariablesTable variables={formula.variables} />
 
           {/* Derived formulas shown IMMEDIATELY */}
-          {derivedFormulas.length > 0 && (
-            <div className="derived-section">
-              <h2>{t('formula.derived')}</h2>
-              <div className="derived-grid">
-                {derivedFormulas.map((df) => (
-                  <Link
-                    key={df.id}
-                    to={`/formula/${df.id}`}
-                    className="derived-card"
-                    id={`derived-${df.id}`}
-                  >
-                    <span className="derived-name">{tr(df, 'name')}</span>
-                    <Latex tex={df.latex} className="derived-latex" />
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          <DerivedFormulasGrid formulas={derivedFormulas} />
 
           {/* Calculator */}
           <Calculator formula={formula} onCalculated={logCalculation} />

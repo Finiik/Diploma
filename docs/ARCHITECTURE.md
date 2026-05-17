@@ -214,13 +214,14 @@ it needs:
 | `formulas` | `data/` + `lib/` + `components/` + `pages/` |
 | `calculator` | `lib/` + `hooks/` + `components/` |
 | `assistant` | `components/` + `hooks/` + `lib/` + `services/` |
-| `theory` / `problems` | `data/` + `pages/` |
+| `theory` / `problems` | `data/` + `components/` + `pages/` |
 | `bookmarks` | `pages/` only (its state lives in `shared/bookmarks`) |
 
 So a `pages/` subfolder is the feature's **internal routing layer**, *not* a
-relapse to the old global `src/pages/`. `theory`/`problems` are thin because
-the capability genuinely *is* "a typed dataset + one filtered list screen";
-`bookmarks` is thin because its state was correctly hoisted to `shared`
+relapse to the old global `src/pages/`. `theory`/`problems` stay small —
+a typed dataset, one presentational card (`TheoryCard`/`ProblemCard`) and
+one filtered list screen that wires filters to it; `bookmarks` is thin
+because its state was correctly hoisted to `shared`
 (§6.1). Thinness here is **honest signal that the slice is small**, not an
 incomplete feature. Keeping the routable screen under `pages/<Name>/` (vs a
 bare `Name.tsx`) also keeps its co-located CSS and future `__tests__`
@@ -291,6 +292,13 @@ rather than control flow:
   thin memoizing wirer that injects the real data. The algorithm is now
   unit-tested on a hand-built fixture, not only against the whole corpus
   (also a Dependency-Inversion fix — `GraphSource` is the injected port).
+  The `Home` container/presentational discipline was then **propagated**
+  to the pages it had skipped: `Theory` → `TheoryCard`, `Problems` →
+  `ProblemCard`, `FormulaDetail` → `FormulaVariablesTable` +
+  `DerivedFormulasGrid`, so every routable screen is now filter/data
+  wiring delegating to presentational components, and the difficulty
+  scale lives once in `shared/lib/difficulty` instead of a badge map in
+  `Theory` diverging from a stars map in `Problems`.
 - **Open/Closed.** Variant handling uses lookup/strategy data instead of
   `if`/`switch` ladders, so adding a case is a new entry, never an edited
   branch. Two mechanisms, with *different* safety guarantees — stated
