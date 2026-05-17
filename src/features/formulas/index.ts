@@ -10,6 +10,7 @@ export {
   getAllFormulas,
   findFormulaById,
   findFormulasByIds,
+  getSubjectData,
   type SubjectFormula
 } from './lib/formulas';
 

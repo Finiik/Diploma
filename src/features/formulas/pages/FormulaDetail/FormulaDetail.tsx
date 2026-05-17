@@ -1,73 +1,39 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Latex from '@/shared/ui/Latex/Latex';
 import { symbolToTex } from '@/shared/lib/symbol-tex';
 import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
-import { useAuth } from '@/shared/auth/AuthContext';
 import { Calculator } from '@/features/calculator';
-import Breadcrumb, {
-  type BreadcrumbItem
-} from '@/shared/ui/Breadcrumb/Breadcrumb';
-import { physicsData } from '@/features/formulas/data/physics';
-import { chemistryData } from '@/features/formulas/data/chemistry';
-import { biologyData } from '@/features/formulas/data/biology';
-import type { Formula, Subject, SubjectData } from '@/shared/types/domain';
-import { isFirebaseConfigured } from '@/shared/lib/env';
+import Breadcrumb from '@/shared/ui/Breadcrumb/Breadcrumb';
 import {
   findFormulaById,
-  findFormulasByIds
+  findFormulasByIds,
+  getSubjectData
 } from '@/features/formulas/lib/formulas';
+import { buildFormulaBreadcrumbs } from '@/features/formulas/lib/breadcrumbs';
+import { useInteractionLog } from '@/shared/firebase/useInteractionLog';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import './FormulaDetail.css';
-
-type InteractionType = 'view' | 'calculation' | 'bookmark';
-
-const subjectDataMap: Record<Subject, SubjectData> = {
-  physics: physicsData,
-  chemistry: chemistryData,
-  biology: biologyData
-};
 
 const BOOKMARK_KEY: Record<'true' | 'false', string> = {
   true: 'formula.bookmark_remove',
   false: 'formula.bookmark_add'
 };
 
-async function safeLogInteraction(
-  userId: string | undefined,
-  formulaId: string,
-  type: InteractionType
-) {
-  if (!isFirebaseConfigured() || !userId) return;
-  try {
-    const { logInteraction } = await import('@/shared/firebase/firestore');
-    await logInteraction(userId, formulaId, type);
-  } catch (e) {
-    console.warn('Failed to log interaction:', e);
-  }
-}
-
-function findFormula(id: string | undefined): Formula | undefined {
-  return id ? findFormulaById(id) : undefined;
-}
-
 export default function FormulaDetail() {
   const { formulaId } = useParams();
   const { t } = useTranslation();
   const tr = useLocalized();
-  const { user } = useAuth();
   const { isBookmarked, toggleBookmark } = useBookmarks();
-  const navigate = useNavigate();
+  const { logView } = useInteractionLog();
 
-  const formula = findFormula(formulaId);
+  const formula = formulaId ? findFormulaById(formulaId) : undefined;
   const bookmarked = formula ? isBookmarked(formula.id) : false;
 
   useEffect(() => {
-    if (formula && user?.uid) {
-      safeLogInteraction(user.uid, formula.id, 'view');
-    }
-  }, [formula?.id, user?.uid]);
+    if (formula) logView(formula.id);
+  }, [formula?.id, logView]);
 
   if (!formula) {
     return (
@@ -79,33 +45,12 @@ export default function FormulaDetail() {
   }
 
   const derivedFormulas = findFormulasByIds(formula.derivedFormulas || []);
-
-  const handleCalculate = () => {
-    if (user?.uid) {
-      safeLogInteraction(user.uid, formula.id, 'calculation');
-    }
-  };
-
-  // Build breadcrumb
-  const subjectData = formula.subject
-    ? subjectDataMap[formula.subject]
-    : undefined;
-  const breadcrumbs: BreadcrumbItem[] = [
-    { label: t('nav.home'), to: '/', icon: '🏠' }
-  ];
-  if (subjectData) {
-    breadcrumbs.push({
-      label: subjectData.name,
-      labelEn: subjectData.nameEn,
-      to: `/subject/${formula.subject}`,
-      icon: subjectData.icon
-    });
-  }
-  if (formula.topic) {
-    breadcrumbs.push({ label: formula.topic, labelEn: formula.topic });
-  }
-  breadcrumbs.push({
-    label: tr(formula, 'name')
+  const subjectData = getSubjectData(formula.subject);
+  const breadcrumbs = buildFormulaBreadcrumbs({
+    formula,
+    subjectData,
+    homeLabel: t('nav.home'),
+    formulaName: tr(formula, 'name')
   });
 
   return (

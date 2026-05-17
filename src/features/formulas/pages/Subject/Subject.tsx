@@ -1,25 +1,16 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { physicsData } from '@/features/formulas/data/physics';
-import { chemistryData } from '@/features/formulas/data/chemistry';
-import { biologyData } from '@/features/formulas/data/biology';
 import FormulaCard from '@/features/formulas/components/FormulaCard/FormulaCard';
 import Breadcrumb from '@/shared/ui/Breadcrumb/Breadcrumb';
-import type { SubjectData } from '@/shared/types/domain';
+import { getSubjectData } from '@/features/formulas/lib/formulas';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import './Subject.css';
-
-const subjectMap: Record<string, SubjectData | undefined> = {
-  physics: physicsData,
-  chemistry: chemistryData,
-  biology: biologyData
-};
 
 export default function Subject() {
   const { subjectId } = useParams<{ subjectId: string }>();
   const { t } = useTranslation();
   const tr = useLocalized();
-  const subject = subjectId ? subjectMap[subjectId] : undefined;
+  const subject = getSubjectData(subjectId);
 
   if (!subject) {
     return (
