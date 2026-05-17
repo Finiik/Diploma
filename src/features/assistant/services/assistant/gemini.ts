@@ -11,15 +11,17 @@ import {
   type GeminiTransport
 } from './geminiClient';
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 // Gemini 3 thinking allowance: "minimal" | "low" | "medium" | "high".
 // "low" keeps the tutor fast/cheap while leaving enough reasoning for the
 // SYNTHESIZE-the-materials task. Env-overridable like the model.
 const GEMINI_THINKING = import.meta.env.VITE_GEMINI_THINKING || 'low';
 
-// Whether a usable API key is configured (vs. missing/placeholder).
-export function geminiConfigured(): boolean {
-  return Boolean(GEMINI_API_KEY) && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY';
+// Configuration is the transport's concern; delegate so the orchestrator
+// never reads env and stays test-injectable.
+export function geminiConfigured(
+  transport: GeminiTransport = defaultGeminiTransport
+): boolean {
+  return transport.isConfigured();
 }
 
 // Call Gemini: build the prompt, shape the request, delegate the network

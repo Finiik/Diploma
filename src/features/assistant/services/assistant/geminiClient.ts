@@ -26,6 +26,8 @@ export interface GeminiRequestBody {
 }
 
 export interface GeminiTransport {
+  /** Whether a usable API key is configured (vs. missing/placeholder). */
+  isConfigured(): boolean;
   generate(body: GeminiRequestBody): Promise<GeminiResponse>;
 }
 
@@ -42,6 +44,11 @@ function geminiUrl(): string {
 }
 
 export const defaultGeminiTransport: GeminiTransport = {
+  isConfigured() {
+    return (
+      Boolean(GEMINI_API_KEY) && GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY'
+    );
+  },
   async generate(body) {
     const response = await fetch(geminiUrl(), {
       method: 'POST',
