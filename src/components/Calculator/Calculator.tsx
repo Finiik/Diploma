@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import type { Formula } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useCalculator } from '@/hooks/useCalculator';
-import Latex from '@/components/Latex/Latex';
+import Latex from '@/shared/ui/Latex/Latex';
 import CalcField from './CalcField';
 import CalcResult from './CalcResult';
 import './Calculator.css';

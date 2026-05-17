@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { theoryData } from '@/data/theory';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useContentFilters } from '@/shared/hooks/useContentFilters';
-import SubjectFilterBar from '@/components/FilterBar/SubjectFilterBar';
+import SubjectFilterBar from '@/shared/ui/FilterBar/SubjectFilterBar';
 import DifficultyFilterBar, {
   type DifficultyOption
-} from '@/components/FilterBar/DifficultyFilterBar';
+} from '@/shared/ui/FilterBar/DifficultyFilterBar';
 import './Theory.css';
 
 interface DifficultyBadge {

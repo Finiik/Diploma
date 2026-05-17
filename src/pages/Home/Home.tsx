@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRecommendations } from '@/services/recommendations';
 import FormulaCard from '@/components/FormulaCard/FormulaCard';
-import { SkeletonGrid } from '@/components/LoadingSkeleton/LoadingSkeleton';
+import { SkeletonGrid } from '@/shared/ui/LoadingSkeleton/LoadingSkeleton';
 import { useAsyncResource } from '@/shared/hooks/useAsyncResource';
 import type { Formula } from '@/shared/types/domain';
 import './Home.css';

@@ -1,13 +1,13 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import Latex from '@/components/Latex/Latex';
+import Latex from '@/shared/ui/Latex/Latex';
 import { useBookmarks } from '@/contexts/BookmarkContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Calculator from '@/components/Calculator/Calculator';
 import Breadcrumb, {
   type BreadcrumbItem
-} from '@/components/Breadcrumb/Breadcrumb';
+} from '@/shared/ui/Breadcrumb/Breadcrumb';
 import { physicsData } from '@/data/physics';
 import { chemistryData } from '@/data/chemistry';
 import { biologyData } from '@/data/biology';

@@ -4,10 +4,10 @@ import { problemsData } from '@/data/problems';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useExpandedSet } from '@/shared/hooks/useExpandedSet';
 import { useContentFilters } from '@/shared/hooks/useContentFilters';
-import SubjectFilterBar from '@/components/FilterBar/SubjectFilterBar';
+import SubjectFilterBar from '@/shared/ui/FilterBar/SubjectFilterBar';
 import DifficultyFilterBar, {
   type DifficultyOption
-} from '@/components/FilterBar/DifficultyFilterBar';
+} from '@/shared/ui/FilterBar/DifficultyFilterBar';
 import './Problems.css';
 
 const DIFF_STARS: Record<string, string> = {

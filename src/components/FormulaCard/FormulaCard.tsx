@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useBookmarks } from '@/contexts/BookmarkContext';
 import type { Formula } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';
-import Latex from '@/components/Latex/Latex';
+import Latex from '@/shared/ui/Latex/Latex';
 import './FormulaCard.css';
 
 const BOOKMARK_KEY: Record<'true' | 'false', string> = {
