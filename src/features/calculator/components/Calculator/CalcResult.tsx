@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Latex from '@/shared/ui/Latex/Latex';
 import { symbolToTex } from '@/shared/lib/symbol-tex';
@@ -14,7 +15,7 @@ interface CalcResultProps {
 }
 
 /** Renders the computed value(s): one row, or several for multi-result formulas. */
-export default function CalcResult({
+function CalcResult({
   result,
   multiResult,
   resultSymbol,
@@ -51,3 +52,9 @@ export default function CalcResult({
     </div>
   );
 }
+
+/**
+ * Memoized: result props change only on `calculate()`, never per keystroke,
+ * so this (and its KaTeX `<Latex>` rows) skips re-render while the user types.
+ */
+export default memo(CalcResult);

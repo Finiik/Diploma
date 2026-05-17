@@ -31,7 +31,7 @@ export default function Calculator({ formula, onCalculated }: CalculatorProps) {
             variable={v}
             name={tr(v, 'name')}
             value={values[v.symbol]}
-            onChange={(value) => setField(v.symbol, value)}
+            onChange={setField}
           />
         ))}
       </div>
