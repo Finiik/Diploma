@@ -3,7 +3,15 @@ import { Link } from 'react-router-dom';
 import i18n from '@/shared/i18n';
 import './ErrorBoundary.css';
 
-type ErrorBoundaryProps = { children: ReactNode };
+type ErrorBoundaryProps = {
+  children: ReactNode;
+  /**
+   * Optional custom fallback. When omitted, the default
+   * try-again / go-home screen is used — so the boundary is open for a
+   * different fallback without modifying this class (Open/Closed).
+   */
+  fallback?: (error: Error | null, reset: () => void) => ReactNode;
+};
 type ErrorBoundaryState = { hasError: boolean; error: Error | null };
 
 export default class ErrorBoundary extends Component<
@@ -23,8 +31,13 @@ export default class ErrorBoundary extends Component<
     console.error('ErrorBoundary caught:', error, info);
   }
 
+  reset = () => this.setState({ hasError: false, error: null });
+
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback(this.state.error, this.reset);
+      }
       return (
         <div className="error-boundary">
           <div className="error-icon">⚠️</div>
@@ -33,10 +46,7 @@ export default class ErrorBoundary extends Component<
             {this.state.error?.message || i18n.t('common.unknown_error')}
           </p>
           <div className="error-actions">
-            <button
-              className="error-btn"
-              onClick={() => this.setState({ hasError: false, error: null })}
-            >
+            <button className="error-btn" onClick={this.reset}>
               {i18n.t('common.try_again')}
             </button>
             <Link to="/" className="error-btn error-btn-secondary">
