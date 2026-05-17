@@ -5,7 +5,7 @@ import { Home } from '@/features/recommendations';
 import { Subject, FormulaDetail } from '@/features/formulas';
 import { Theory } from '@/features/theory';
 import { Problems } from '@/features/problems';
-import Bookmarks from '@/pages/Bookmarks/Bookmarks';
+import { Bookmarks } from '@/features/bookmarks';
 import './styles/global.css';
 
 export default function App() {
