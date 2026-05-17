@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { processMessage } from '@/features/assistant/services/assistantEngine';
 import type { ChatMessage } from '@/features/assistant/components/AIAssistant/types';
+import { SUPPORTED_LANGUAGES } from '@/shared/i18n/constants';
 
 /**
  * Owns the chat transcript, the input box and the typing flag. `send` and
@@ -10,7 +11,7 @@ import type { ChatMessage } from '@/features/assistant/components/AIAssistant/ty
  */
 export function useChatSession() {
   const { t, i18n } = useTranslation();
-  const isUk = i18n.language === 'uk';
+  const isUk = i18n.language === SUPPORTED_LANGUAGES.uk;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');

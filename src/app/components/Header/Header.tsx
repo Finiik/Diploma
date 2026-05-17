@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/features/theme';
 import { useBodyScrollLock } from '@/shared/hooks/useBodyScrollLock';
 import { SearchBar } from '@/features/search';
+import {
+  LANGUAGE_STORAGE_KEY,
+  SUPPORTED_LANGUAGES
+} from '@/shared/i18n/constants';
 import './Header.css';
 
 const THEME_TITLE_KEY: Record<string, string> = {
@@ -26,9 +30,12 @@ export default function Header() {
   useBodyScrollLock(mobileMenuOpen);
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'uk' ? 'en' : 'uk';
+    const newLang =
+      i18n.language === SUPPORTED_LANGUAGES.uk
+        ? SUPPORTED_LANGUAGES.en
+        : SUPPORTED_LANGUAGES.uk;
     i18n.changeLanguage(newLang);
-    localStorage.setItem('language', newLang);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, newLang);
   };
 
   return (
