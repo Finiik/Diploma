@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRecommendations } from '@/services/recommendations';
-import FormulaCard from '@/components/FormulaCard/FormulaCard';
+import { FormulaCard } from '@/features/formulas';
 import { SkeletonGrid } from '@/shared/ui/LoadingSkeleton/LoadingSkeleton';
 import { useAsyncResource } from '@/shared/hooks/useAsyncResource';
 import type { Formula } from '@/shared/types/domain';

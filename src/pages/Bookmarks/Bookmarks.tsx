@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useBookmarks } from '@/shared/bookmarks/BookmarkContext';
-import FormulaCard from '@/components/FormulaCard/FormulaCard';
-import { findFormulasByIds } from '@/lib/formulas';
+import { FormulaCard, findFormulasByIds } from '@/features/formulas';
 import './Bookmarks.css';
 
 export default function Bookmarks() {

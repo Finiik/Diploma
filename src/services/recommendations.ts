@@ -4,7 +4,7 @@
    Falls back instantly to demo data when Firebase is not configured
    ============================================ */
 
-import { getAllFormulas, findFormulasByIds } from '@/lib/formulas';
+import { getAllFormulas, findFormulasByIds } from '@/features/formulas';
 import type {
   Formula,
   Interaction,

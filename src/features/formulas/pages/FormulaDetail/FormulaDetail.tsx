@@ -8,12 +8,15 @@ import Calculator from '@/components/Calculator/Calculator';
 import Breadcrumb, {
   type BreadcrumbItem
 } from '@/shared/ui/Breadcrumb/Breadcrumb';
-import { physicsData } from '@/data/physics';
-import { chemistryData } from '@/data/chemistry';
-import { biologyData } from '@/data/biology';
+import { physicsData } from '@/features/formulas/data/physics';
+import { chemistryData } from '@/features/formulas/data/chemistry';
+import { biologyData } from '@/features/formulas/data/biology';
 import type { Formula, Subject, SubjectData } from '@/shared/types/domain';
 import { isFirebaseConfigured } from '@/shared/lib/env';
-import { findFormulaById, findFormulasByIds } from '@/lib/formulas';
+import {
+  findFormulaById,
+  findFormulasByIds
+} from '@/features/formulas/lib/formulas';
 import { useLocalized } from '@/shared/hooks/useLocalized';
 import './FormulaDetail.css';
 

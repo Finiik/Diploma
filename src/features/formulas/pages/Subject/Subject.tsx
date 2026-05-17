@@ -1,9 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { physicsData } from '@/data/physics';
-import { chemistryData } from '@/data/chemistry';
-import { biologyData } from '@/data/biology';
-import FormulaCard from '@/components/FormulaCard/FormulaCard';
+import { physicsData } from '@/features/formulas/data/physics';
+import { chemistryData } from '@/features/formulas/data/chemistry';
+import { biologyData } from '@/features/formulas/data/biology';
+import FormulaCard from '@/features/formulas/components/FormulaCard/FormulaCard';
 import Breadcrumb from '@/shared/ui/Breadcrumb/Breadcrumb';
 import type { SubjectData } from '@/shared/types/domain';
 import { useLocalized } from '@/shared/hooks/useLocalized';

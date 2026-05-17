@@ -5,7 +5,7 @@ import {
   getAllFormulas,
   findFormulaById,
   findFormulasByIds
-} from '@/lib/formulas';
+} from '@/features/formulas/lib/formulas';
 
 describe('getAllFormulas', () => {
   it('returns a non-empty catalog', () => {

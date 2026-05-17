@@ -2,15 +2,14 @@
    Subject helpers — formula catalogs, labels, localization
    ============================================ */
 
-import { physicsData, getAllFormulas } from '@/data/physics';
 import {
+  physicsData,
   chemistryData,
-  getAllFormulas as getAllChemFormulas
-} from '@/data/chemistry';
-import {
   biologyData,
-  getAllFormulas as getAllBioFormulas
-} from '@/data/biology';
+  getAllPhysicsFormulas as getAllFormulas,
+  getAllChemistryFormulas as getAllChemFormulas,
+  getAllBiologyFormulas as getAllBioFormulas
+} from '@/features/formulas';
 import type { Formula, Subject } from '@/shared/types/domain';
 
 export {
