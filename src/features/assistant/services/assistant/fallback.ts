@@ -20,11 +20,8 @@ import {
   SUGGESTIONS_LIMIT,
   WEAK_MATCH_MAX_SCORE
 } from './constants';
-import type {
-  GraphItem,
-  ResponderResult,
-  SearchHit
-} from '@/shared/types/domain';
+import type { GraphItem, SearchHit } from '@/shared/types/domain';
+import type { ResponderResult } from '@/features/assistant/types';
 
 // Offline concept answer, fully SYNTHESIZED from the course data — no
 // hardcoded prose. A matched concept (topic/subtopic) leads with its

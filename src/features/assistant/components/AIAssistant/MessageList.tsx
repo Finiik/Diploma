@@ -1,7 +1,7 @@
 import { type RefObject } from 'react';
 import ChatMessage from './ChatMessage';
 import TypingIndicator from './TypingIndicator';
-import type { NavLink } from '@/shared/types/domain';
+import type { NavLink } from '@/features/assistant/types';
 import type { ChatMessage as ChatMsg } from './types';
 
 interface MessageListProps {

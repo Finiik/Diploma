@@ -19,7 +19,7 @@ import {
   RESPONDERS,
   finalizeResponse
 } from '@/features/assistant/services/assistant/responders';
-import type { AssistantResponse } from '@/shared/types/domain';
+import type { AssistantResponse } from '@/features/assistant/types';
 
 // ============================================
 // Main entry point — async

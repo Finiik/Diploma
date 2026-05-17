@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { formatMessage } from '@/features/assistant/lib/markdown';
-import type { NavLink } from '@/shared/types/domain';
+import type { NavLink } from '@/features/assistant/types';
 import type { ChatMessage as ChatMsg } from './types';
 
 const LINK_ICON: Record<NavLink['type'], string> = {

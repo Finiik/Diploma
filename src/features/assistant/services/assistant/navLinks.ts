@@ -8,7 +8,8 @@ import { localizedName } from './subjects';
 import { resolveRelated } from './courseGraph';
 import { smartSearch } from './text';
 import { NAV_LINKS_LIMIT } from './constants';
-import type { Concept, GraphItem, NavLink } from '@/shared/types/domain';
+import type { Concept, GraphItem } from '@/shared/types/domain';
+import type { NavLink } from '@/features/assistant/types';
 
 const LINK_TYPE: Record<GraphItem['type'], NavLink['type']> = {
   formula: 'formula',
