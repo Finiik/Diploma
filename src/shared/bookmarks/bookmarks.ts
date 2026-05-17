@@ -4,6 +4,11 @@
    This module owns only the offline-first-then-sync
    policy; storage adapters live in localBookmarkStore /
    remoteBookmarkStore.
+
+   The two adapters are intentionally asymmetric, not
+   interchangeable: local = synchronous whole-list cache
+   (always read), remote = async per-user sync target
+   (best-effort). Each has its own typed interface.
    ============================================ */
 
 import { localBookmarkStore } from './localBookmarkStore';
