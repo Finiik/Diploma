@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getRecommendations } from '@/services/recommendations';
 import FormulaCard from '@/components/FormulaCard/FormulaCard';
 import { SkeletonGrid } from '@/components/LoadingSkeleton/LoadingSkeleton';
-import { useAsyncResource } from '@/hooks/useAsyncResource';
+import { useAsyncResource } from '@/shared/hooks/useAsyncResource';
 import type { Formula } from '@/shared/types/domain';
 import './Home.css';
 

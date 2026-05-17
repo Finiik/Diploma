@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { search } from '@/services/search';
 import type { SearchHit, ContentType, Subject } from '@/shared/types/domain';
-import { useLocalized } from '@/hooks/useLocalized';
-import { useClickOutside } from '@/hooks/useClickOutside';
+import { useLocalized } from '@/shared/hooks/useLocalized';
+import { useClickOutside } from '@/shared/hooks/useClickOutside';
 import { resolveNavPath } from '@/shared/lib/navigation';
 import './SearchBar.css';
 

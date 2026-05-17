@@ -14,7 +14,7 @@ import { biologyData } from '@/data/biology';
 import type { Formula, Subject, SubjectData } from '@/shared/types/domain';
 import { isFirebaseConfigured } from '@/shared/lib/env';
 import { findFormulaById, findFormulasByIds } from '@/lib/formulas';
-import { useLocalized } from '@/hooks/useLocalized';
+import { useLocalized } from '@/shared/hooks/useLocalized';
 import './FormulaDetail.css';
 
 type InteractionType = 'view' | 'calculation' | 'bookmark';

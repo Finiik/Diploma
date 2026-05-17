@@ -6,7 +6,7 @@ import { biologyData } from '@/data/biology';
 import FormulaCard from '@/components/FormulaCard/FormulaCard';
 import Breadcrumb from '@/components/Breadcrumb/Breadcrumb';
 import type { SubjectData } from '@/shared/types/domain';
-import { useLocalized } from '@/hooks/useLocalized';
+import { useLocalized } from '@/shared/hooks/useLocalized';
 import './Subject.css';
 
 const subjectMap: Record<string, SubjectData | undefined> = {

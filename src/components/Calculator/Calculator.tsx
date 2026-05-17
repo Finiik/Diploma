@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Formula } from '@/shared/types/domain';
-import { useLocalized } from '@/hooks/useLocalized';
+import { useLocalized } from '@/shared/hooks/useLocalized';
 import { useCalculator } from '@/hooks/useCalculator';
 import Latex from '@/components/Latex/Latex';
 import CalcField from './CalcField';

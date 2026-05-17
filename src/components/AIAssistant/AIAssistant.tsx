@@ -6,7 +6,7 @@ import type { NavLink } from '@/shared/types/domain';
 import { resolveNavPath } from '@/shared/lib/navigation';
 import { useChatSession } from '@/hooks/useChatSession';
 import { useChatScroll } from '@/hooks/useChatScroll';
-import { useAutoFocus } from '@/hooks/useAutoFocus';
+import { useAutoFocus } from '@/shared/hooks/useAutoFocus';
 import ChatFab from './ChatFab';
 import ChatHeader from './ChatHeader';
 import MessageList from './MessageList';

@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { problemsData } from '@/data/problems';
-import { useLocalized } from '@/hooks/useLocalized';
-import { useExpandedSet } from '@/hooks/useExpandedSet';
-import { useContentFilters } from '@/hooks/useContentFilters';
+import { useLocalized } from '@/shared/hooks/useLocalized';
+import { useExpandedSet } from '@/shared/hooks/useExpandedSet';
+import { useContentFilters } from '@/shared/hooks/useContentFilters';
 import SubjectFilterBar from '@/components/FilterBar/SubjectFilterBar';
 import DifficultyFilterBar, {
   type DifficultyOption
