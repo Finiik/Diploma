@@ -20,7 +20,11 @@ import {
   SUGGESTIONS_LIMIT,
   WEAK_MATCH_MAX_SCORE
 } from './constants';
-import type { ResponderResult } from '@/shared/types/domain';
+import type {
+  GraphItem,
+  ResponderResult,
+  SearchHit
+} from '@/shared/types/domain';
 
 // Offline concept answer, fully SYNTHESIZED from the course data — no
 // hardcoded prose. A matched concept (topic/subtopic) leads with its
@@ -75,50 +79,57 @@ export function detectConceptualAnswer(
   return { text, suggestions };
 }
 
-export function localFallback(query: string, isUk: boolean): ResponderResult {
-  // Broad conceptual question (e.g. "що таке фізика?") — answer the concept
-  // generally instead of forcing the nearest specific formula.
-  const concept = detectConceptualAnswer(query, isUk);
-  if (concept) return concept;
+// --- Result classification + per-type renderers -----------------------------
 
-  // Search-based response
-  const results = smartSearch(query);
-
-  if (results.length === 0) {
-    return {
-      text: isUk
-        ? `🤔 На жаль, не знайшов точної відповіді на **"${query}"**.\n\nСпробуйте:\n• Використати ключові слова (напр. "закон Ома", "pH", "ДНК")\n• Написати назву формули або теми\n• Запитати "допомога" для списку можливостей`
-        : `🤔 Sorry, I couldn't find a precise answer for **"${query}"**.\n\nTry:\n• Using key terms (e.g., "Ohm's law", "pH", "DNA")\n• Typing a formula or topic name\n• Asking "help" for available capabilities`,
-      suggestions: isUk
-        ? ['Які є формули?', 'Допомога', 'Закон Ньютона']
-        : ['Available formulas?', 'Help', "Newton's law"]
-    };
-  }
-
+function classifyTopResult(results: SearchHit[]): 'none' | 'weak' | 'strong' {
+  if (results.length === 0) return 'none';
   const top = results[0];
-
   // A weak fuzzy match shouldn't masquerade as a confident answer card.
-  // Offer it as a suggestion instead of asserting it as THE answer.
-  if (top.score != null && top.score > WEAK_MATCH_MAX_SCORE) {
-    return {
-      text: isUk
-        ? `🤔 Точної відповіді на **"${query}"** не знайшов. Можливо, ви мали на увазі щось із наведеного нижче — або уточніть питання.`
-        : `🤔 I couldn't find an exact answer for **"${query}"**. You might mean one of the items below — or try rephrasing the question.`,
-      suggestions: results
-        .slice(0, SUGGESTIONS_LIMIT)
-        .map((r) => localizedName(r, isUk))
-    };
-  }
+  if (top.score != null && top.score > WEAK_MATCH_MAX_SCORE) return 'weak';
+  return 'strong';
+}
 
-  const others = results.slice(1, 1 + FALLBACK_RELATED_RESULTS);
-  const name = localizedName(top, isUk);
-  // The type guards below exhaust GraphItem's discriminant, so the trailing
-  // "generic result" branch is unreachable; keep an un-narrowed handle to
-  // read the shared description fields there without a `never` access.
-  const topItem = top;
+function noResultsCard(query: string, isUk: boolean): ResponderResult {
+  return {
+    text: isUk
+      ? `🤔 На жаль, не знайшов точної відповіді на **"${query}"**.\n\nСпробуйте:\n• Використати ключові слова (напр. "закон Ома", "pH", "ДНК")\n• Написати назву формули або теми\n• Запитати "допомога" для списку можливостей`
+      : `🤔 Sorry, I couldn't find a precise answer for **"${query}"**.\n\nTry:\n• Using key terms (e.g., "Ohm's law", "pH", "DNA")\n• Typing a formula or topic name\n• Asking "help" for available capabilities`,
+    suggestions: isUk
+      ? ['Які є формули?', 'Допомога', 'Закон Ньютона']
+      : ['Available formulas?', 'Help', "Newton's law"]
+  };
+}
 
+function weakMatchCard(
+  query: string,
+  results: SearchHit[],
+  isUk: boolean
+): ResponderResult {
+  // Offer the weak match as a suggestion instead of asserting it as THE
+  // answer.
+  return {
+    text: isUk
+      ? `🤔 Точної відповіді на **"${query}"** не знайшов. Можливо, ви мали на увазі щось із наведеного нижче — або уточніть питання.`
+      : `🤔 I couldn't find an exact answer for **"${query}"**. You might mean one of the items below — or try rephrasing the question.`,
+    suggestions: results
+      .slice(0, SUGGESTIONS_LIMIT)
+      .map((r) => localizedName(r, isUk))
+  };
+}
+
+// Per-type answer cards. An exhaustive map over GraphItem's discriminant:
+// adding a new item variant is a compile error here instead of silently
+// falling through to a generic card.
+type FallbackRenderer<T extends GraphItem['type']> = (
+  top: Extract<GraphItem, { type: T }>,
+  others: GraphItem[],
+  isUk: boolean
+) => ResponderResult;
+
+const FALLBACK_RENDERERS: { [T in GraphItem['type']]: FallbackRenderer<T> } = {
   // Formula response — rich with variables
-  if (top.type === 'formula') {
+  formula: (top, others, isUk) => {
+    const name = localizedName(top, isUk);
     const desc = isUk ? top.description : top.descriptionEn;
     const vars = top.variables
       ? top.variables
@@ -148,10 +159,11 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
     }
 
     return { text, suggestions: [] };
-  }
+  },
 
   // Theory response — preview with content
-  if (top.type === 'theory') {
+  theory: (top, _others, isUk) => {
+    const name = localizedName(top, isUk);
     const desc = isUk ? top.description : top.descriptionEn;
     const content = (isUk ? top.content : top.contentEn) || '';
     const preview = content
@@ -167,10 +179,11 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
     }
 
     return { text, suggestions: [] };
-  }
+  },
 
   // Problem response — with steps preview
-  if (top.type === 'problem') {
+  problem: (top, _others, isUk) => {
+    const name = localizedName(top, isUk);
     const desc = isUk ? top.description : top.descriptionEn;
     const stepsPreview = top.steps
       ? top.steps
@@ -191,11 +204,29 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
 
     return { text, suggestions: [] };
   }
+};
 
-  // Generic result (unreachable: the guards above cover every GraphItem
-  // variant; kept as a defensive default identical to the original).
-  return {
-    text: `🔍 **${name}**\n\n${isUk ? topItem.description : topItem.descriptionEn || topItem.description}`,
-    suggestions: []
-  };
+export function localFallback(query: string, isUk: boolean): ResponderResult {
+  // Broad conceptual question (e.g. "що таке фізика?") — answer the concept
+  // generally instead of forcing the nearest specific formula.
+  const concept = detectConceptualAnswer(query, isUk);
+  if (concept) return concept;
+
+  // Search-based response
+  const results = smartSearch(query);
+  const classification = classifyTopResult(results);
+  if (classification === 'none') return noResultsCard(query, isUk);
+  if (classification === 'weak') return weakMatchCard(query, results, isUk);
+
+  const top = results[0];
+  const others = results.slice(1, 1 + FALLBACK_RELATED_RESULTS);
+
+  // Single typed dispatch boundary; exhaustiveness is enforced by the
+  // mapped-type declaration of FALLBACK_RENDERERS above.
+  const render = FALLBACK_RENDERERS[top.type] as (
+    t: GraphItem,
+    o: GraphItem[],
+    uk: boolean
+  ) => ResponderResult;
+  return render(top, others, isUk);
 }
