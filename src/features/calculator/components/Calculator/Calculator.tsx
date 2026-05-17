@@ -9,13 +9,15 @@ import './Calculator.css';
 
 interface CalculatorProps {
   formula: ComputableFormula;
+  /** Fired once per successful calculation (analytics sink, injected). */
+  onCalculated?: (formulaId: string) => void;
 }
 
-export default function Calculator({ formula }: CalculatorProps) {
+export default function Calculator({ formula, onCalculated }: CalculatorProps) {
   const { t } = useTranslation();
   const tr = useLocalized();
   const { values, result, error, setField, calculate, inputVars, resultVar } =
-    useCalculator(formula);
+    useCalculator(formula, onCalculated);
 
   return (
     <div className="calculator" id="formula-calculator">

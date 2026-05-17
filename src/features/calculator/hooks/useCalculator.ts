@@ -12,8 +12,17 @@ import {
  * Owns the calculator's field/result/error state and bridges the pure
  * `runCalculation` to localized error messages. The component stays
  * presentational.
+ *
+ * `onCalculated` is an injected callback fired once per *successful*
+ * calculation (Dependency Inversion: the hook depends on a callback, not
+ * on `useInteractionLog`, so it stays pure/testable). The page wires the
+ * analytics sink — without it the recommender's `calculation` signal
+ * (weighted 3× in the CF model) was never emitted by the running app.
  */
-export function useCalculator(formula: ComputableFormula) {
+export function useCalculator(
+  formula: ComputableFormula,
+  onCalculated?: (formulaId: string) => void
+) {
   const { t } = useTranslation();
   const tr = useLocalized();
 
@@ -40,6 +49,7 @@ export function useCalculator(formula: ComputableFormula) {
     if (outcome.ok) {
       setResult(outcome.result);
       setError('');
+      onCalculated?.(formula.id);
     } else if (outcome.reason === 'invalid') {
       setError(
         t('formula.invalid_value', { name: tr(outcome.variable, 'name') })
@@ -47,7 +57,7 @@ export function useCalculator(formula: ComputableFormula) {
     } else {
       setError(t('formula.calc_error'));
     }
-  }, [formula, values, t, tr]);
+  }, [formula, values, t, tr, onCalculated]);
 
   return { values, result, error, setField, calculate, inputVars, resultVar };
 }

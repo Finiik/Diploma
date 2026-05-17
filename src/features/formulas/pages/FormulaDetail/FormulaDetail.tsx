@@ -26,7 +26,7 @@ export default function FormulaDetail() {
   const { t } = useTranslation();
   const tr = useLocalized();
   const { isBookmarked, toggleBookmark } = useBookmarks();
-  const { logView } = useInteractionLog();
+  const { logView, logCalculation } = useInteractionLog();
 
   const formula = formulaId ? findFormulaById(formulaId) : undefined;
   const bookmarked = formula ? isBookmarked(formula.id) : false;
@@ -112,7 +112,7 @@ export default function FormulaDetail() {
           )}
 
           {/* Calculator */}
-          <Calculator formula={formula} />
+          <Calculator formula={formula} onCalculated={logCalculation} />
         </div>
       </div>
     </div>

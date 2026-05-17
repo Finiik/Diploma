@@ -332,7 +332,14 @@ rather than control flow:
   does exactly this (a configured fake proves model text flows through; an
   unconfigured/throwing fake pins the deterministic fallback path) rather
   than stubbing global `fetch`. The instant responders take no transport,
-  so the chain abstraction stays segregated.
+  so the chain abstraction stays segregated. The same inversion applies to
+  analytics: `useCalculator(formula, onCalculated?)` fires an *injected*
+  callback on a successful calculation rather than importing
+  `useInteractionLog` itself, so the hook stays pure and the page owns the
+  sink. (This also closed a real gap — the recommender weights
+  `calculation` 3×, but no running-app code emitted that event until the
+  seam was wired; the README's "tracks calculations" claim is now true,
+  not aspirational.)
 
 Stateful React boundaries follow the same rule: provider effects move into
 hooks (`useFirebaseAuthState`), and **all three** context values — auth,
