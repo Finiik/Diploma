@@ -37,7 +37,7 @@ async function safeLogInteraction(
 ) {
   if (!isFirebaseConfigured() || !userId) return;
   try {
-    const { logInteraction } = await import('@/firebase/firestore');
+    const { logInteraction } = await import('@/shared/firebase/firestore');
     await logInteraction(userId, formulaId, type);
   } catch (e) {
     console.warn('Failed to log interaction:', e);

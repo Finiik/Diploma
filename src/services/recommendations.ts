@@ -95,7 +95,9 @@ export async function getRecommendations(
   // Only try Firebase if configured
   if (isFirebaseConfigured()) {
     try {
-      const { getAllInteractions } = await import('@/firebase/firestore');
+      const { getAllInteractions } = await import(
+        '@/shared/firebase/firestore'
+      );
       // Add a timeout so we don't block the UI
       const firebasePromise = getAllInteractions();
       const timeoutPromise = new Promise((_, reject) =>

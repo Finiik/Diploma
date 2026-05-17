@@ -1,6 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import i18n from '@/i18n';
+import i18n from '@/shared/i18n';
 import './ErrorBoundary.css';
 
 type ErrorBoundaryProps = { children: ReactNode };
