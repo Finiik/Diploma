@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo
+} from 'react';
 import type { ReactNode } from 'react';
 import {
   initTheme,
@@ -18,14 +25,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setThemeService(theme);
   }, [theme]);
 
-  const toggleTheme = () => {
+  // Stable across renders (functional update needs no deps) so the context
+  // value is referentially stable — same thin-boundary discipline as
+  // AuthContext/BookmarkContext (ARCHITECTURE §6.5).
+  const toggleTheme = useCallback(() => {
     setTheme((prev) => nextTheme(prev));
-  };
+  }, []);
+
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 }
 

@@ -284,11 +284,21 @@ rather than control flow:
   chain wiring vs. `instantResponders` content; the Gemini prompt context →
   static catalog (`promptContext`) vs. per-query retrieval (`ragContext`);
   `Home` → `SubjectsGrid` + `RecommendationsFeed`.
-- **Open/Closed.** Variant handling uses exhaustive lookup/strategy maps
-  keyed by a discriminant (`ITEM_FORMATTERS`, `subjectIcon`,
-  `subjectColor`, the responder list, corpus/interaction source arrays), so
-  adding a case is a new entry — and a *compile error* if a case is missed
-  — never an edit to an `if`/`switch` ladder.
+- **Open/Closed.** Variant handling uses lookup/strategy data instead of
+  `if`/`switch` ladders, so adding a case is a new entry, never an edited
+  branch. Two mechanisms, with *different* safety guarantees — stated
+  precisely rather than conflated:
+  - **Keyed maps over a discriminant** (`ITEM_FORMATTERS`,
+    `FALLBACK_RENDERERS`, `subjectIcon`, `subjectColor`, `SUBJECT_DATA`):
+    typed as `Record<K, …>` / a mapped type, so an omitted case is a
+    **compile error**. These are closed-by-construction.
+  - **Ordered registries** (the `createResponders()` chain, the
+    `SearchCorpusSource` / `InteractionsSource` arrays): open for
+    extension by appending an entry, but completeness is **convention,
+    not compile-checked** — a forgotten registration is a silent
+    behavioural gap, not a type error. They are still OCP for *adding*
+    a strategy; they just don't carry the exhaustiveness guarantee the
+    keyed maps do.
 - **Liskov / Interface Segregation.** The bookmark stores carry explicit,
   intentionally asymmetric interfaces (`LocalBookmarkStore` sync cache vs.
   `RemoteBookmarkStore` async per-user sync target) so the contract is
@@ -317,8 +327,11 @@ rather than control flow:
   so the chain abstraction stays segregated.
 
 Stateful React boundaries follow the same rule: provider effects move into
-hooks (`useFirebaseAuthState`), and context values are memoised so the
-provider is a thin boundary, not a state machine.
+hooks (`useFirebaseAuthState`), and **all three** context values — auth,
+bookmarks and theme — are `useMemo`'d with `useCallback`'d handlers, so
+every provider hands consumers a referentially stable value and is a thin
+boundary, not a state machine. (Theme was brought in line with the other
+two in the SOLID hardening pass; the claim is now uniform, not aspirational.)
 
 ---
 
