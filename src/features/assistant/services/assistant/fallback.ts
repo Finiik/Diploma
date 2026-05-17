@@ -9,6 +9,17 @@
 import { smartSearch } from './text';
 import { matchConcept, resolveRelated, buildCourseGraph } from './courseGraph';
 import { getSubjectEmoji, localizedName } from './subjects';
+import {
+  FALLBACK_THEORY_CHARS,
+  THEORY_PREVIEW_CHARS,
+  THEORY_PREVIEW_PARAGRAPHS,
+  PROBLEM_STEPS_PREVIEW,
+  FALLBACK_FORMULA_SUMMARY_LIMIT,
+  FALLBACK_RELATED_FORMULAS,
+  FALLBACK_RELATED_RESULTS,
+  SUGGESTIONS_LIMIT,
+  WEAK_MATCH_MAX_SCORE
+} from './constants';
 import type { ResponderResult } from '@/shared/types/domain';
 
 // Offline concept answer, fully SYNTHESIZED from the course data — no
@@ -33,11 +44,13 @@ export function detectConceptualAnswer(
   if (theory) {
     const content = (isUk ? theory.content : theory.contentEn) || '';
     body =
-      content.length > 700 ? `${content.slice(0, 700).trimEnd()}…` : content;
+      content.length > FALLBACK_THEORY_CHARS
+        ? `${content.slice(0, FALLBACK_THEORY_CHARS).trimEnd()}…`
+        : content;
   } else {
     body = related
       .filter((r) => r.type === 'formula')
-      .slice(0, 4)
+      .slice(0, FALLBACK_FORMULA_SUMMARY_LIMIT)
       .map((f) => {
         const n = localizedName(f, isUk);
         const d = isUk ? f.description : f.descriptionEn || f.description;
@@ -56,7 +69,7 @@ export function detectConceptualAnswer(
     .filter(
       (o) => o.subject === c.subject && o.label !== c.label && o.itemIds.length
     )
-    .slice(0, 3)
+    .slice(0, SUGGESTIONS_LIMIT)
     .map((o) => (isUk ? o.label : o.labelEn));
 
   return { text, suggestions };
@@ -86,16 +99,18 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
 
   // A weak fuzzy match shouldn't masquerade as a confident answer card.
   // Offer it as a suggestion instead of asserting it as THE answer.
-  if (top.score != null && top.score > 0.55) {
+  if (top.score != null && top.score > WEAK_MATCH_MAX_SCORE) {
     return {
       text: isUk
         ? `🤔 Точної відповіді на **"${query}"** не знайшов. Можливо, ви мали на увазі щось із наведеного нижче — або уточніть питання.`
         : `🤔 I couldn't find an exact answer for **"${query}"**. You might mean one of the items below — or try rephrasing the question.`,
-      suggestions: results.slice(0, 3).map((r) => localizedName(r, isUk))
+      suggestions: results
+        .slice(0, SUGGESTIONS_LIMIT)
+        .map((r) => localizedName(r, isUk))
     };
   }
 
-  const others = results.slice(1, 4);
+  const others = results.slice(1, 1 + FALLBACK_RELATED_RESULTS);
   const name = localizedName(top, isUk);
   // The type guards below exhaust GraphItem's discriminant, so the trailing
   // "generic result" branch is unreachable; keep an un-narrowed handle to
@@ -125,7 +140,7 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
     if (others.length > 0) {
       const related = others
         .filter((o) => o.type === 'formula')
-        .slice(0, 2)
+        .slice(0, FALLBACK_RELATED_FORMULAS)
         .map((o) => (isUk ? o.name : o.nameEn));
       if (related.length > 0) {
         text += `\n\n${isUk ? '🔗 Також дивіться' : '🔗 Also see'}: ${related.join(', ')}`;
@@ -139,10 +154,13 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
   if (top.type === 'theory') {
     const desc = isUk ? top.description : top.descriptionEn;
     const content = (isUk ? top.content : top.contentEn) || '';
-    const preview = content.split('\n\n').slice(0, 2).join('\n\n');
+    const preview = content
+      .split('\n\n')
+      .slice(0, THEORY_PREVIEW_PARAGRAPHS)
+      .join('\n\n');
     const diffLabels: Record<number, string> = { 1: '🟢', 2: '🟡', 3: '🔴' };
 
-    let text = `📖 **${name}** ${diffLabels[top.difficulty] || ''}\n\n${desc}\n\n${preview.slice(0, 300)}${content.length > 300 ? '...' : ''}`;
+    let text = `📖 **${name}** ${diffLabels[top.difficulty] || ''}\n\n${desc}\n\n${preview.slice(0, THEORY_PREVIEW_CHARS)}${content.length > THEORY_PREVIEW_CHARS ? '...' : ''}`;
 
     if (top.relatedFormulas && top.relatedFormulas.length > 0) {
       text += `\n\n${isUk ? "📐 Пов'язані формули" : '📐 Related formulas'}: ${top.relatedFormulas.join(', ')}`;
@@ -156,7 +174,7 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
     const desc = isUk ? top.description : top.descriptionEn;
     const stepsPreview = top.steps
       ? top.steps
-          .slice(0, 2)
+          .slice(0, PROBLEM_STEPS_PREVIEW)
           .map((s, i) => {
             const stepText = isUk ? s.text : s.textEn;
             return `  ${i + 1}. ${stepText}`;
@@ -166,8 +184,8 @@ export function localFallback(query: string, isUk: boolean): ResponderResult {
     const answer = isUk ? top.answer : top.answerEn;
 
     let text = `📝 **${name}** ${'⭐'.repeat(top.difficulty || 1)}\n\n${desc}\n\n**${isUk ? "Розв'язок" : 'Solution'}:**\n${stepsPreview}`;
-    if (top.steps && top.steps.length > 2) {
-      text += `\n  ... ${isUk ? 'ще' : 'more'} ${top.steps.length - 2} ${isUk ? 'кроків' : 'steps'}`;
+    if (top.steps && top.steps.length > PROBLEM_STEPS_PREVIEW) {
+      text += `\n  ... ${isUk ? 'ще' : 'more'} ${top.steps.length - PROBLEM_STEPS_PREVIEW} ${isUk ? 'кроків' : 'steps'}`;
     }
     text += `\n\n**${isUk ? 'Відповідь' : 'Answer'}:** ${answer}`;
 

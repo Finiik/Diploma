@@ -10,6 +10,14 @@ import { problemsData } from '@/features/problems';
 import { getAllFormulasFlat, localizedName } from './subjects';
 import { buildCourseGraph, matchConcept, resolveRelated } from './courseGraph';
 import { smartSearch } from './text';
+import {
+  CONTEXT_DESCRIPTION_CHARS,
+  CONTEXT_THEORY_CHARS,
+  STRONG_MATCH_MAX_SCORE,
+  RAG_RESULTS_LIMIT,
+  NAV_LINKS_LIMIT,
+  MERGED_LINKS_CAP
+} from './constants';
 import type { Concept, GraphItem, NavLink } from '@/shared/types/domain';
 
 // Build a compact context summary for Gemini
@@ -20,8 +28,8 @@ export function buildPlatformContext(isUk: boolean) {
     .map((f) => {
       const name = isUk ? f.name : f.nameEn;
       const desc = isUk
-        ? (f.description || '').slice(0, 80)
-        : (f.descriptionEn || '').slice(0, 80);
+        ? (f.description || '').slice(0, CONTEXT_DESCRIPTION_CHARS)
+        : (f.descriptionEn || '').slice(0, CONTEXT_DESCRIPTION_CHARS);
       return `- ${name} (id: ${f.id}, LaTeX: ${f.latex}): ${desc}`;
     })
     .join('\n');
@@ -30,8 +38,8 @@ export function buildPlatformContext(isUk: boolean) {
     .map((t) => {
       const name = isUk ? t.name : t.nameEn;
       const content = isUk
-        ? (t.content || '').slice(0, 120)
-        : (t.contentEn || '').slice(0, 120);
+        ? (t.content || '').slice(0, CONTEXT_THEORY_CHARS)
+        : (t.contentEn || '').slice(0, CONTEXT_THEORY_CHARS);
       return `- ${name} (${t.subject}, difficulty: ${t.difficulty}): ${content}`;
     })
     .join('\n');
@@ -40,8 +48,8 @@ export function buildPlatformContext(isUk: boolean) {
     .map((p) => {
       const name = isUk ? p.name : p.nameEn;
       const desc = isUk
-        ? (p.description || '').slice(0, 80)
-        : (p.descriptionEn || '').slice(0, 80);
+        ? (p.description || '').slice(0, CONTEXT_DESCRIPTION_CHARS)
+        : (p.descriptionEn || '').slice(0, CONTEXT_DESCRIPTION_CHARS);
       return `- ${name} (${p.subject}, difficulty: ${p.difficulty}⭐): ${desc}`;
     })
     .join('\n');
@@ -121,8 +129,8 @@ export function findRelevantContent(query: string, isUk: boolean): string {
   }
 
   const results = smartSearch(query)
-    .filter((r) => r.score == null || r.score <= 0.4)
-    .slice(0, 3);
+    .filter((r) => r.score == null || r.score <= STRONG_MATCH_MAX_SCORE)
+    .slice(0, RAG_RESULTS_LIMIT);
   if (results.length === 0) return '';
 
   let context =
@@ -163,7 +171,7 @@ function itemToLink(
 // Build navigation links from search results
 export function extractLinks(query: string, isUk: boolean): NavLink[] {
   return smartSearch(query)
-    .slice(0, 4)
+    .slice(0, NAV_LINKS_LIMIT)
     .map((item) => itemToLink(item, isUk, true))
     .filter((l): l is NavLink => l !== null);
 }
@@ -175,7 +183,7 @@ export function buildConceptLinks(
   isUk: boolean
 ): NavLink[] {
   return resolveRelated(concept)
-    .slice(0, 4)
+    .slice(0, NAV_LINKS_LIMIT)
     .map((item) => itemToLink(item, isUk))
     .filter((l): l is NavLink => l !== null);
 }
@@ -183,7 +191,7 @@ export function buildConceptLinks(
 export function mergeLinks<T extends { type: string; id: string }>(
   primary: T[],
   extra: T[],
-  cap = 5
+  cap = MERGED_LINKS_CAP
 ): T[] {
   const seen = new Set(primary.map((l) => `${l.type}:${l.id}`));
   const out = [...primary];

@@ -19,6 +19,11 @@ import {
   getAllBioFormulas
 } from './subjects';
 import { normalizeConcept, conceptCore, similarity } from './text';
+import {
+  FUZZY_MATCH_MAX_WORDS,
+  CONCEPT_MATCH_MIN_SIMILARITY,
+  RELATED_ITEMS_LIMIT
+} from './constants';
 import type {
   Concept,
   CourseGraph,
@@ -185,13 +190,15 @@ export function matchConcept(query: string): Concept | null {
 
   // Fuzzy whole-string match, short queries only, to avoid hijacking longer
   // specific questions.
-  if (core.split(' ').filter(Boolean).length > 4) return null;
+  if (core.split(' ').filter(Boolean).length > FUZZY_MATCH_MAX_WORDS)
+    return null;
 
   let best: { c: Concept; s: number } | null = null;
   for (const c of concepts) {
     for (const k of c.keys) {
       const s = Math.max(similarity(core, k), similarity(raw, k));
-      if (s >= 0.84 && (!best || s > best.s)) best = { c, s };
+      if (s >= CONCEPT_MATCH_MIN_SIMILARITY && (!best || s > best.s))
+        best = { c, s };
     }
   }
   return best ? best.c : null;
@@ -218,5 +225,5 @@ export function resolveRelated(concept: Concept | null): GraphItem[] {
     .map((id) => byId[id])
     .filter((item): item is GraphItem => Boolean(item))
     .sort((a, b) => (order[a.type] ?? 3) - (order[b.type] ?? 3))
-    .slice(0, 6);
+    .slice(0, RELATED_ITEMS_LIMIT);
 }

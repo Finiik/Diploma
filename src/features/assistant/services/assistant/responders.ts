@@ -26,6 +26,10 @@ import {
 } from './subjects';
 import { matchConcept } from './courseGraph';
 import { extractLinks, buildConceptLinks, mergeLinks } from './context';
+import {
+  SUBJECT_FORMULA_LIST_LIMIT,
+  MAX_PURE_SUBJECT_QUERY_LENGTH
+} from './constants';
 import { callGemini, geminiConfigured } from './gemini';
 import {
   detectHelpIntent,
@@ -99,11 +103,11 @@ function list(query: string, isUk: boolean): ResponderResult | null {
   if (subj) {
     const fBySubject = formulasBySubject(subj);
     const names = fBySubject
-      .slice(0, 10)
+      .slice(0, SUBJECT_FORMULA_LIST_LIMIT)
       .map((f) => `• ${isUk ? f.name : f.nameEn}`)
       .join('\n');
     return {
-      text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}** — ${fBySubject.length} ${isUk ? 'формул' : 'formulas'}:\n\n${names}${fBySubject.length > 10 ? `\n\n...${isUk ? 'та ще' : 'and'} ${fBySubject.length - 10} ${isUk ? 'більше' : 'more'}` : ''}`,
+      text: `${getSubjectEmoji(subj)} **${getSubjectLabel(subj, isUk)}** — ${fBySubject.length} ${isUk ? 'формул' : 'formulas'}:\n\n${names}${fBySubject.length > SUBJECT_FORMULA_LIST_LIMIT ? `\n\n...${isUk ? 'та ще' : 'and'} ${fBySubject.length - SUBJECT_FORMULA_LIST_LIMIT} ${isUk ? 'більше' : 'more'}` : ''}`,
       links: [
         {
           type: 'subject',
@@ -126,7 +130,7 @@ function list(query: string, isUk: boolean): ResponderResult | null {
 
 function pureSubject(query: string, isUk: boolean): ResponderResult | null {
   const subj = detectSubjectIntent(query);
-  if (!subj || query.length >= 15) return null;
+  if (!subj || query.length >= MAX_PURE_SUBJECT_QUERY_LENGTH) return null;
 
   const fBySubject = formulasBySubject(subj);
   const topics = [...new Set(fBySubject.map((f) => f.topic))].filter(Boolean);

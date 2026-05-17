@@ -4,6 +4,7 @@
    ============================================ */
 
 import { search } from '@/features/search';
+import { MIN_SEARCH_WORD_LENGTH } from './constants';
 import type { SearchHit } from '@/shared/types/domain';
 
 // Intent words to strip before searching
@@ -96,7 +97,9 @@ export function smartSearch(query: string): SearchHit[] {
   }
 
   // Try individual significant words (3+ chars)
-  const words = cleaned.split(/\s+/).filter((w) => w.length >= 3);
+  const words = cleaned
+    .split(/\s+/)
+    .filter((w) => w.length >= MIN_SEARCH_WORD_LENGTH);
   for (const word of words) {
     results = search(word);
     if (results.length > 0) return results;

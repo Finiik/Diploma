@@ -5,6 +5,7 @@
 import { theoryData } from '@/features/theory';
 import { problemsData } from '@/features/problems';
 import { buildPlatformContext, findRelevantContent } from './context';
+import { GEMINI_MAX_OUTPUT_TOKENS } from './constants';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 // Model is env-overridable (VITE_GEMINI_MODEL) so swapping models is config,
@@ -116,7 +117,7 @@ ${relevantContent}`;
       // So no temperature/topP overrides here on purpose.
       // Budget covers thinking + answer (thinking levels are relative
       // allowances, not strict guarantees), so keep generous headroom.
-      maxOutputTokens: 2048,
+      maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS,
       thinkingConfig: { thinkingLevel: GEMINI_THINKING }
     }
   };
