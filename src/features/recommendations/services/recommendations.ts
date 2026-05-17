@@ -1,7 +1,8 @@
 /* ============================================
    Collaborative Filtering Recommendation Engine
-   Uses Firebase for real multi-user interaction data
-   Falls back instantly to demo data when Firebase is not configured
+   This module owns only the recommendation algorithm and its
+   popularity fallback. The interaction corpus is supplied by
+   interactionSources; the math lives in lib/similarity.
    ============================================ */
 
 import { getAllFormulas, findFormulasByIds } from '@/features/formulas';
@@ -10,84 +11,19 @@ import type {
   Interaction,
   InteractionsByUser
 } from '@/shared/types/domain';
-import { isFirebaseConfigured } from '@/shared/lib/env';
 import {
   DEFAULT_RECOMMENDATION_COUNT,
-  INTERACTION_WEIGHTS,
-  SIMILAR_USERS_NEIGHBOURHOOD,
-  FIREBASE_READ_TIMEOUT_MS,
-  LOCAL_INTERACTIONS_STORAGE_KEY
+  SIMILAR_USERS_NEIGHBOURHOOD
 } from '@/features/recommendations/lib/constants';
-
-// Pre-seeded demo users for initial recommendations
-const DEMO_INTERACTIONS: InteractionsByUser = {
-  demo_user_1: {
-    phys_newton2: { views: 5, calculations: 3, bookmarks: 1 },
-    phys_kinetic_energy: { views: 3, calculations: 2, bookmarks: 1 },
-    phys_work: { views: 4, calculations: 1, bookmarks: 0 },
-    chem_ideal_gas: { views: 2, calculations: 1, bookmarks: 1 },
-    phys_momentum: { views: 3, calculations: 2, bookmarks: 0 }
-  },
-  demo_user_2: {
-    chem_ideal_gas: { views: 6, calculations: 4, bookmarks: 1 },
-    chem_molarity: { views: 4, calculations: 3, bookmarks: 1 },
-    chem_dilution: { views: 3, calculations: 2, bookmarks: 0 },
-    phys_newton2: { views: 2, calculations: 1, bookmarks: 0 },
-    bio_hardy_weinberg: { views: 1, calculations: 1, bookmarks: 0 }
-  },
-  demo_user_3: {
-    bio_hardy_weinberg: { views: 5, calculations: 3, bookmarks: 1 },
-    bio_population_growth: { views: 4, calculations: 2, bookmarks: 1 },
-    bio_bmi: { views: 3, calculations: 2, bookmarks: 0 },
-    chem_molarity: { views: 2, calculations: 1, bookmarks: 1 },
-    phys_kinetic_energy: { views: 1, calculations: 0, bookmarks: 0 }
-  },
-  demo_user_4: {
-    phys_ohm: { views: 5, calculations: 4, bookmarks: 1 },
-    phys_power_electric: { views: 4, calculations: 3, bookmarks: 1 },
-    phys_newton2: { views: 3, calculations: 1, bookmarks: 0 },
-    chem_dilution: { views: 2, calculations: 1, bookmarks: 0 },
-    phys_kinetic_energy: { views: 2, calculations: 1, bookmarks: 0 }
-  },
-  demo_user_5: {
-    bio_michaelis_menten: { views: 4, calculations: 3, bookmarks: 1 },
-    bio_hardy_weinberg: { views: 3, calculations: 2, bookmarks: 0 },
-    chem_ph: { views: 4, calculations: 2, bookmarks: 1 },
-    chem_molarity: { views: 2, calculations: 1, bookmarks: 0 },
-    bio_population_growth: { views: 2, calculations: 1, bookmarks: 0 }
-  }
-};
-
-function interactionScore(interaction: Interaction | undefined): number {
-  if (!interaction) return 0;
-  return (
-    (interaction.views || 0) * INTERACTION_WEIGHTS.view +
-    (interaction.calculations || 0) * INTERACTION_WEIGHTS.calculation +
-    (interaction.bookmarks || 0) * INTERACTION_WEIGHTS.bookmark
-  );
-}
-
-function buildUserVector(
-  interactions: Record<string, Interaction>,
-  allFormulaIds: string[]
-): number[] {
-  return allFormulaIds.map((id) => interactionScore(interactions[id]));
-}
-
-function cosineSimilarity(a: number[], b: number[]): number {
-  let dot = 0,
-    magA = 0,
-    magB = 0;
-  for (let i = 0; i < a.length; i++) {
-    dot += a[i] * b[i];
-    magA += a[i] * a[i];
-    magB += b[i] * b[i];
-  }
-  magA = Math.sqrt(magA);
-  magB = Math.sqrt(magB);
-  if (magA === 0 || magB === 0) return 0;
-  return dot / (magA * magB);
-}
+import {
+  interactionScore,
+  buildUserVector,
+  cosineSimilarity
+} from '@/features/recommendations/lib/similarity';
+import {
+  composeInteractions,
+  getLocalUserInteractions
+} from '@/features/recommendations/services/interactionSources';
 
 export async function getRecommendations(
   userId: string | null | undefined,
@@ -96,51 +32,13 @@ export async function getRecommendations(
   const allFormulas = getAllFormulas();
   const allFormulaIds = allFormulas.map((f) => f.id);
 
-  // Start with demo data — always available instantly
-  let allInteractions: InteractionsByUser = { ...DEMO_INTERACTIONS };
+  const allInteractions = await composeInteractions();
 
-  // Only try Firebase if configured
-  if (isFirebaseConfigured()) {
-    try {
-      const { getAllInteractions } = await import(
-        '@/shared/firebase/firestore'
-      );
-      // Add a timeout so we don't block the UI
-      const firebasePromise = getAllInteractions();
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error('Firebase timeout')),
-          FIREBASE_READ_TIMEOUT_MS
-        )
-      );
-      const firebaseInteractions = (await Promise.race([
-        firebasePromise,
-        timeoutPromise
-      ])) as InteractionsByUser;
-      allInteractions = { ...allInteractions, ...firebaseInteractions };
-    } catch (e) {
-      console.warn(
-        'Using demo data for recommendations:',
-        e instanceof Error ? e.message : e
-      );
-    }
-  }
-
-  // Get current user interactions from local storage as fast fallback
-  let userInteractions: Record<string, Interaction> = {};
-  if (userId && allInteractions[userId]) {
-    userInteractions = allInteractions[userId];
-  } else {
-    // Check localStorage for local user interactions
-    try {
-      const local = JSON.parse(
-        localStorage.getItem(LOCAL_INTERACTIONS_STORAGE_KEY) || '{}'
-      ) as Record<string, Interaction>;
-      userInteractions = local;
-    } catch {
-      userInteractions = {};
-    }
-  }
+  // Known user → their corpus row; otherwise the offline localStorage map.
+  const userInteractions: Record<string, Interaction> =
+    userId && allInteractions[userId]
+      ? allInteractions[userId]
+      : getLocalUserInteractions();
 
   // If user has no interactions, return popular formulas
   const userVector = buildUserVector(userInteractions, allFormulaIds);
