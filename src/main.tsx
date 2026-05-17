@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/shared/auth/AuthContext';
 import { BookmarkProvider } from '@/shared/bookmarks/BookmarkContext';
 import '@/shared/i18n/index.js';
 

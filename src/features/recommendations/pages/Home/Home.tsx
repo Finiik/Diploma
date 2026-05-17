@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/auth/AuthContext';
 import { getRecommendations } from '@/features/recommendations/services/recommendations';
 import { FormulaCard } from '@/features/formulas';
 import { SkeletonGrid } from '@/shared/ui/LoadingSkeleton/LoadingSkeleton';

@@ -12,7 +12,7 @@ import {
   removeBookmark,
   isBookmarked as checkBookmarked
 } from '@/shared/bookmarks/bookmarks';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/shared/auth/AuthContext';
 
 type BookmarkContextValue = {
   bookmarks: string[];
