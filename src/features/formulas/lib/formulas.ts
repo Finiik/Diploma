@@ -43,16 +43,40 @@ const SUBJECT_FORMULAS: Record<Subject, () => ComputableFormula[]> = {
   biology: getBioFormulas
 };
 
+/*
+ * The catalog is static for the app's lifetime, so it is derived once and
+ * cached. Previously every call re-spread ~78 formulas; the recommender
+ * alone hits getAllFormulas()/findFormulasByIds several times per Home
+ * render, so this was pure repeated allocation on a hot path. The cache is
+ * treated as immutable (no consumer mutates a formula); getAllFormulas()
+ * still hands out a fresh shallow copy so the "fresh array" contract holds.
+ */
+let catalogCache: SubjectFormula[] | null = null;
+let byIdCache: Map<string, SubjectFormula> | null = null;
+
 /**
- * Every formula across all subjects, in canonical `SUBJECTS` order, each
- * explicitly tagged with its `subject`. The spread *constructs* the tagged
- * shape, so this needs no `as SubjectFormula[]` cast — the invariant is
- * proven by the type, not asserted.
+ * The cached tagged catalog in canonical `SUBJECTS` order. The spread
+ * *constructs* the tagged shape, so this needs no `as SubjectFormula[]`
+ * cast — the invariant is proven by the type, not asserted.
+ */
+function catalog(): SubjectFormula[] {
+  return (catalogCache ??= SUBJECTS.flatMap((s) =>
+    SUBJECT_FORMULAS[s]().map((f) => ({ ...f, subject: s }))
+  ));
+}
+
+/** id → formula, built once from {@link catalog} for O(1)/O(ids) lookup. */
+function catalogById(): Map<string, SubjectFormula> {
+  return (byIdCache ??= new Map(catalog().map((f) => [f.id, f])));
+}
+
+/**
+ * Every formula across all subjects, each tagged with its `subject`. A
+ * fresh shallow copy of the cached catalog (callers must not mutate the
+ * shared one; `no shared mutable state` is pinned by formulas.test.ts).
  */
 export function getAllFormulas(): SubjectFormula[] {
-  return SUBJECTS.flatMap((s) =>
-    SUBJECT_FORMULAS[s]().map((f) => ({ ...f, subject: s }))
-  );
+  return catalog().slice();
 }
 
 /** Single source of the subject → full dataset mapping. */
@@ -87,13 +111,21 @@ export interface SubjectTopic extends Omit<Topic, 'subtopics'> {
  * A subject's topic tree with every formula already tagged with its
  * `subject`. This is the one place that owns subject-tagging, so pages
  * (e.g. Subject) no longer spread `{ ...formula, subject }` themselves.
+ *
+ * Memoized per subject: the tree is static, but the `Subject` page calls
+ * this every render. Caching also returns a *stable reference*, so any
+ * downstream `React.memo` on the tree actually holds.
  */
+const subjectTopicsCache = new Map<Subject, SubjectTopic[]>();
+
 export function getSubjectTopics(
   subject: string | undefined
 ): SubjectTopic[] | undefined {
   const data = getSubjectData(subject);
   if (!data) return undefined;
-  return data.topics.map((topic) => ({
+  const cached = subjectTopicsCache.get(data.id);
+  if (cached) return cached;
+  const built: SubjectTopic[] = data.topics.map((topic) => ({
     ...topic,
     subtopics: topic.subtopics.map((subtopic) => ({
       ...subtopic,
@@ -103,20 +135,22 @@ export function getSubjectTopics(
       }))
     }))
   }));
+  subjectTopicsCache.set(data.id, built);
+  return built;
 }
 
-/** First formula matching `id` across all subjects, or undefined. */
+/** Formula matching `id` across all subjects, or undefined. O(1). */
 export function findFormulaById(id: string): SubjectFormula | undefined {
-  return getAllFormulas().find((f) => f.id === id);
+  return catalogById().get(id);
 }
 
 /**
- * Resolve a list of ids to formulas, preserving order and dropping ids that
- * don't resolve to a known formula.
+ * Resolve a list of ids to formulas, preserving order (and duplicates) and
+ * dropping ids that don't resolve to a known formula. O(ids), not O(ids·n).
  */
 export function findFormulasByIds(ids: string[]): SubjectFormula[] {
-  const all = getAllFormulas();
+  const byId = catalogById();
   return ids
-    .map((id) => all.find((f) => f.id === id))
+    .map((id) => byId.get(id))
     .filter((f): f is SubjectFormula => f !== undefined);
 }
